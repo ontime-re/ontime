@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "ontime"
+version = "0.1.0"
+description = ""
+authors = ["Fred Montet <fredmontet@gmail.com>"]
+readme = "README.md"
+packages = [{include = "ontime", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "3.10"
+darts = "^0.25.0"
+xarray = "^2023.8.0"
+catboost = "^1.2"
+altair = "^5.1.0"
+skforecast = "^0.10.0"
+
+[tool.poetry.group.dev.dependencies]
+jupyterlab = "^4.0.5"
+pre-commit = "^3.3.3"
+black = "^23.7.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
