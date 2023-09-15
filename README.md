@@ -1,3 +1,5 @@
+[![Continuous Integration](https://github.com/fredmontet/ontime/actions/workflows/ci.yml/badge.svg)](https://github.com/fredmontet/ontime/actions/workflows/ci.yml)
+
 onTime
 ======
 
@@ -5,16 +7,12 @@ A library to work with time series
 
 ## Getting Started
 
-TODO
-
-## Documentation
-
-TODO
+The best to start is to look at the examples in the `notebook` folder.
 
 ## Authors
 
-TODO
+Frédéric Montet (frederic.montet@hefr.ch)
 
 ## License
 
-TODO
+Apache License 2.0
