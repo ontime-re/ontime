@@ -12,32 +12,32 @@ install-dependency-manager:
 
 install-dependencies:
 	@echo "Installing..."
-	poetry install
-	poetry run pre-commit install
+	$POETRY_HOME/bin/poetry install
+	$POETRY_HOME/bin/poetry run pre-commit install
 
 activate:
 	@echo "Activating virtual environment"
-	poetry shell
+	$POETRY_HOME/bin/poetry shell
 
 format:
 	@echo "Formatting code"
-	poetry run black src/ontime
+	$POETRY_HOME/bin/poetry run black src/ontime
 
 format-check:
 	@echo "Checking code formatting"
-	poetry run black src/ontime --check
+	$POETRY_HOME/bin/poetry run black src/ontime --check
 
 test:
 	@echo "Running tests"
-	poetry run python -m unittest
+	$POETRY_HOME/bin/poetry run python -m unittest
 
 build:
 	@echo "Building package"
-	poetry build
+	$POETRY_HOME/bin/poetry build
 
 publish:
 	@echo "Publishing package"
-	poetry publish
+	$POETRY_HOME/bin/poetry publish
 
 ## Delete all compiled Python files
 clean:
