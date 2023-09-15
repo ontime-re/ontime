@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "ontime", from = "src"}]
 
 [tool.poetry.dependencies]
-python = "3.10"
+python = "^3.10"
 darts = "^0.25.0"
 xarray = "^2023.8.0"
 catboost = "^1.2"
