@@ -21,12 +21,13 @@ activate:
 	poetry shell
 
 format:
-	@echo "Formatting code"
-	poetry run black src/ontime
+	@echo "Formatting codebase"
+	poetry run black src/ontime tests
 
 format-check:
 	@echo "Checking code formatting"
 	poetry run black src/ontime --check
+	poetry run black tests --check
 
 test:
 	@echo "Running tests"
