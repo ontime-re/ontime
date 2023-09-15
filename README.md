@@ -1,9 +1,12 @@
 [![Continuous Integration](https://github.com/fredmontet/ontime/actions/workflows/ci.yml/badge.svg)](https://github.com/fredmontet/ontime/actions/workflows/ci.yml)
 
-onTime
-======
+<div align="center">
+    <img src="res/ontime-logo.png" width="200" title="hover text">
+    <h1>onTime</h1>
+    <h3>Your library to work with time series</h3>
+</div>
 
-A library to work with time series
+---
 
 ## Getting Started
 
