@@ -8,6 +8,7 @@ install-dependency-manager:
 	python -m venv $POETRY_HOME
 	$POETRY_HOME/bin/pip install poetry
 	$POETRY_HOME/bin/poetry --version
+	poetry --version
 
 install-dependencies:
 	@echo "Installing..."
