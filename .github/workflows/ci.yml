@@ -38,8 +38,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install dependency manager
+        run: make install-dependency-manager
       - name: Install dependencies
-        run: make install
+        run: make install-dependencies
       - name: Run test suite
         run: make test
 
@@ -48,11 +50,14 @@ jobs:
   #####################
 
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Install dependency manager
+        run: make install-dependency-manager
       - name: Install dependencies
-        run: make install
+        run: make install-dependencies
       - name: Build package
         run: make build

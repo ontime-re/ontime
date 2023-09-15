@@ -2,7 +2,14 @@
 .PHONY: notebook docs
 .EXPORT_ALL_VARIABLES:
 
-install: 
+install-dependency-manager:
+	@echo "Setting up..."
+	export POETRY_HOME=/opt/poetry
+	python -m venv $POETRY_HOME
+	$POETRY_HOME/bin/pip install poetry
+	$POETRY_HOME/bin/poetry --version
+
+install-dependencies:
 	@echo "Installing..."
 	poetry install
 	poetry run pre-commit install
