@@ -44,8 +44,8 @@ jobs:
         run: make install-dependencies
       - name: Run test suite
         run: |
-          python -c "import ontime"
-          python -c "import src.ontime"
+          $POETRY_HOME/bin/poetry python -c "import ontime"
+          $POETRY_HOME/bin/poetry python -c "import src.ontime"
           make test
 
   #####################
