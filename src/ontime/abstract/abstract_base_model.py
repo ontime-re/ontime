@@ -4,7 +4,7 @@ from typing import Any, NoReturn
 
 
 class AbstractBaseModel(ABC):
-    """ Abstract class to define methods to implement
+    """Abstract class to define methods to implement
     for a Model class inspired by Scikit Learn API.
     """
 
@@ -14,12 +14,12 @@ class AbstractBaseModel(ABC):
 
     @abstractmethod
     def fit(self, series) -> NoReturn:
-        """ Fit a model """
+        """Fit a model"""
         self._is_fitted = True
         self.X_train = series
 
     @abstractmethod
     def predict(self, horizon) -> Any:
-        """ Usage of the model to predict values """
+        """Usage of the model to predict values"""
         if self._is_fitted is False:
-            raise Exception('fit() must be called before predict()')
+            raise Exception("fit() must be called before predict()")

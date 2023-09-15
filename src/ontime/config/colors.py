@@ -8,7 +8,7 @@ COLORS_DICT = {
     "yellow": "#E8C547",
     "red": "#E4572E",
     "red_dark": "#92140C",
-    "grey": "#CDD1C4"
+    "grey": "#CDD1C4",
 }
 
 colors = SimpleNamespace(**COLORS_DICT)

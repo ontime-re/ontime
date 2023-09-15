@@ -3,11 +3,11 @@ from typing import NoReturn
 
 
 class AbstractBaseDetector(ABC):
-    """ Abstract class to define methods to implement
+    """Abstract class to define methods to implement
     for a Detector class.
     """
 
     @abstractmethod
     def detect(self, ts) -> NoReturn:
-        """ Detect features """
+        """Detect features"""
         raise NotImplementedError
