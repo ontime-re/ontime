@@ -43,7 +43,10 @@ jobs:
       - name: Install dependencies
         run: make install-dependencies
       - name: Run test suite
-        run: make test
+        run: |
+          python -c "import ontime"
+          python -c "import src.ontime"
+          make test
 
   #####################
   # Build the Package #
