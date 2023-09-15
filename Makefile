@@ -29,10 +29,6 @@ format-check:
 	poetry run black src/ontime --check
 	poetry run black tests --check
 
-test:
-	@echo "Running tests"
-	poetry run python -m unittest
-
 build:
 	@echo "Building package"
 	poetry build

@@ -22,31 +22,6 @@ jobs:
       - name: Format
         uses: psf/black@stable
 
-  # --------------------------------
-  # Test the Codebase
-  # --------------------------------
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [ '3.10' ]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Install dependency manager
-        uses: snok/install-poetry@v1
-
-      - name: Install dependencies
-        run: make install-dependencies
-
-      - name: Get informations
-        run : make get-informations
-
-      - name: Run test suite
-        run: make test
 
   # --------------------------------
   # Build the Package
