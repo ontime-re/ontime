@@ -9,7 +9,7 @@ on:
 jobs:
 
   #####################
-  # Lint the codebase #
+  # Lint the Codebase #
   #####################
 
   lint:
@@ -22,7 +22,7 @@ jobs:
         uses: psf/black@stable
 
   #####################
-  # Test the codebase #
+  # Test the Codebase #
   #####################
 
   test:
@@ -35,7 +35,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -44,7 +44,7 @@ jobs:
         run: make test
 
   #####################
-  # Build the package #
+  # Build the Package #
   #####################
 
   build:
