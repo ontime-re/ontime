@@ -2,6 +2,15 @@
 .PHONY: notebook docs
 .EXPORT_ALL_VARIABLES:
 
+get-informations:
+	@echo "Python path"
+	python -c "import sys; print('\n'.join(sys.path))"
+
+	@echo "Versions"
+	@echo "Python version: $(shell python --version)"
+	@echo "Poetry version: $(shell poetry --version)"
+	@echo "Pre-commit version: $(shell pre-commit --version)"
+
 install-dependencies:
 	@echo "Installing..."
 	poetry install
