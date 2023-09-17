@@ -8,6 +8,7 @@ class Threshold(ThresholdDetector, AbstractBaseDetector):
     """
     Wrapper around Darts ThresholdDetector.
     """
+
     def __init__(self, low_threshold=None, high_threshold=None):
         super().__init__(low_threshold, high_threshold)
 
@@ -19,4 +20,3 @@ class Threshold(ThresholdDetector, AbstractBaseDetector):
         """
         ts_detected = super().detect(ts)
         return TimeSeries.from_darts(ts_detected)
-

@@ -10,6 +10,7 @@ class ARIMA(ARIMA, AbstractBaseModel):
     """
     Wrapper around Darts ARIMA model.
     """
+
     def __init__(
         self,
         p: int = 12,
@@ -59,8 +60,10 @@ class ARIMA(ARIMA, AbstractBaseModel):
         """
         super().__init__(p, d, q, seasonal_order, trend, random_state, add_encoders)
 
-    def fit(self, ts: TimeSeries, future_covariates: Optional[TimeSeries] = None) -> ARIMA:
-        """ Fit/train the model on the (single) provided series.
+    def fit(
+        self, ts: TimeSeries, future_covariates: Optional[TimeSeries] = None
+    ) -> ARIMA:
+        """Fit/train the model on the (single) provided series.
 
         Optionally, a future covariates series can be provided as well.
 
@@ -76,14 +79,14 @@ class ARIMA(ARIMA, AbstractBaseModel):
         return self
 
     def predict(
-            self,
-            n: int,
-            ts: Optional[TimeSeries] = None,
-            future_covariates: Optional[TimeSeries] = None,
-            num_samples: int = 1,
-            **kwargs,
-        ) -> TimeSeries:
-        """ If the `series` parameter is not set, forecasts values for `n` time steps after the end of the training
+        self,
+        n: int,
+        ts: Optional[TimeSeries] = None,
+        future_covariates: Optional[TimeSeries] = None,
+        num_samples: int = 1,
+        **kwargs,
+    ) -> TimeSeries:
+        """If the `series` parameter is not set, forecasts values for `n` time steps after the end of the training
         series. If some future covariates were specified during the training, they must also be specified here.
 
         If the `series` parameter is set, forecasts values for `n` time steps after the end of the new target

@@ -12,18 +12,18 @@ class CatBoost(CatBoostModel, AbstractBaseModel):
     """
 
     def __init__(
-            self,
-            lags: Union[int, list] = None,
-            lags_past_covariates: Union[int, List[int]] = None,
-            lags_future_covariates: Union[Tuple[int, int], List[int]] = None,
-            output_chunk_length: int = 1,
-            add_encoders: Optional[dict] = None,
-            likelihood: str = None,
-            quantiles: List = None,
-            random_state: Optional[int] = None,
-            multi_models: Optional[bool] = True,
-            use_static_covariates: bool = True,
-            **kwargs
+        self,
+        lags: Union[int, list] = None,
+        lags_past_covariates: Union[int, List[int]] = None,
+        lags_future_covariates: Union[Tuple[int, int], List[int]] = None,
+        output_chunk_length: int = 1,
+        add_encoders: Optional[dict] = None,
+        likelihood: str = None,
+        quantiles: List = None,
+        random_state: Optional[int] = None,
+        multi_models: Optional[bool] = True,
+        use_static_covariates: bool = True,
+        **kwargs,
     ):
         """
         CatBoost Model
@@ -91,22 +91,22 @@ class CatBoost(CatBoostModel, AbstractBaseModel):
             random_state,
             multi_models,
             use_static_covariates,
-            **kwargs
+            **kwargs,
         )
 
     def fit(
-            self,
-            ts: TimeSeries,
-            past_covariates: TimeSeries = None,
-            future_covariates: Optional[TimeSeries] = None,
-            val_series: Optional[TimeSeries] = None,
-            val_past_covariates: Optional[TimeSeries] = None,
-            val_future_covariates: Optional[TimeSeries] = None,
-            max_samples_per_ts: Optional[int] = None,
-            verbose: Optional[Union[int, bool]] = 0,
-            **kwargs,
+        self,
+        ts: TimeSeries,
+        past_covariates: TimeSeries = None,
+        future_covariates: Optional[TimeSeries] = None,
+        val_series: Optional[TimeSeries] = None,
+        val_past_covariates: Optional[TimeSeries] = None,
+        val_future_covariates: Optional[TimeSeries] = None,
+        max_samples_per_ts: Optional[int] = None,
+        verbose: Optional[Union[int, bool]] = 0,
+        **kwargs,
     ):
-        """ Fits/trains the model using the provided list of features time series and the target time series.
+        """Fits/trains the model using the provided list of features time series and the target time series.
 
         :param ts:
             TimeSeries or Sequence[TimeSeries] object containing the target values.
@@ -133,30 +133,31 @@ class CatBoost(CatBoostModel, AbstractBaseModel):
             Additional kwargs passed to `catboost.CatboostRegressor.fit()`
         :return: self
         """
-        super().fit(ts,
-                    past_covariates,
-                    future_covariates,
-                    val_series,
-                    val_past_covariates,
-                    val_future_covariates,
-                    max_samples_per_ts,
-                    verbose,
-                    **kwargs,
-                    )
+        super().fit(
+            ts,
+            past_covariates,
+            future_covariates,
+            val_series,
+            val_past_covariates,
+            val_future_covariates,
+            max_samples_per_ts,
+            verbose,
+            **kwargs,
+        )
         return self
 
     def predict(
-            self,
-            n: int,
-            ts: Optional[TimeSeries] = None,
-            past_covariates: Optional[TimeSeries] = None,
-            future_covariates: Optional[TimeSeries] = None,
-            num_samples: int = 1,
-            verbose: bool = False,
-            predict_likelihood_parameters: bool = False,
-            **kwargs
-        ) -> TimeSeries:
-        """ Forecasts values for `n` time steps after the end of the series.
+        self,
+        n: int,
+        ts: Optional[TimeSeries] = None,
+        past_covariates: Optional[TimeSeries] = None,
+        future_covariates: Optional[TimeSeries] = None,
+        num_samples: int = 1,
+        verbose: bool = False,
+        predict_likelihood_parameters: bool = False,
+        **kwargs,
+    ) -> TimeSeries:
+        """Forecasts values for `n` time steps after the end of the series.
 
         :param n: int
             Forecast horizon - the number of time steps after the end of the series for which to produce predictions.

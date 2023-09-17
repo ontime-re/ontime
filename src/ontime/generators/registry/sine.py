@@ -12,6 +12,7 @@ class Sine(AbstractBaseGenerator):
     """
     Wrapper around Darts sine time series generator.
     """
+
     def __init__(self):
         super().__init__()
 

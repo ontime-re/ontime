@@ -12,6 +12,7 @@ class RandomWalk(AbstractBaseGenerator):
     """
     Wrapper around Darts random walk time series generator.
     """
+
     def __init__(self):
         super().__init__()
 

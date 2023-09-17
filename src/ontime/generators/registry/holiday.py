@@ -7,6 +7,7 @@ from darts.utils.timeseries_generation import holidays_timeseries
 from ...abstract import AbstractBaseGenerator
 from ...time_series import TimeSeries
 
+
 class Holiday(AbstractBaseGenerator):
     """
     Wrapper around Darts holiday time series generator.

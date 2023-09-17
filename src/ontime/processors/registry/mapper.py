@@ -12,6 +12,7 @@ class Mapper(AbstractBaseProcessor):
     Wrapper around Darts Mapper
     https://unit8co.github.io/darts/generated_api/darts.dataprocessing.transformers.mappers.html
     """
+
     def __init__(self, fn, inverse_fn=None, name="Map", n_jobs=1, verbose=False):
         """Data transformer to apply a custom function and its inverse to a ``TimeSeries``
         (similar to calling :func:`TimeSeries.map()` on each series).
@@ -38,9 +39,7 @@ class Mapper(AbstractBaseProcessor):
         self.func = fn
 
         if inverse_fn is None:
-            self._processor = DartsMapper(
-                fn, name=name, n_jobs=n_jobs, verbose=verbose
-            )
+            self._processor = DartsMapper(fn, name=name, n_jobs=n_jobs, verbose=verbose)
         else:
             self._processor = DartsInvertibleMapper(
                 fn, inverse_fn, name=name, n_jobs=n_jobs, verbose=verbose

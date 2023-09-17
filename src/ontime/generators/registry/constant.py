@@ -12,6 +12,7 @@ class Constant(AbstractBaseGenerator):
     """
     Wrapper around Darts constant time series generator.
     """
+
     def __init__(self):
         super().__init__()
 
@@ -37,7 +38,5 @@ class Constant(AbstractBaseGenerator):
         :param dtype: np.float64
         :return: TimeSeries
         """
-        ts = constant_timeseries(
-            value, start, end, length, freq, column_name, dtype
-        )
+        ts = constant_timeseries(value, start, end, length, freq, column_name, dtype)
         return TimeSeries.from_darts(ts)

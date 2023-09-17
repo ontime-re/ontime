@@ -13,16 +13,16 @@ class TCN(TCNModel, AbstractBaseModel):
     """
 
     def __init__(
-            self,
-            input_chunk_length: int,
-            output_chunk_length: int,
-            kernel_size: int = 3,
-            num_filters: int = 3,
-            num_layers: Optional[int] = None,
-            dilation_base: int = 2,
-            weight_norm: bool = False,
-            dropout: float = 0.2,
-            **kwargs
+        self,
+        input_chunk_length: int,
+        output_chunk_length: int,
+        kernel_size: int = 3,
+        num_filters: int = 3,
+        num_layers: Optional[int] = None,
+        dilation_base: int = 2,
+        weight_norm: bool = False,
+        dropout: float = 0.2,
+        **kwargs
     ):
         """Temporal Convolutional Network Model (TCN).
 
@@ -68,19 +68,20 @@ class TCN(TCNModel, AbstractBaseModel):
             **kwargs
         )
 
-    def fit(self,
-            ts: TimeSeries,
-            past_covariates: Optional[TimeSeries] = None,
-            future_covariates: Optional[TimeSeries] = None,
-            val_series: Optional[TimeSeries] = None,
-            val_past_covariates: Optional[TimeSeries] = None,
-            val_future_covariates: Optional[TimeSeries] = None,
-            trainer: Optional[pl.Trainer] = None,
-            verbose: Optional[bool] = None,
-            epochs: int = 0,
-            max_samples_per_ts: Optional[int] = None,
-            num_loader_workers: int = 0
-            ):
+    def fit(
+        self,
+        ts: TimeSeries,
+        past_covariates: Optional[TimeSeries] = None,
+        future_covariates: Optional[TimeSeries] = None,
+        val_series: Optional[TimeSeries] = None,
+        val_past_covariates: Optional[TimeSeries] = None,
+        val_future_covariates: Optional[TimeSeries] = None,
+        trainer: Optional[pl.Trainer] = None,
+        verbose: Optional[bool] = None,
+        epochs: int = 0,
+        max_samples_per_ts: Optional[int] = None,
+        num_loader_workers: int = 0,
+    ):
         """Fit/train the model on one or multiple series.
 
         This method wraps around :func:`fit_from_dataset()`, constructing a default training
@@ -150,26 +151,26 @@ class TCN(TCNModel, AbstractBaseModel):
             verbose,
             epochs,
             max_samples_per_ts,
-            num_loader_workers
+            num_loader_workers,
         )
         return self
 
     def predict(
-            self,
-            n: int,
-            series: Optional[TimeSeries] = None,
-            past_covariates: Optional[TimeSeries] = None,
-            future_covariates: Optional[TimeSeries] = None,
-            trainer: Optional[pl.Trainer] = None,
-            batch_size: Optional[int] = None,
-            verbose: Optional[bool] = None,
-            n_jobs: int = 1,
-            roll_size: Optional[int] = None,
-            num_samples: int = 1,
-            num_loader_workers: int = 0,
-            mc_dropout: bool = False,
-            predict_likelihood_parameters: bool = False,
-        ) -> TimeSeries:
+        self,
+        n: int,
+        series: Optional[TimeSeries] = None,
+        past_covariates: Optional[TimeSeries] = None,
+        future_covariates: Optional[TimeSeries] = None,
+        trainer: Optional[pl.Trainer] = None,
+        batch_size: Optional[int] = None,
+        verbose: Optional[bool] = None,
+        n_jobs: int = 1,
+        roll_size: Optional[int] = None,
+        num_samples: int = 1,
+        num_loader_workers: int = 0,
+        mc_dropout: bool = False,
+        predict_likelihood_parameters: bool = False,
+    ) -> TimeSeries:
         """Predict the ``n`` time step following the end of the training series, or of the specified ``series``.
 
         Prediction is performed with a PyTorch Lightning Trainer. It uses a default Trainer object from presets and
@@ -241,7 +242,19 @@ class TCN(TCNModel, AbstractBaseModel):
             One time series containing the forecasts of ``series``, or the forecast of the training series
             if ``series`` is not specified and the model has been trained on a single series.
         """
-        ts_predicted = super().predict(n, series, past_covariates, future_covariates, trainer, batch_size, verbose,
-                                       n_jobs, roll_size, num_samples, num_loader_workers, mc_dropout,
-                                       predict_likelihood_parameters)
+        ts_predicted = super().predict(
+            n,
+            series,
+            past_covariates,
+            future_covariates,
+            trainer,
+            batch_size,
+            verbose,
+            n_jobs,
+            roll_size,
+            num_samples,
+            num_loader_workers,
+            mc_dropout,
+            predict_likelihood_parameters,
+        )
         return TimeSeries.from_darts(ts_predicted)

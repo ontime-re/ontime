@@ -7,10 +7,12 @@ from darts.utils.timeseries_generation import linear_timeseries
 from ...abstract import AbstractBaseGenerator
 from ...time_series import TimeSeries
 
+
 class Linear(AbstractBaseGenerator):
     """
     Wrapper around Darts linear time series generator.
     """
+
     def __init__(self):
         super().__init__()
 

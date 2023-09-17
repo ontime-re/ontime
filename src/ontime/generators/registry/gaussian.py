@@ -7,10 +7,12 @@ from darts.utils.timeseries_generation import gaussian_timeseries
 from ...abstract import AbstractBaseGenerator
 from ...time_series import TimeSeries
 
+
 class Gaussian(AbstractBaseGenerator):
     """
     Wrapper around Darts gaussian time series generator.
     """
+
     def __init__(self):
         super().__init__()
 

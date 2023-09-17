@@ -10,6 +10,7 @@ class Quantile(QuantileDetector, AbstractBaseDetector):
     """
     Wrapper around Darts QuantileDetector.
     """
+
     def __init__(self, low_quantile=None, high_quantile=None):
         super().__init__(low_quantile, high_quantile)
 
