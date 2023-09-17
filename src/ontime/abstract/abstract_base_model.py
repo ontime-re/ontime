@@ -2,6 +2,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, NoReturn
 
+from ..time_series import TimeSeries
+
 
 class AbstractBaseModel(ABC):
     """Abstract class to define methods to implement
@@ -13,13 +15,13 @@ class AbstractBaseModel(ABC):
         self.X_train = None
 
     @abstractmethod
-    def fit(self, series) -> NoReturn:
+    def fit(self, ts: TimeSeries) -> NoReturn:
         """Fit a model"""
         self._is_fitted = True
-        self.X_train = series
+        self.X_train = ts
 
     @abstractmethod
-    def predict(self, horizon) -> Any:
+    def predict(self, horizon: Any) -> Any:
         """Usage of the model to predict values"""
         if self._is_fitted is False:
             raise Exception("fit() must be called before predict()")
