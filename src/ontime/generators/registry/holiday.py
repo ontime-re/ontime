@@ -5,9 +5,14 @@ import pandas as pd
 from darts.utils.timeseries_generation import holidays_timeseries
 
 from ...abstract import AbstractBaseGenerator
+from ...time_series import TimeSeries
 
 
 class Holiday(AbstractBaseGenerator):
+    """
+    Wrapper around Darts holiday time series generator.
+    """
+
     def __init__(self):
         super().__init__()
 
@@ -22,6 +27,20 @@ class Holiday(AbstractBaseGenerator):
         add_length: int = 0,
         dtype: np.dtype = np.float64,
     ):
-        return holidays_timeseries(
+        """
+        Generates a holiday time series.
+
+        :param time_index: Pandas DatetimeIndex
+        :param country_code: str
+        :param prov: str
+        :param state: str
+        :param column_name: str
+        :param until: int, str or Pandas Timestamp
+        :param add_length: int
+        :param dtype: np.float64
+        :return: TimeSeries
+        """
+        ts = holidays_timeseries(
             time_index, country_code, prov, state, column_name, until, add_length, dtype
         )
+        return TimeSeries.from_darts(ts)

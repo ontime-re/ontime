@@ -4,10 +4,15 @@ import numpy as np
 import pandas as pd
 from darts.utils.timeseries_generation import random_walk_timeseries
 
+from ...time_series import TimeSeries
 from ...abstract import AbstractBaseGenerator
 
 
-class Random(AbstractBaseGenerator):
+class RandomWalk(AbstractBaseGenerator):
+    """
+    Wrapper around Darts random walk time series generator.
+    """
+
     def __init__(self):
         super().__init__()
 
@@ -22,6 +27,20 @@ class Random(AbstractBaseGenerator):
         column_name: Optional[str] = "random_walk",
         dtype: np.dtype = np.float64,
     ):
-        return random_walk_timeseries(
+        """
+        Generates a random walk time series.
+
+        :param mean: float
+        :param std: float
+        :param start: Pandas Timestamp or int
+        :param end: Pandas Timestamp or int
+        :param length: int
+        :param freq: str or int
+        :param column_name: str
+        :param dtype: np.float64
+        :return: TimeSeries
+        """
+        ts = random_walk_timeseries(
             mean, std, start, end, length, freq, column_name, dtype
         )
+        return TimeSeries.from_darts(ts)

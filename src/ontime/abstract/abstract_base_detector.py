@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import NoReturn
+
+from ..time_series import TimeSeries
 
 
 class AbstractBaseDetector(ABC):
@@ -8,6 +9,6 @@ class AbstractBaseDetector(ABC):
     """
 
     @abstractmethod
-    def detect(self, ts) -> NoReturn:
+    def detect(self, ts: TimeSeries) -> TimeSeries:
         """Detect features"""
         raise NotImplementedError
