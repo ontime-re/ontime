@@ -5,9 +5,12 @@ import pandas as pd
 from darts.utils.timeseries_generation import gaussian_timeseries
 
 from ...abstract import AbstractBaseGenerator
-
+from ...time_series import TimeSeries
 
 class Gaussian(AbstractBaseGenerator):
+    """
+    Wrapper around Darts gaussian time series generator.
+    """
     def __init__(self):
         super().__init__()
 
@@ -22,6 +25,20 @@ class Gaussian(AbstractBaseGenerator):
         column_name: Optional[str] = "gaussian",
         dtype: np.dtype = np.float64,
     ):
-        return gaussian_timeseries(
+        """
+        Generates a gaussian time series.
+
+        :param mean: float or np.ndarray
+        :param std: float or np.ndarray
+        :param start: Pandas Timestamp or int
+        :param end: Pandas Timestamp or int
+        :param length: int
+        :param freq: str or int
+        :param column_name: str
+        :param dtype: np.float64
+        :return: TimeSeries
+        """
+        ts = gaussian_timeseries(
             mean, std, start, end, length, freq, column_name, dtype
         )
+        return TimeSeries.from_darts(ts)
