@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ontime"
-version = "0.2.0"
+version = "0.3.0"
 description = ""
 authors = ["Fred Montet <fredmontet@gmail.com>"]
 readme = "README.md"
