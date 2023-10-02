@@ -7,6 +7,7 @@ from .detectors import detectors
 from .generators import generators
 
 # from .metrics import metrics
+from .model import Model
 from .models import models
 
 # from .plots import plots
