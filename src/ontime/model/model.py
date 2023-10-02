@@ -4,13 +4,16 @@ from ontime.abstract.abstract_base_model import AbstractBaseModel
 from ontime.time_series import TimeSeries
 
 from .libs.darts.forecasting_model import ForecastingModel as DartsForecastingModel
-from .libs.skforecast.forecaster_autoreg import ForecasterAutoreg as SkForecastForecasterAutoreg
+from .libs.skforecast.forecaster_autoreg import (
+    ForecasterAutoreg as SkForecastForecasterAutoreg,
+)
 
 
 class Model(AbstractBaseModel):
     """
     Generic wrapper around all implemented time series libraries
     """
+
     def __init__(self, model, **params):
         super().__init__()
         if isinstance(model, ModelMeta):

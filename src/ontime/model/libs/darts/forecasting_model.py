@@ -6,6 +6,7 @@ class ForecastingModel(AbstractBaseModel):
     """
     Generic wrapper around Darts forecasting models
     """
+
     def __init__(self, model, **params):
         super().__init__()
         self.model = model(**params)
