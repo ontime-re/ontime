@@ -11,17 +11,14 @@ class AbstractBaseModel(ABC):
     """
 
     def __init__(self):
-        self._is_fitted = False
-        self.X_train = None
+        pass
 
     @abstractmethod
     def fit(self, ts: TimeSeries) -> NoReturn:
         """Fit a model"""
-        self._is_fitted = True
-        self.X_train = ts
+        pass
 
     @abstractmethod
     def predict(self, horizon: Any) -> Any:
         """Usage of the model to predict values"""
-        if self._is_fitted is False:
-            raise Exception("fit() must be called before predict()")
+        pass
