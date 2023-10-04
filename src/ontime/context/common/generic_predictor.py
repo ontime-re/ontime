@@ -15,7 +15,7 @@ class GenericPredictor:
         """
         Fit the model to the given time series
         :param ts: TimeSeries
-        :return:
+        :return: self
         """
         # Get information about the time series
         has_seasonality, seasonality = check_seasonality(ts)
