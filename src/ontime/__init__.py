@@ -1,6 +1,7 @@
 """ OnTime API Definition """
 
 # from .abstract import *
+from .context import *
 from .detectors import detectors
 
 # from .config import *
