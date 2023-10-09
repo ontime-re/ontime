@@ -25,7 +25,13 @@ Update the version in `pyproject.toml`
 
 Commit and push
     
-    git commit 
+    git add pyproject.toml
+    git commit -m 'Update version to x.y.z-suffix'
+
+Tag the version
+    
+    git tag -a x.y.z-suffix -m 'Version x.y.z-suffix'
+    git push origin x.y.z-suffix
 
 Build
 
