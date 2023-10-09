@@ -48,4 +48,3 @@ class TimeSeries(DartsTimeSeries):
         :return: OnTime TimeSeries
         """
         return TimeSeries(ts.data_array())
-
