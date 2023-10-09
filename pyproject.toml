@@ -13,12 +13,15 @@ catboost = "^1.2"
 altair = "^5.1.0"
 skforecast = "^0.10.0"
 torch = "^2.0.1"
+vegafusion-python-embed = "^1.4.1"
+vegafusion = {extras = ["embed"], version = "^1.4.1"}
+protobuf = "^4.24.4"
+vega-datasets = "^0.9.0"
 
 [tool.poetry.group.dev.dependencies]
 jupyterlab = "^4.0.5"
 pre-commit = "^3.3.3"
 black = "^23.7.0"
-gluonts = {extras = ["torch"], version = "^0.13.5"}
 
 [build-system]
 requires = ["poetry-core"]
