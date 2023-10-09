@@ -11,6 +11,6 @@ from .generators import generators
 from .model import Model
 from .models import models
 
-# from .plots import plots
+from .plots import plots
 from .processors import processors
 from .time_series import TimeSeries
