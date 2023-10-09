@@ -3,7 +3,7 @@ from enum import Enum
 import pandas as pd
 
 
-class _ProfileMaker:
+class Profiler:
     """
     This class should not be instantiated.
     This class is used to make a profile from a time series.
@@ -30,7 +30,7 @@ class _ProfileMaker:
         YEARLY = ['Y', '%m%d %H:%M', '%m%d %H:%M']
 
     @staticmethod
-    def make_profile(ts: TimeSeries, period: Period, aggregation: Aggregation):
+    def profile(ts: TimeSeries, period: Period, aggregation: Aggregation):
         """
         Make a profile from a time series
         It resumes the time series by a period and an aggregation.
@@ -46,8 +46,8 @@ class _ProfileMaker:
         :return: TimeSeries
         """
         # Define the column names
-        _time_col = _ProfileMaker.TIME_COL
-        _value_col = _ProfileMaker.VALUE_COL
+        _time_col = Profiler.TIME_COL
+        _value_col = Profiler.VALUE_COL
         time_agg = 'time_formatted'
 
         # Split the time series by week
@@ -59,8 +59,6 @@ class _ProfileMaker:
             df = time_series.pd_dataframe()
             col = df.columns[0]
             value = df[col].values
-            # Debugging
-            print("df.index:", df.index)  # Check the value of df.index
             temp_df = pd.DataFrame({time_agg: df.index.strftime(period.value[1]),
                                     _time_col: df.index,
                                     _value_col: value})

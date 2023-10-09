@@ -1,10 +1,11 @@
 from __future__ import annotations
+from typing import List
 
 from darts import TimeSeries as DartsTimeSeries
 import pandas as pd
 import xarray as xr
 
-from typing import List
+from ..plots import plots
 
 
 class TimeSeries(DartsTimeSeries):
@@ -47,3 +48,4 @@ class TimeSeries(DartsTimeSeries):
         :return: OnTime TimeSeries
         """
         return TimeSeries(ts.data_array())
+
