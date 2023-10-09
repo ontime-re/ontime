@@ -15,12 +15,17 @@ Change branch to `main`
 Merge `develop` on `main`
 
     git merge develop
+    git push
 
 Update the version in `pyproject.toml`
 
     [tool.poetry]
     name = "ontime"
     version = "x.y.z-suffix"
+
+Commit and push
+    
+    git commit 
 
 Build
 
