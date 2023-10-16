@@ -1,6 +1,8 @@
 from darts.models import CatBoostModel
 from darts.utils.statistics import check_seasonality
-import ontime as on
+from ...time_series import BinaryTimeSeries
+from ...detectors import Quantile
+from ...model import Model
 
 
 class GenericDetector:
@@ -9,6 +11,7 @@ class GenericDetector:
     """
 
     def __init__(self):
+        self.detector = None
         self.model = None
         self.low_quantile = 0.2
         self.high_quantile = 0.8
@@ -24,31 +27,38 @@ class GenericDetector:
         lags = 12 if seasonality == 0 else seasonality
 
         # Create model
-        self.model = on.Model(
+        self.model = Model(
             CatBoostModel,
             lags=int(lags),
         )
         self.model.fit(ts)
 
         # Create detector
-        self.detector = on.detectors.quantile(low_quantile=self.low_quantile, high_quantile=self.high_quantile)
+        self.detector = Quantile(low_quantile=self.low_quantile, high_quantile=self.high_quantile)
         self.detector.fit(ts)
 
         return self
 
-    def detect(self, ts):
+    def detect(self, ts) -> BinaryTimeSeries:
         """
         Detect anomalies in the given time series
         :param ts: TimeSeries
-        :return: TimeSeries
+        :return: BinaryTimeSeries
         """
-        return self.detector.detect(ts)
+        if self.detector is None:
+            raise ValueError("Detector has not been fitted")
+        return BinaryTimeSeries(self.detector.detect(ts))
 
-    def predetect(self, n):
+    def predetect(self, n) -> BinaryTimeSeries:
         """
         Predict n steps into the future and detect anomalies
+
+        Can raise a ValueError if the model has not been fitted
+
         :param n: Int number of steps to predict
-        :return: TimeSeries
+        :return: BinaryTimeSeries
         """
+        if self.model is None:
+            raise ValueError("Model has not been fitted")
         pred = self.model.predict(n)
-        return self.detector.detect(pred)
+        return BinaryTimeSeries(self.detector.detect(pred))
