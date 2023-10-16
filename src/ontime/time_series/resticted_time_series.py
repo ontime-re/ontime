@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, Optional, Union, List, Dict, Sequence, Callable
+from typing import Generic, TypeVar, Optional, Union, List, Dict, Sequence, Callable, Type
 import pandas as pd
 from .time_series import TimeSeries
 import xarray as xr
@@ -7,24 +7,25 @@ from darts import TimeSeries as DartsTimeSeries
 
 T = TypeVar('T')
 
-class RestrictedTimeSeries (TimeSeries, Generic[T]):
 
-    def __init__(self):
-        raise NotImplementedError("This object must not be instantiated")
+class RestrictedTimeSeries(TimeSeries, Generic[T]):
 
-    def check(self) -> bool:
+    def __init__(self, xa: xr.DataArray):
+        super().__init__(xa)
+
+    def check(self, xa: xr.DataArray) -> bool:
         raise NotImplementedError
 
-    @staticmethod
-    def from_darts(ts: DartsTimeSeries):
+    @classmethod
+    def from_darts(cls, ts: DartsTimeSeries):
         """
         Convert a Darts TimeSeries to an OnTime TimeSeries
 
         :param ts: Darts TimeSeries
         :return: OnTime TimeSeries
         """
-        T.is_probabilistic(ts.data_array())
-        return T(ts.data_array())
+        cls.check(cls, ts.data_array())
+        return cls(ts.data_array())
 
     @classmethod
     def from_dataframe(
@@ -125,8 +126,9 @@ class RestrictedTimeSeries (TimeSeries, Generic[T]):
             fill_missing_dates: Optional[bool] = False,
             freq: Optional[Union[str, int]] = None,
             fillna_value: Optional[float] = None,
-    ):
-        raise NotImplementedError
+    ) -> Type[T]:
+        cls.check(cls, xa)
+        return super().from_xarray(xa, fill_missing_dates, freq, fillna_value)
 
     def append(self, other: T) -> T:
         """
@@ -135,26 +137,14 @@ class RestrictedTimeSeries (TimeSeries, Generic[T]):
         :param other: T to append
         :return: T
         """
-        if other is T:
-            return T(super().append(other))
-        else:
-            raise ValueError(f"Other's type must be {T.__name__}")
+
+        return super().append(other)
 
     def append_values(self, values: np.ndarray) -> T:
         """
         Append values to the time series
-
-        :param values: np.ndarray
-        :return: T
         """
-        # check that all value of values are binary
-        if isinstance(values, np.ndarray):
-            if T.check(values):
-                return T(super().append_values(values))
-            else:
-                raise ValueError("Values must be binary")
-        else:
-            raise ValueError(f"Other's type must be {T.__name__}")
+        raise NotImplementedError
 
     def concatenate(
             self,
@@ -199,8 +189,9 @@ class RestrictedTimeSeries (TimeSeries, Generic[T]):
         :return: The prepended series.
         """
         if isinstance(values, np.ndarray):
-            if T.check(values):
-                return T(super().prepend_values(values))
+            ts = T(super().prepend_values(values))
+            if ts.check(values):
+                return ts
             else:
                 raise ValueError("Values must be binary")
         else:
@@ -212,7 +203,7 @@ class RestrictedTimeSeries (TimeSeries, Generic[T]):
 
         :param value_at_first_step: The value at the first step of the rescaled time series.
         :return: The rescaled time series. **It changes the type of the ProbabilisticTimeSeries to TimeSeries.**
-        TODO Check if this action make sense for ProbabilisticTimeSeries
+        TODO Check if this action make sense
         """
         return TimeSeries(super().rescale_with_value(value_at_first_step))
 
@@ -222,7 +213,7 @@ class RestrictedTimeSeries (TimeSeries, Generic[T]):
 
         :param other: The time series to stack with.
         :return: The stacked time series.  **It changes the type of the ProbabilisticTimeSeries to TimeSeries.**
-        TODO Check if this action make sense for ProbabilisticTimeSeries
+        TODO Check if this action make sense
         """
         return TimeSeries(super().stack(other))
 
@@ -232,7 +223,7 @@ class RestrictedTimeSeries (TimeSeries, Generic[T]):
 
         :param axis: The axis along which to sum.
         :return: The summed time series.  **It changes the type of the T to TimeSeries.**
-        TODO Check if this action make sense for T
+        TODO Check if this action make sense
         """
         return TimeSeries(super().sum(axis))
 
@@ -254,8 +245,9 @@ class RestrictedTimeSeries (TimeSeries, Generic[T]):
         :return: The time series with the given values.
         """
         if isinstance(values, np.ndarray):
-            if T.check(values):
-                return T(super().with_values(values))
+            ts = T(super().with_values(values))
+            if ts.check(values):
+                return ts
             else:
                 raise ValueError("Values must be binary")
         else:
