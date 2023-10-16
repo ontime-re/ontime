@@ -22,6 +22,6 @@ class BinaryTimeSeries(RestrictedTimeSeries['BinaryTimeSeries']):
         """
         if isinstance(xa, xr.DataArray):
             # Check if all values in the DataArray are within {0; 1}
-            return np.all((xa == 0) & (xa == 1))
+            return np.all((xa == 0) | (xa == 1))
         else:
             raise ValueError("Input is not an xarray DataArray")

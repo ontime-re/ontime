@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from typing import Generic, TypeVar, Optional, Union, List, Dict, Sequence, Callable, Type
 import pandas as pd
 from .time_series import TimeSeries
@@ -13,6 +14,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
     def __init__(self, xa: xr.DataArray):
         super().__init__(xa)
 
+    @abstractmethod
     def check(self, xa: xr.DataArray) -> bool:
         raise NotImplementedError
 
@@ -137,7 +139,6 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         :param other: T to append
         :return: T
         """
-
         return super().append(other)
 
     def append_values(self, values: np.ndarray) -> T:
@@ -153,12 +154,10 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
             ignore_time_axis: bool = False,
             ignore_static_covariates: bool = False,
             drop_hierarchy: bool = True,
-    ):
-        if series is T:
-            return T(
-                super().concatenate(series, axis, ignore_time_axis, ignore_static_covariates, drop_hierarchy))
-        else:
-            raise ValueError(f"Other's type must be {T.__name__}")
+    ) -> Type[T]:
+        # TODO : if return super().concatenate the type is TimeSeries. I choose to raise an error. See what is the best
+        raise NotImplementedError
+
 
     def map(
             self,
@@ -169,6 +168,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
     ):
         raise NotImplementedError
 
+
     def prepend(self, other: T) -> T:
         """
         Prepends (i.e. adds to the beginning) another series to this series along the time axis.
@@ -176,10 +176,8 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         :param other: The series to prepend.
         :return: The prepended series.
         """
-        if other is T:
-            return T(super().prepend(other))
-        else:
-            raise ValueError(f"Other's type must be {T.__name__}")
+        return super().prepend(other)
+
 
     def prepend_values(self, values: np.ndarray) -> T:
         """
@@ -188,14 +186,8 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         :param values: The values to prepend.
         :return: The prepended series.
         """
-        if isinstance(values, np.ndarray):
-            ts = T(super().prepend_values(values))
-            if ts.check(values):
-                return ts
-            else:
-                raise ValueError("Values must be binary")
-        else:
-            raise ValueError(f"Other's type must be {T.__name__}")
+        raise NotImplementedError
+
 
     def rescale_with_value(self, value_at_first_step: float) -> 'TimeSeries':
         """
@@ -203,9 +195,10 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
 
         :param value_at_first_step: The value at the first step of the rescaled time series.
         :return: The rescaled time series. **It changes the type of the ProbabilisticTimeSeries to TimeSeries.**
-        TODO Check if this action make sense
+        TODO Check if this action make sense to implement.
         """
-        return TimeSeries(super().rescale_with_value(value_at_first_step))
+        raise NotImplementedError
+
 
     def stack(self, other: "TimeSeries") -> "TimeSeries":
         """
@@ -213,9 +206,10 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
 
         :param other: The time series to stack with.
         :return: The stacked time series.  **It changes the type of the ProbabilisticTimeSeries to TimeSeries.**
-        TODO Check if this action make sense
+        TODO Check if this action make sense to implement.
         """
-        return TimeSeries(super().stack(other))
+        return NotImplementedError
+
 
     def sum(self, axis: int = 2) -> 'TimeSeries':
         """
@@ -223,9 +217,10 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
 
         :param axis: The axis along which to sum.
         :return: The summed time series.  **It changes the type of the T to TimeSeries.**
-        TODO Check if this action make sense
+         TODO Check if this action make sense to implement.
         """
-        return TimeSeries(super().sum(axis))
+        return NotImplementedError
+
 
     def window_transform(
             self,
@@ -237,6 +232,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
     ):
         raise NotImplementedError
 
+
     def with_values(self, values: np.ndarray) -> T:
         """
         Returns a copy of the time series with the given values.
@@ -244,11 +240,4 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         :param values: The values to set.
         :return: The time series with the given values.
         """
-        if isinstance(values, np.ndarray):
-            ts = T(super().with_values(values))
-            if ts.check(values):
-                return ts
-            else:
-                raise ValueError("Values must be binary")
-        else:
-            raise ValueError(f"Other's type must be {T.__name__}")
+        raise NotImplementedError

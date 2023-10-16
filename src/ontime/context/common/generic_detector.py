@@ -47,7 +47,7 @@ class GenericDetector:
         """
         if self.detector is None:
             raise ValueError("Detector has not been fitted")
-        return BinaryTimeSeries(self.detector.detect(ts))
+        return self.detector.detect(ts)
 
     def predetect(self, n) -> BinaryTimeSeries:
         """
@@ -61,4 +61,4 @@ class GenericDetector:
         if self.model is None:
             raise ValueError("Model has not been fitted")
         pred = self.model.predict(n)
-        return BinaryTimeSeries(self.detector.detect(pred))
+        return self.detector.detect(pred)
