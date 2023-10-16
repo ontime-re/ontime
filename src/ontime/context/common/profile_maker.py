@@ -10,8 +10,8 @@ class _ProfileMaker:
     """
 
     # Define const for column's names
-    VALUE_COL = 'value'
-    TIME_COL = 'time'
+    VALUE_COL = "value"
+    TIME_COL = "time"
 
     # Define the all aggregations possible
     class Aggregation(Enum):
@@ -24,10 +24,10 @@ class _ProfileMaker:
     # The second element is the format to make the aggregation (**Also users' format**)
     # The third element is the format to convert data to match with TimeSeries format and the chosen period
     class Period(Enum):
-        DAILY = ['D', '%H:%M', '%H:%M']
-        WEEKLY = ['W', '%A %H:%M', '%d %H:%M']
-        MONTHLY = ['M', '%d %H:%M', '%d %H:%M']
-        YEARLY = ['Y', '%m%d %H:%M', '%m%d %H:%M']
+        DAILY = ["D", "%H:%M", "%H:%M"]
+        WEEKLY = ["W", "%A %H:%M", "%d %H:%M"]
+        MONTHLY = ["M", "%d %H:%M", "%d %H:%M"]
+        YEARLY = ["Y", "%m%d %H:%M", "%m%d %H:%M"]
 
     @staticmethod
     def make_profile(ts: TimeSeries, period: Period, aggregation: Aggregation):
@@ -48,7 +48,7 @@ class _ProfileMaker:
         # Define the column names
         _time_col = _ProfileMaker.TIME_COL
         _value_col = _ProfileMaker.VALUE_COL
-        time_agg = 'time_formatted'
+        time_agg = "time_formatted"
 
         # Split the time series by week
         split_ts = ts.split_by_period(period.value[0])
@@ -61,17 +61,22 @@ class _ProfileMaker:
             value = df[col].values
             # Debugging
             print("df.index:", df.index)  # Check the value of df.index
-            temp_df = pd.DataFrame({time_agg: df.index.strftime(period.value[1]),
-                                    _time_col: df.index,
-                                    _value_col: value})
+            temp_df = pd.DataFrame(
+                {
+                    time_agg: df.index.strftime(period.value[1]),
+                    _time_col: df.index,
+                    _value_col: value,
+                }
+            )
             data_frames.append(temp_df)
 
         # Concatenate all the DataFrames in the list into one DataFrame
         data = pd.concat(data_frames)
 
         # Group the DataFrame by the day of the week and calculate the mean
-        grouped = data.groupby([time_agg]).agg({_value_col: aggregation.value,
-                                                _time_col: 'first'})
+        grouped = data.groupby([time_agg]).agg(
+            {_value_col: aggregation.value, _time_col: "first"}
+        )
 
         # Reset the index, making 'period' the new index column
         grouped.reset_index(inplace=True)
@@ -80,4 +85,6 @@ class _ProfileMaker:
         grouped[_time_col] = pd.to_datetime(grouped[_time_col], format=period.value[2])
 
         # Return a TimeSeries from the grouped DataFrame
-        return TimeSeries.from_dataframe(grouped, time_col=_time_col, value_cols=_value_col)
+        return TimeSeries.from_dataframe(
+            grouped, time_col=_time_col, value_cols=_value_col
+        )

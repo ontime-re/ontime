@@ -1,16 +1,25 @@
 from abc import abstractmethod
-from typing import Generic, TypeVar, Optional, Union, List, Dict, Sequence, Callable, Type
+from typing import (
+    Generic,
+    TypeVar,
+    Optional,
+    Union,
+    List,
+    Dict,
+    Sequence,
+    Callable,
+    Type,
+)
 import pandas as pd
 from .time_series import TimeSeries
 import xarray as xr
 import numpy as np
 from darts import TimeSeries as DartsTimeSeries
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class RestrictedTimeSeries(TimeSeries, Generic[T]):
-
     def __init__(self, xa: xr.DataArray):
         super().__init__(xa)
 
@@ -31,51 +40,51 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
 
     @classmethod
     def from_dataframe(
-            cls,
-            df: pd.DataFrame,
-            time_col: Optional[str] = None,
-            value_cols: Optional[Union[List[str], str]] = None,
-            fill_missing_dates: Optional[bool] = False,
-            freq: Optional[Union[str, int]] = None,
-            fillna_value: Optional[float] = None,
-            static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
-            hierarchy: Optional[Dict] = None,
+        cls,
+        df: pd.DataFrame,
+        time_col: Optional[str] = None,
+        value_cols: Optional[Union[List[str], str]] = None,
+        fill_missing_dates: Optional[bool] = False,
+        freq: Optional[Union[str, int]] = None,
+        fillna_value: Optional[float] = None,
+        static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        hierarchy: Optional[Dict] = None,
     ):
         raise NotImplementedError
 
     @classmethod
     def from_group_dataframe(
-            cls,
-            df: pd.DataFrame,
-            group_cols: Union[List[str], str],
-            time_col: Optional[str] = None,
-            value_cols: Optional[Union[List[str], str]] = None,
-            static_cols: Optional[Union[List[str], str]] = None,
-            fill_missing_dates: Optional[bool] = False,
-            freq: Optional[Union[str, int]] = None,
-            fillna_value: Optional[float] = None,
+        cls,
+        df: pd.DataFrame,
+        group_cols: Union[List[str], str],
+        time_col: Optional[str] = None,
+        value_cols: Optional[Union[List[str], str]] = None,
+        static_cols: Optional[Union[List[str], str]] = None,
+        fill_missing_dates: Optional[bool] = False,
+        freq: Optional[Union[str, int]] = None,
+        fillna_value: Optional[float] = None,
     ):
         raise NotImplementedError
 
     @classmethod
     def from_series(
-            cls,
-            pd_series: pd.Series,
-            fill_missing_dates: Optional[bool] = False,
-            freq: Optional[Union[str, int]] = None,
-            fillna_value: Optional[float] = None,
-            static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        cls,
+        pd_series: pd.Series,
+        fill_missing_dates: Optional[bool] = False,
+        freq: Optional[Union[str, int]] = None,
+        fillna_value: Optional[float] = None,
+        static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
     ):
         raise NotImplementedError
 
     @classmethod
     def from_values(
-            cls,
-            values: np.ndarray,
-            columns: Optional[pd._typing.Axes] = None,
-            fillna_value: Optional[float] = None,
-            static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
-            hierarchy: Optional[Dict] = None,
+        cls,
+        values: np.ndarray,
+        columns: Optional[pd._typing.Axes] = None,
+        fillna_value: Optional[float] = None,
+        static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        hierarchy: Optional[Dict] = None,
     ):
         raise NotImplementedError
 
@@ -85,49 +94,49 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
 
     @classmethod
     def from_times_and_values(
-            cls,
-            times: Union[pd.DatetimeIndex, pd.RangeIndex, pd.Index],
-            values: np.ndarray,
-            fill_missing_dates: Optional[bool] = False,
-            freq: Optional[Union[str, int]] = None,
-            columns: Optional[pd._typing.Axes] = None,
-            fillna_value: Optional[float] = None,
-            static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
-            hierarchy: Optional[Dict] = None,
+        cls,
+        times: Union[pd.DatetimeIndex, pd.RangeIndex, pd.Index],
+        values: np.ndarray,
+        fill_missing_dates: Optional[bool] = False,
+        freq: Optional[Union[str, int]] = None,
+        columns: Optional[pd._typing.Axes] = None,
+        fillna_value: Optional[float] = None,
+        static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        hierarchy: Optional[Dict] = None,
     ):
         raise NotImplementedError
 
     @classmethod
     def from_csv(
-            cls,
-            filepath_or_buffer,
-            time_col: Optional[str] = None,
-            value_cols: Optional[Union[List[str], str]] = None,
-            fill_missing_dates: Optional[bool] = False,
-            freq: Optional[Union[str, int]] = None,
-            fillna_value: Optional[float] = None,
-            static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
-            hierarchy: Optional[Dict] = None,
-            **kwargs,
+        cls,
+        filepath_or_buffer,
+        time_col: Optional[str] = None,
+        value_cols: Optional[Union[List[str], str]] = None,
+        fill_missing_dates: Optional[bool] = False,
+        freq: Optional[Union[str, int]] = None,
+        fillna_value: Optional[float] = None,
+        static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        hierarchy: Optional[Dict] = None,
+        **kwargs,
     ):
         raise NotImplementedError
 
     @classmethod
     def from_json(
-            cls,
-            json_str: str,
-            static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
-            hierarchy: Optional[Dict] = None,
+        cls,
+        json_str: str,
+        static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        hierarchy: Optional[Dict] = None,
     ):
         raise NotImplementedError
 
     @classmethod
     def from_xarray(
-            cls,
-            xa: xr.DataArray,
-            fill_missing_dates: Optional[bool] = False,
-            freq: Optional[Union[str, int]] = None,
-            fillna_value: Optional[float] = None,
+        cls,
+        xa: xr.DataArray,
+        fill_missing_dates: Optional[bool] = False,
+        freq: Optional[Union[str, int]] = None,
+        fillna_value: Optional[float] = None,
     ) -> Type[T]:
         cls.check(cls, xa)
         return super().from_xarray(xa, fill_missing_dates, freq, fillna_value)
@@ -148,26 +157,24 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         raise NotImplementedError
 
     def concatenate(
-            self,
-            series: Sequence[T],
-            axis: Union[str, int] = 0,
-            ignore_time_axis: bool = False,
-            ignore_static_covariates: bool = False,
-            drop_hierarchy: bool = True,
+        self,
+        series: Sequence[T],
+        axis: Union[str, int] = 0,
+        ignore_time_axis: bool = False,
+        ignore_static_covariates: bool = False,
+        drop_hierarchy: bool = True,
     ) -> Type[T]:
         # TODO : if return super().concatenate the type is TimeSeries. I choose to raise an error. See what is the best
         raise NotImplementedError
 
-
     def map(
-            self,
-            fn: Union[
-                Callable[[np.number], np.number],
-                Callable[[Union[pd.Timestamp, int], np.number], np.number],
-            ],
+        self,
+        fn: Union[
+            Callable[[np.number], np.number],
+            Callable[[Union[pd.Timestamp, int], np.number], np.number],
+        ],
     ):
         raise NotImplementedError
-
 
     def prepend(self, other: T) -> T:
         """
@@ -178,7 +185,6 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         """
         return super().prepend(other)
 
-
     def prepend_values(self, values: np.ndarray) -> T:
         """
         Prepends (i.e. adds to the beginning) values to this series along the time axis.
@@ -188,8 +194,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         """
         raise NotImplementedError
 
-
-    def rescale_with_value(self, value_at_first_step: float) -> 'TimeSeries':
+    def rescale_with_value(self, value_at_first_step: float) -> "TimeSeries":
         """
         Rescales the time series so that the first value is equal to the given value.
 
@@ -198,7 +203,6 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         TODO Check if this action make sense to implement.
         """
         raise NotImplementedError
-
 
     def stack(self, other: "TimeSeries") -> "TimeSeries":
         """
@@ -210,8 +214,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         """
         return NotImplementedError
 
-
-    def sum(self, axis: int = 2) -> 'TimeSeries':
+    def sum(self, axis: int = 2) -> "TimeSeries":
         """
         Sums the values along the given axis.
 
@@ -221,17 +224,15 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         """
         return NotImplementedError
 
-
     def window_transform(
-            self,
-            transforms: Union[Dict, Sequence[Dict]],
-            treat_na: Optional[Union[str, Union[int, float]]] = None,
-            forecasting_safe: Optional[bool] = True,
-            keep_non_transformed: Optional[bool] = False,
-            include_current: Optional[bool] = True,
+        self,
+        transforms: Union[Dict, Sequence[Dict]],
+        treat_na: Optional[Union[str, Union[int, float]]] = None,
+        forecasting_safe: Optional[bool] = True,
+        keep_non_transformed: Optional[bool] = False,
+        include_current: Optional[bool] = True,
     ):
         raise NotImplementedError
-
 
     def with_values(self, values: np.ndarray) -> T:
         """

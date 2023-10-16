@@ -3,8 +3,7 @@ import xarray as xr
 import numpy as np
 
 
-class BinaryTimeSeries(RestrictedTimeSeries['BinaryTimeSeries']):
-
+class BinaryTimeSeries(RestrictedTimeSeries["BinaryTimeSeries"]):
     def __init__(self, xa: xr.DataArray):
         super().__init__(xa)
         if not self.check(xa):

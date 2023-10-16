@@ -34,7 +34,9 @@ class GenericDetector:
         self.model.fit(ts)
 
         # Create detector
-        self.detector = Quantile(low_quantile=self.low_quantile, high_quantile=self.high_quantile)
+        self.detector = Quantile(
+            low_quantile=self.low_quantile, high_quantile=self.high_quantile
+        )
         self.detector.fit(ts)
 
         return self

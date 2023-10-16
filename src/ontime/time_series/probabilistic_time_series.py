@@ -3,8 +3,7 @@ import xarray as xr
 import numpy as np
 
 
-class ProbabilisticTimeSeries(RestrictedTimeSeries['ProbabilisticTimeSeries']):
-
+class ProbabilisticTimeSeries(RestrictedTimeSeries["ProbabilisticTimeSeries"]):
     def __init__(self, xa: xr.DataArray):
         super().__init__(xa)
         if not self.check(xa):
