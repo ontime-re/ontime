@@ -1,6 +1,7 @@
 from .resticted_time_series import RestrictedTimeSeries
 import xarray as xr
 import numpy as np
+import pandas as pd
 
 
 class ProbabilisticTimeSeries(RestrictedTimeSeries["ProbabilisticTimeSeries"]):

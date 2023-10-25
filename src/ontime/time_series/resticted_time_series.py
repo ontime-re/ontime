@@ -35,7 +35,8 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         :param ts: Darts TimeSeries
         :return: OnTime TimeSeries
         """
-        cls.check(cls, ts.data_array())
+        if not cls.check(cls, ts.data_array()):
+            raise ValueError("Input DataArray contains values outside the range")
         return cls(ts.data_array())
 
     @classmethod
@@ -50,7 +51,19 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
         hierarchy: Optional[Dict] = None,
     ):
-        raise NotImplementedError
+        ts = super().from_dataframe(
+            df,
+            time_col,
+            value_cols,
+            fill_missing_dates,
+            freq,
+            fillna_value,
+            static_covariates,
+            hierarchy,
+        )
+        if not cls.check(cls, ts.data_array()):
+            raise ValueError("Input DataArray contains values outside the range")
+        return ts
 
     @classmethod
     def from_group_dataframe(
@@ -75,7 +88,12 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         fillna_value: Optional[float] = None,
         static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
     ):
-        raise NotImplementedError
+        ts = super().from_series(
+            pd_series, fill_missing_dates, freq, fillna_value, static_covariates
+        )
+        if not cls.check(cls, ts.data_array()):
+            raise ValueError("Input DataArray contains values outside the range")
+        return ts
 
     @classmethod
     def from_values(

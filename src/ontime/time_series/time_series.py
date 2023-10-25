@@ -39,7 +39,7 @@ class TimeSeries(DartsTimeSeries):
         return ts
 
     @staticmethod
-    def from_darts(ts):
+    def from_darts(ts: DartsTimeSeries) -> TimeSeries:
         """
         Convert a Darts TimeSeries to an OnTime TimeSeries
 
