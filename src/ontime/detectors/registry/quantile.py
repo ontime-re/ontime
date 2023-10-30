@@ -1,9 +1,6 @@
-from typing import Sequence, Union
-
 from darts.ad.detectors.quantile_detector import QuantileDetector
-
 from ...abstract import AbstractBaseDetector
-from ...time_series import TimeSeries
+from ...time_series import BinaryTimeSeries, TimeSeries
 
 
 class Quantile(QuantileDetector, AbstractBaseDetector):
@@ -22,11 +19,11 @@ class Quantile(QuantileDetector, AbstractBaseDetector):
         """
         super().fit(ts)
 
-    def detect(self, ts: TimeSeries) -> TimeSeries:
+    def detect(self, ts: TimeSeries) -> BinaryTimeSeries:
         """
         Detects anomalies in the given time series.
         :param ts: TimeSeries
-        :return: TimeSeries
+        :return: BinaryTimeSeries
         """
         ts_detected = super().detect(ts)
-        return TimeSeries.from_darts(ts_detected)
+        return BinaryTimeSeries.from_darts(ts_detected)
