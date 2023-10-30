@@ -25,4 +25,3 @@ class ProbabilisticTimeSeries(RestrictedTimeSeries["ProbabilisticTimeSeries"]):
             return np.all((xa >= 0) & (xa <= 1))
         else:
             raise ValueError("Input is not an xarray DataArray")
-
