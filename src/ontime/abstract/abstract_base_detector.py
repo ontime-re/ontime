@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from ..time_series import TimeSeries
+from ..time_series import BinaryTimeSeries, TimeSeries
 
 
 class AbstractBaseDetector(ABC):
@@ -8,7 +8,8 @@ class AbstractBaseDetector(ABC):
     for a Detector class.
     """
 
+    # TODO check if this must return a TimeSeries or a BinaryTimeSeries
     @abstractmethod
-    def detect(self, ts: TimeSeries) -> TimeSeries:
+    def detect(self, ts: TimeSeries) -> BinaryTimeSeries:
         """Detect features"""
         raise NotImplementedError

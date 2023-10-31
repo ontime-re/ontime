@@ -48,6 +48,7 @@ class Profiler:
         # Define the column names
         _time_col = Profiler.TIME_COL
         _value_col = Profiler.VALUE_COL
+
         time_agg = "time_formatted"
 
         # Split the time series by week
