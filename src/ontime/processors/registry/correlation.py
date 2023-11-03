@@ -13,7 +13,9 @@ class Correlation:
     """Correlation class handles correlation computation in a TimeSeries"""
 
     @staticmethod
-    def process(ts: TimeSeries, window: Union[int, timedelta, str, BaseOffset, BaseIndexer]) -> TimeSeries:
+    def process(
+        ts: TimeSeries, window: Union[int, timedelta, str, BaseOffset, BaseIndexer]
+    ) -> TimeSeries:
         """Compute correlations for a TimeSeries
 
         :param ts: TimeSeries
@@ -29,7 +31,9 @@ class Correlation:
         return TimeSeries.from_dataframe(df)
 
     @staticmethod
-    def compute_correlations(df: pd.DataFrame, window: Union[int, timedelta, str, BaseOffset, BaseIndexer]) -> pd.DataFrame:
+    def compute_correlations(
+        df: pd.DataFrame, window: Union[int, timedelta, str, BaseOffset, BaseIndexer]
+    ) -> pd.DataFrame:
         """
         Compute correlations for a DataFrame
 
