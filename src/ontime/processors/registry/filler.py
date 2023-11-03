@@ -33,7 +33,7 @@ class Filler(AbstractBaseProcessor):
             fill=fill, name=name, n_jobs=n_jobs, verbose=verbose
         )
 
-    def process(self, ts) -> TimeSeries:
+    def process(self, ts: TimeSeries) -> TimeSeries:
         """Process the time series.
         :param ts: TimeSeries
         :return: TimeSeries

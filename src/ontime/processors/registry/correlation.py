@@ -1,4 +1,9 @@
+from typing import Union
+from datetime import timedelta
+
 import pandas as pd
+from pandas._libs.tslibs import BaseOffset
+from pandas.core.indexers.objects import BaseIndexer
 import numpy as np
 
 from ...time_series import TimeSeries
@@ -8,7 +13,7 @@ class Correlation:
     """Correlation class handles correlation computation in a TimeSeries"""
 
     @staticmethod
-    def process(ts, window):
+    def process(ts: TimeSeries, window: Union[int, timedelta, str, BaseOffset, BaseIndexer]) -> TimeSeries:
         """Compute correlations for a TimeSeries
 
         :param ts: TimeSeries
@@ -24,7 +29,7 @@ class Correlation:
         return TimeSeries.from_dataframe(df)
 
     @staticmethod
-    def compute_correlations(df, window):
+    def compute_correlations(df: pd.DataFrame, window: Union[int, timedelta, str, BaseOffset, BaseIndexer]) -> pd.DataFrame:
         """
         Compute correlations for a DataFrame
 
@@ -67,11 +72,10 @@ class Correlation:
                 )
 
         # Step 5: Convert the list of non-redundant items to a new DataFrame
-        result_df = pd.DataFrame(non_redundant_items)
-        return result_df
+        return pd.DataFrame(non_redundant_items)
 
     @staticmethod
-    def pivot(df):
+    def pivot(df: pd.DataFrame) -> pd.DataFrame:
         """
         Pivot a DataFrame so that each pair of variables becomes a column
 
@@ -88,6 +92,4 @@ class Correlation:
 
         # Step 3: Pivot the table so that each 'pair' becomes a column
         # The values in the table will be the 'correlation' values
-        pivoted_df = df.pivot(columns="pair", values="correlation")
-
-        return pivoted_df
+        return df.pivot(columns="pair", values="correlation")
