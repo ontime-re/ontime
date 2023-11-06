@@ -7,6 +7,9 @@ from .libs.darts.forecasting_model import ForecastingModel as DartsForecastingMo
 from .libs.skforecast.forecaster_autoreg import (
     ForecasterAutoreg as SkForecastForecasterAutoreg,
 )
+from .libs.skforecast.forecaster_autoreg_multi_series import (
+    ForecasterAutoregMultiSeries as SkForecastForecasterAutoregMultiSeries,
+)
 
 
 class Model(AbstractBaseModel):
@@ -14,14 +17,18 @@ class Model(AbstractBaseModel):
     Generic wrapper around all implemented time series libraries
     """
 
-    def __init__(self, model, **params):
+    def __init__(self, model, multi_series=False, **params):
         super().__init__()
         if isinstance(model, ModelMeta):
             # Darts Models
             self.model = DartsForecastingModel(model, **params)
         else:
-            # scikit-learn API compatible models
-            self.model = SkForecastForecasterAutoreg(model, **params)
+            if multi_series:
+                # scikit-learn API compatible models
+                self.model = SkForecastForecasterAutoregMultiSeries(model, **params)
+            else:
+                # scikit-learn API compatible models
+                self.model = SkForecastForecasterAutoreg(model, **params)
 
     def fit(self, ts, **params):
         """
