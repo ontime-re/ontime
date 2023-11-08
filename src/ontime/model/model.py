@@ -14,10 +14,9 @@ from .libs.skforecast.forecaster_autoreg_multi_series import (
 
 class Model(AbstractBaseModel):
     """
-    Generic wrapper around all implemented time series libraries
+    Generic wrapper around SkForecast and DartsForecast time series libraries
     """
-
-    def __init__(self, model, multi_series=False, **params):
+    def __init__(self, model, multi_series: bool = False, **params):
         super().__init__()
         if isinstance(model, ModelMeta):
             # Darts Models
@@ -30,7 +29,7 @@ class Model(AbstractBaseModel):
                 # scikit-learn API compatible models
                 self.model = SkForecastForecasterAutoreg(model, **params)
 
-    def fit(self, ts, **params):
+    def fit(self, ts: TimeSeries, **params) -> "Model":
         """
         Fit the model to the given time series
         :param ts: TimeSeries
@@ -40,7 +39,7 @@ class Model(AbstractBaseModel):
         self.model.fit(ts, **params)
         return self
 
-    def predict(self, n, **params):
+    def predict(self, n: int, **params) -> TimeSeries:
         """
         Predict n steps into the future
         :param n: Integer

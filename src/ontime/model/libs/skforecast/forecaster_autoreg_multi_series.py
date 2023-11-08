@@ -19,10 +19,11 @@ class ForecasterAutoregMultiSeries(AbstractBaseModel):
             model = model()
         self.model = SkForecastForecasterAutoregMultiSeries(regressor=model, **params)
 
-    def fit(self, ts, **params):
-        self.model.fit(series=ts, **params)
+    def fit(self, ts: TimeSeries, **params) -> "ForecasterAutoregMultiSeries":
+        df = ts.pd_dataframe()
+        self.model.fit(series=df, **params)
         return self
 
-    def predict(self, n, **params):
+    def predict(self, n: int, **params) -> TimeSeries:
         pred = self.model.predict(n, **params)
         return TimeSeries.from_dataframe(pred)
