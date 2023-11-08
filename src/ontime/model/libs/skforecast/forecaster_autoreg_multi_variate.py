@@ -3,12 +3,12 @@ from abc import ABCMeta
 from ontime.abstract.abstract_base_model import AbstractBaseModel
 from ontime.time_series import TimeSeries
 
-from skforecast.ForecasterAutoregMultiSeries import (
-    ForecasterAutoregMultiSeries as SkForecastForecasterAutoregMultiSeries,
+from skforecast.ForecasterAutoregMultiVariate import (
+    ForecasterAutoregMultiVariate as SkForecastForecasterAutoregMultiVariate,
 )
 
 
-class ForecasterAutoregMultiSeries(AbstractBaseModel):
+class ForecasterAutoregMultiVariate(AbstractBaseModel):
     """
     Generic wrapper around SkForecast ForecasterAutoreg models
     """
@@ -17,9 +17,9 @@ class ForecasterAutoregMultiSeries(AbstractBaseModel):
         super().__init__()
         if isinstance(model, ABCMeta):
             model = model()
-        self.model = SkForecastForecasterAutoregMultiSeries(regressor=model, **params)
+        self.model = SkForecastForecasterAutoregMultiVariate(regressor=model, **params)
 
-    def fit(self, ts: TimeSeries, **params) -> "ForecasterAutoregMultiSeries":
+    def fit(self, ts: TimeSeries, **params) -> "ForecasterAutoregMultiVariate":
         df = ts.pd_dataframe()
         self.model.fit(series=df, **params)
         return self

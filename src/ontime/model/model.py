@@ -7,28 +7,24 @@ from .libs.darts.forecasting_model import ForecastingModel as DartsForecastingMo
 from .libs.skforecast.forecaster_autoreg import (
     ForecasterAutoreg as SkForecastForecasterAutoreg,
 )
-from .libs.skforecast.forecaster_autoreg_multi_series import (
-    ForecasterAutoregMultiSeries as SkForecastForecasterAutoregMultiSeries,
+from .libs.skforecast.forecaster_autoreg_multi_variate import (
+    ForecasterAutoregMultiVariate as SkForecastForecasterAutoregMultiSeries,
 )
 
 
 class Model(AbstractBaseModel):
     """
     Generic wrapper around SkForecast and DartsForecast time series libraries
+
+    The model is automatically selected based on the size of the time series.
+    It is chosen once and then kept for the whole lifecycle of the model.
     """
 
-    def __init__(self, model, multi_series: bool = False, **params):
+    def __init__(self, model, **params):
         super().__init__()
-        if isinstance(model, ModelMeta):
-            # Darts Models
-            self.model = DartsForecastingModel(model, **params)
-        else:
-            if multi_series:
-                # scikit-learn API compatible models
-                self.model = SkForecastForecasterAutoregMultiSeries(model, **params)
-            else:
-                # scikit-learn API compatible models
-                self.model = SkForecastForecasterAutoreg(model, **params)
+        self.model = model
+        self.params = params
+        self.is_model_undefined = False
 
     def fit(self, ts: TimeSeries, **params) -> "Model":
         """
@@ -37,6 +33,10 @@ class Model(AbstractBaseModel):
         :param params: Parameters to pass to the model
         :return: self
         """
+        if self.is_model_undefined:
+            self._set_model(ts)
+            self.is_model_undefined = True
+
         self.model.fit(ts, **params)
         return self
 
@@ -49,3 +49,17 @@ class Model(AbstractBaseModel):
         """
         pred = self.model.predict(n, **params)
         return TimeSeries.from_darts(pred)
+
+    def _set_model(self, ts):
+        size_of_ts = len(ts)
+
+        if isinstance(self.model, ModelMeta):
+            # Darts Models
+            self.model = DartsForecastingModel(self.model, **self.params)
+        else:
+            if size_of_ts > 1:
+                # scikit-learn API compatible models
+                self.model = SkForecastForecasterAutoregMultiSeries(self.model, **self.params)
+            else:
+                # scikit-learn API compatible models
+                self.model = SkForecastForecasterAutoreg(self.model, **self.params)

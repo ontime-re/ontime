@@ -11,10 +11,10 @@ class ForecastingModel(AbstractBaseModel):
         super().__init__()
         self.model = model(**params)
 
-    def fit(self, ts, **params):
+    def fit(self, ts: TimeSeries, **params) -> "ForecastingModel":
         self.model.fit(ts, **params)
         return self
 
-    def predict(self, n, **params):
+    def predict(self, n: int, **params) -> TimeSeries:
         pred = self.model.predict(n, **params)
         return TimeSeries.from_darts(pred)
