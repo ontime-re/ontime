@@ -16,6 +16,7 @@ class Model(AbstractBaseModel):
     """
     Generic wrapper around SkForecast and DartsForecast time series libraries
     """
+
     def __init__(self, model, multi_series: bool = False, **params):
         super().__init__()
         if isinstance(model, ModelMeta):
