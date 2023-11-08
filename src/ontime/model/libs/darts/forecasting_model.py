@@ -12,6 +12,7 @@ class ForecastingModel(AbstractBaseModel):
         self.model = model(**params)
 
     def fit(self, ts: TimeSeries, **params) -> "ForecastingModel":
+        print("pass")
         self.model.fit(ts, **params)
         return self
 

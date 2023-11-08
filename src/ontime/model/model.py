@@ -25,7 +25,7 @@ class Model(AbstractBaseModel):
         super().__init__()
         self.model = model
         self.params = params
-        self.is_model_undefined = False
+        self.is_model_undefined = True
 
     def fit(self, ts: TimeSeries, **params) -> "Model":
         """
@@ -36,7 +36,7 @@ class Model(AbstractBaseModel):
         """
         if self.is_model_undefined:
             self._set_model(ts)
-            self.is_model_undefined = True
+            self.is_model_undefined = False
 
         self.model.fit(ts, **params)
         return self
@@ -52,13 +52,12 @@ class Model(AbstractBaseModel):
         return TimeSeries.from_darts(pred)
 
     def _set_model(self, ts):
-        size_of_ts = len(ts)
-
-        if isinstance(self.model, ModelMeta):
+        size_of_ts = ts.n_components
+        if issubclass(self.model.__class__, ModelMeta):
             # Darts Models
             self.model = DartsForecastingModel(self.model, **self.params)
         # This take all the sklearn regressors and pipelines
-        elif isinstance(self.model, BaseEstimator):
+        elif issubclass(self.model, BaseEstimator):
             if size_of_ts > 1:
                 # scikit-learn API compatible models
                 self.model = SkForecastForecasterAutoregMultiSeries(
