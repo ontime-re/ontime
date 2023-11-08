@@ -1,4 +1,5 @@
 from darts.models.forecasting.forecasting_model import ModelMeta
+from sklearn.base import BaseEstimator
 
 from ontime.abstract.abstract_base_model import AbstractBaseModel
 from ontime.time_series import TimeSeries
@@ -56,7 +57,8 @@ class Model(AbstractBaseModel):
         if isinstance(self.model, ModelMeta):
             # Darts Models
             self.model = DartsForecastingModel(self.model, **self.params)
-        else:
+        # This take all the sklearn regressors and pipelines
+        elif isinstance(self.model, BaseEstimator):
             if size_of_ts > 1:
                 # scikit-learn API compatible models
                 self.model = SkForecastForecasterAutoregMultiSeries(
@@ -65,3 +67,7 @@ class Model(AbstractBaseModel):
             else:
                 # scikit-learn API compatible models
                 self.model = SkForecastForecasterAutoreg(self.model, **self.params)
+        else:
+            raise ValueError(
+                f"The {self.model} Model is not supported by the Model wrapper."
+            )
