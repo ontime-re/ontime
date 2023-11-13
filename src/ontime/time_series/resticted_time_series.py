@@ -29,7 +29,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         raise NotImplementedError
 
     @classmethod
-    def from_darts(cls, ts: DartsTimeSeries):
+    def from_darts(cls, ts: DartsTimeSeries) -> T:
         """
         Convert a Darts TimeSeries to an OnTime TimeSeries
 
@@ -51,7 +51,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         fillna_value: Optional[float] = None,
         static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
         hierarchy: Optional[Dict] = None,
-    ):
+    ) -> T:
         ts = super().from_dataframe(
             df,
             time_col,
@@ -77,7 +77,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         fill_missing_dates: Optional[bool] = False,
         freq: Optional[Union[str, int]] = None,
         fillna_value: Optional[float] = None,
-    ):
+    ) -> T:
         raise NotImplementedError
 
     @classmethod
@@ -88,7 +88,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         freq: Optional[Union[str, int]] = None,
         fillna_value: Optional[float] = None,
         static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    ):
+    ) -> T:
         ts = super().from_series(
             pd_series, fill_missing_dates, freq, fillna_value, static_covariates
         )
@@ -104,11 +104,11 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         fillna_value: Optional[float] = None,
         static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
         hierarchy: Optional[Dict] = None,
-    ):
+    ) -> T:
         raise NotImplementedError
 
     @classmethod
-    def from_pickle(cls, path: str):
+    def from_pickle(cls, path: str) -> T:
         raise NotImplementedError
 
     @classmethod
@@ -122,7 +122,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         fillna_value: Optional[float] = None,
         static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
         hierarchy: Optional[Dict] = None,
-    ):
+    ) -> T:
         raise NotImplementedError
 
     @classmethod
@@ -137,7 +137,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
         hierarchy: Optional[Dict] = None,
         **kwargs,
-    ):
+    ) -> T:
         raise NotImplementedError
 
     @classmethod
@@ -146,7 +146,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         json_str: str,
         static_covariates: Optional[Union[pd.Series, pd.DataFrame]] = None,
         hierarchy: Optional[Dict] = None,
-    ):
+    ) -> T:
         raise NotImplementedError
 
     @classmethod
@@ -156,7 +156,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         fill_missing_dates: Optional[bool] = False,
         freq: Optional[Union[str, int]] = None,
         fillna_value: Optional[float] = None,
-    ) -> Type[T]:
+    ) -> T:
         cls.check(cls, xa)
         return super().from_xarray(xa, fill_missing_dates, freq, fillna_value)
 
@@ -182,7 +182,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         ignore_time_axis: bool = False,
         ignore_static_covariates: bool = False,
         drop_hierarchy: bool = True,
-    ) -> Type[T]:
+    ) -> T:
         # TODO : if return super().concatenate the type is TimeSeries. I choose to raise an error. See what is the best
         raise NotImplementedError
 
@@ -213,7 +213,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         """
         raise NotImplementedError
 
-    def rescale_with_value(self, value_at_first_step: float) -> "TimeSeries":
+    def rescale_with_value(self, value_at_first_step: float) -> T:
         """
         Rescales the time series so that the first value is equal to the given value.
 
@@ -223,7 +223,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         """
         raise NotImplementedError
 
-    def stack(self, other: "TimeSeries") -> "TimeSeries":
+    def stack(self, other: "TimeSeries") -> T:
         """
         Stacks this time series with another one, along the time axis.
 
@@ -233,7 +233,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         """
         return NotImplementedError
 
-    def sum(self, axis: int = 2) -> "TimeSeries":
+    def sum(self, axis: int = 2) -> T:
         """
         Sums the values along the given axis.
 
@@ -250,7 +250,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         forecasting_safe: Optional[bool] = True,
         keep_non_transformed: Optional[bool] = False,
         include_current: Optional[bool] = True,
-    ):
+    ) -> T:
         raise NotImplementedError
 
     def with_values(self, values: np.ndarray) -> T:
