@@ -6,7 +6,9 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from darts.dataprocessing.transformers import Scaler
 
 
-def normalize(ts: TimeSeries, type='minmax', return_transformer=False) -> tuple | TimeSeries:
+def normalize(
+    ts: TimeSeries, type="minmax", return_transformer=False
+) -> tuple | TimeSeries:
     """
     Normalize a TimeSeries
 
@@ -16,9 +18,9 @@ def normalize(ts: TimeSeries, type='minmax', return_transformer=False) -> tuple 
     :return: TimeSeries
     """
     match type:
-        case 'minmax':
+        case "minmax":
             scaler = MinMaxScaler()
-        case 'zscore':
+        case "zscore":
             scaler = StandardScaler()
     transformer = Scaler(scaler)
     ts_transformed = transformer.fit_transform(ts)
@@ -39,14 +41,16 @@ def train_test_split(ts: TimeSeries, test_split=None, train_split=None) -> tuple
     """
 
     if train_split is not None and test_split is not None:
-        raise Exception('Only one of those two parameters can be set : train_split, test_split.')
+        raise Exception(
+            "Only one of those two parameters can be set : train_split, test_split."
+        )
 
     if train_split is None and test_split is None:
         test_split = 0.25
 
     # split ts in subts : train, test
     if test_split is not None:
-        train_set, test_set = ts.split_after(1-test_split)
+        train_set, test_set = ts.split_after(1 - test_split)
 
     if train_split is not None:
         train_set, test_set = ts.split_after(train_split)
@@ -90,7 +94,10 @@ def split_by_length(ts: TimeSeries, length: int, drop_last: bool = True) -> list
     # Change the data structure from DataFrame to TimeSeries
     return list(map(TimeSeries.from_dataframe, splits_df))
 
-def split_inputs_from_targets(ts_list: list, input_length: int, target_length: int) -> tuple:
+
+def split_inputs_from_targets(
+    ts_list: list, input_length: int, target_length: int
+) -> tuple:
     """
     Split a list of TimeSeries into input and target TimeSeries
 
@@ -118,7 +125,9 @@ def split_inputs_from_targets(ts_list: list, input_length: int, target_length: i
             target_series = df.iloc[-target_length:]
             target_series_list.append(target_series)
         else:
-            raise Exception('input_length + label_len is longer that the total length of the DataFrame')
+            raise Exception(
+                "input_length + label_len is longer that the total length of the DataFrame"
+            )
 
     input_ts_list = list(map(TimeSeries.from_dataframe, input_series_list))
     target_ts_list = list(map(TimeSeries.from_dataframe, target_series_list))
