@@ -53,7 +53,7 @@ class GenericDetector:
 
     def predetect(self, n) -> BinaryTimeSeries:
         """
-        Predict n steps into the future and detect anomalies
+        Predict length steps into the future and detect anomalies
 
         Can raise a ValueError if the model has not been fitted
 
