@@ -1,5 +1,8 @@
+import pandas as pd
+
 from ..time_series import TimeSeries, BinaryTimeSeries
-import matplotlib.pyplot as plt
+import altair as alt
+
 
 class AnomalyTimeSeries:
     @staticmethod
@@ -24,8 +27,50 @@ class AnomalyTimeSeries:
 
         :return: TODO
         """
-        fig, axs = plt.subplots( figsize=(20, 10))
+        data_df = data.pd_dataframe()
 
-        axs.plot(data)
+        chart = alt.Chart(data_df.reset_index()).mark_line().encode(
+            x='time:T',
+            y='random_walk:Q',
+        ).properties(
+            title='Line Chart',
+            width=600,
+            height=400
+        )
 
-        return fig, axs
+        if point_anomalies is not None:
+            anomalies_df = point_anomalies.pd_dataframe()
+            anomalies_df['anomalies_y'] = anomalies_df['anomalies'] * data_df['random_walk']
+
+            anomalies_chart = alt.Chart(anomalies_df.reset_index()).mark_circle(color='red').encode(
+                x='time:T',
+                y='anomalies_y:Q',
+            ).transform_filter(
+                alt.datum.anomalies == 1
+            )
+
+            chart += anomalies_chart
+
+        if contextual_anomalies is not None:
+            chart += AnomalyTimeSeries._make_line_chart(data_df, contextual_anomalies)
+
+        if collective_anomalies is not None:
+            chart += AnomalyTimeSeries._make_line_chart(data_df, collective_anomalies)
+
+        if seasonal_anomalies is not None:
+            chart += AnomalyTimeSeries._make_line_chart(data_df, seasonal_anomalies)
+
+        if cyclical_anomalies is not None:
+            chart += AnomalyTimeSeries._make_line_chart(data_df, cyclical_anomalies)
+
+        return chart
+
+    @staticmethod
+    def _make_line_chart(data: pd.DataFrame, anomalies_ts: BinaryTimeSeries):
+        anomalies = anomalies_ts.pd_dataframe()
+        anomalies['anomalies_y'] = anomalies['anomalies'] * data['random_walk']
+
+        return alt.Chart(anomalies.reset_index()).mark_line(color='red').encode(
+            x='time:T',
+            y='anomalies_y:Q',
+        )
