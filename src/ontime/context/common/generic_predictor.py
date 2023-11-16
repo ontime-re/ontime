@@ -31,7 +31,7 @@ class GenericPredictor:
 
     def predict(self, n):
         """
-        Predict n steps into the future
+        Predict length steps into the future
         :param n: Int number of steps to predict
         :return: TimeSeries
         """

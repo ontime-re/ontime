@@ -35,7 +35,7 @@ class Model(AbstractBaseModel):
 
     def predict(self, n, **params):
         """
-        Predict n steps into the future
+        Predict length steps into the future
         :param n: Integer
         :param params: Parameters to pass to the predict method
         :return: TimeSeries
