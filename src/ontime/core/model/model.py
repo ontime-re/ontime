@@ -3,7 +3,9 @@ from darts.models.forecasting.forecasting_model import ModelMeta
 from ..time_series import TimeSeries
 from .abstract_model import AbstractModel
 from .libs.darts.forecasting_model import ForecastingModel as DartsForecastingModel
-from .libs.skforecast.forecaster_autoreg import ForecasterAutoreg as SkForecastForecasterAutoreg
+from .libs.skforecast.forecaster_autoreg import (
+    ForecasterAutoreg as SkForecastForecasterAutoreg,
+)
 
 
 class Model(AbstractModel):

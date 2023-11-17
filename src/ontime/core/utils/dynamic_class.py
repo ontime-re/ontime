@@ -5,6 +5,7 @@ class DynamicClass(Registry):
     """
     DynamicClass is a class that can load other classes dynamically
     """
+
     def __init__(self):
         super().__init__()
 

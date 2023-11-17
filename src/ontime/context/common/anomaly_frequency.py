@@ -19,7 +19,9 @@ class AnomalyFrequency:
         sum_series = self.anomalies_series.rolling(window=window_size).sum()
         return TimeSeries.from_series(sum_series)
 
-    def get_frequency_of_anomaly_in_window(self, window_size: str) -> ProbabilisticTimeSeries:
+    def get_frequency_of_anomaly_in_window(
+        self, window_size: str
+    ) -> ProbabilisticTimeSeries:
         """
         Compute the frequency of anomalies in a time window. The frequency is computed as the number of anomalies in
         the window divided by the maximum number of anomalies in a window. So 1 mean that all samples in the window are

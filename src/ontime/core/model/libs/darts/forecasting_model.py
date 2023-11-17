@@ -8,7 +8,7 @@ class ForecastingModel(AbstractModel):
     """
 
     def __init__(self, model, **params):
-        """ Constructor of a ForecastingModel object
+        """Constructor of a ForecastingModel object
 
         :param model: Dart's forecasting model
         :param params: dict of keyword arguments for this model's constructor

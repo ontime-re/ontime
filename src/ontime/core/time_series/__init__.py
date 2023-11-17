@@ -4,8 +4,8 @@ from .binary_time_series import BinaryTimeSeries
 from .resticted_time_series import RestrictedTimeSeries
 
 __all__ = [
-    'TimeSeries',
-    'ProbabilisticTimeSeries',
-    'BinaryTimeSeries',
-    'RestrictedTimeSeries'
+    "TimeSeries",
+    "ProbabilisticTimeSeries",
+    "BinaryTimeSeries",
+    "RestrictedTimeSeries",
 ]

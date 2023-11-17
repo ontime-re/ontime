@@ -75,7 +75,9 @@ def heatmap(ts: TimeSeries) -> alt.Chart:
     return chart
 
 
-def prediction(train_ts: TimeSeries, pred_ts: TimeSeries = None, test_ts: TimeSeries = None) -> alt.Chart:
+def prediction(
+    train_ts: TimeSeries, pred_ts: TimeSeries = None, test_ts: TimeSeries = None
+) -> alt.Chart:
     """
     Plot a prediction
 

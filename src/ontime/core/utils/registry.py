@@ -3,6 +3,7 @@ class Registry:
     Registry class with the aim to store objects in a dictionary and retrieve them by name
 
     """
+
     def __init__(self):
         self.registry = {}
 
