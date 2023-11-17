@@ -1,11 +1,12 @@
-from ontime.time_series import TimeSeries
 from enum import Enum
+
 import pandas as pd
+
+from ...core.time_series import TimeSeries
 
 
 class Profiler:
     """
-    This class should not be instantiated.
     This class is used to make a profile from a time series.
     """
 
@@ -20,7 +21,7 @@ class Profiler:
         SUM = "sum"
 
     # Define the all periods possible
-    # The first element is the offset alias for split_by_period from ontime.time_series
+    # The first element is the offset alias for split_by_period from ontime.modules.time_series
     # The second element is the format to make the aggregation (**Also users' format**)
     # The third element is the format to convert data to match with TimeSeries format and the chosen period
     class Period(Enum):
