@@ -1,8 +1,9 @@
 from darts.models import CatBoostModel
 from darts.utils.statistics import check_seasonality
-from ...time_series import BinaryTimeSeries
-from ...detectors import Quantile
-from ...model import Model
+
+from ...core.time_series import BinaryTimeSeries
+from ...core.detector import Quantile
+from ...core.model import Model
 
 
 class GenericDetector:
