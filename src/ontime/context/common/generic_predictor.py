@@ -1,6 +1,7 @@
 from darts.models import CatBoostModel
 from darts.utils.statistics import check_seasonality
-import ontime as on
+
+from ...core.model import Model
 
 
 class GenericPredictor:
@@ -22,7 +23,7 @@ class GenericPredictor:
         lags = 12 if seasonality == 0 else seasonality
 
         # Create model
-        self.model = on.Model(
+        self.model = Model(
             CatBoostModel,
             lags=int(lags),
         )
