@@ -134,7 +134,6 @@ class AnomalyPlot:
         array_anomalies_df = AnomalyPlot.split_continuous_series(anomalies)
         chart_total = None
         for anomalies_df in array_anomalies_df:
-
             anomalies_df["max"] = y_max + delta
             anomalies_df["min"] = y_min - delta
 
