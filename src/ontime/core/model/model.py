@@ -60,9 +60,7 @@ class Model(AbstractModel):
         elif issubclass(self.model, BaseEstimator):
             if size_of_ts > 1:
                 # scikit-learn API compatible models
-                self.model = SkForecasterAutoregMultiSeries(
-                    self.model, **self.params
-                )
+                self.model = SkForecasterAutoregMultiSeries(self.model, **self.params)
             else:
                 # scikit-learn API compatible models
                 self.model = SkForecastForecasterAutoreg(self.model, **self.params)
