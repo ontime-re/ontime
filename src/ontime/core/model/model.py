@@ -24,6 +24,7 @@ class Model(AbstractModel):
         self.model = model
         self.params = params
         self.is_model_undefined = True
+
     def fit(self, ts: TimeSeries, **params) -> "Model":
         """
         Fit the model to the given time series
