@@ -7,7 +7,7 @@ from .libs.skforecast.forecaster_autoreg import (
     ForecasterAutoreg as SkForecastForecasterAutoreg,
 )
 from .libs.skforecast.forecaster_autoreg_multi_variate import (
-    ForecasterAutoregMultiVariate as SkForecastForecasterAutoregMultiSeries,
+    ForecasterAutoregMultiVariate as SkForecasterAutoregMultiSeries,
 )
 
 
@@ -60,7 +60,7 @@ class Model(AbstractModel):
         elif issubclass(self.model, BaseEstimator):
             if size_of_ts > 1:
                 # scikit-learn API compatible models
-                self.model = SkForecastForecasterAutoregMultiSeries(
+                self.model = SkForecasterAutoregMultiSeries(
                     self.model, **self.params
                 )
             else:
