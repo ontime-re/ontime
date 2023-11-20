@@ -1,4 +1,6 @@
 from .generic_predictor import GenericPredictor
 from .generic_detector import GenericDetector
 from .profiler import Profiler
-from .anomalies_frequencies import AnomaliesFrequencies
+from .anomaly_frequency import AnomalyFrequency
+
+__all__ = ["GenericPredictor", "GenericDetector", "Profiler", "AnomalyFrequency"]
