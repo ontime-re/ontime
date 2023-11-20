@@ -4,7 +4,9 @@ from ..time_series import TimeSeries, BinaryTimeSeries
 import altair as alt
 
 
-class AnomalyTimeSeries:
+class AnomalyPlot:
+    _DATA_COLUMN_NAME = "data"
+
     @staticmethod
     def plot_anomalies(
         data: TimeSeries,
@@ -35,20 +37,27 @@ class AnomalyTimeSeries:
             .mark_line()
             .encode(
                 x="time:T",
-                y="random_walk:Q",
+                y=alt.Y(
+                    f"{AnomalyPlot._DATA_COLUMN_NAME}:Q",
+                    axis=alt.Axis(title="Values"),
+                ),
             )
-            .properties(title="Line Chart", width=600, height=400)
+            .properties(
+                title="Chart representing the data and the anomalies over the time",
+                width=600,
+                height=400,
+            )
         )
 
         if point_anomalies is not None:
             anomalies_df = point_anomalies.pd_dataframe()
             anomalies_df["anomalies_y"] = (
-                anomalies_df["anomalies"] * data_df["random_walk"]
+                anomalies_df["anomalies"] * data_df[AnomalyPlot._DATA_COLUMN_NAME]
             )
 
             anomalies_chart = (
                 alt.Chart(anomalies_df.reset_index())
-                .mark_circle(color="red")
+                .mark_circle(color="red", size=100)
                 .encode(
                     x="time:T",
                     y="anomalies_y:Q",
@@ -59,24 +68,16 @@ class AnomalyTimeSeries:
             chart += anomalies_chart
 
         if contextual_anomalies is not None:
-            chart = AnomalyTimeSeries._make_line_chart(
-                data_df, chart, contextual_anomalies
-            )
+            chart = AnomalyPlot._make_line_chart(data_df, chart, contextual_anomalies)
 
         if collective_anomalies is not None:
-            chart = AnomalyTimeSeries._make_line_chart(
-                data_df, chart, collective_anomalies
-            )
+            chart = AnomalyPlot._make_area_chart(data_df, chart, collective_anomalies)
 
         if seasonal_anomalies is not None:
-            chart = AnomalyTimeSeries._make_line_chart(
-                data_df, chart, seasonal_anomalies
-            )
+            chart = AnomalyPlot._make_line_chart(data_df, chart, seasonal_anomalies)
 
         if cyclical_anomalies is not None:
-            chart = AnomalyTimeSeries._make_line_chart(
-                data_df, chart, cyclical_anomalies
-            )
+            chart = AnomalyPlot._make_line_chart(data_df, chart, cyclical_anomalies)
 
         return chart
 
@@ -93,15 +94,15 @@ class AnomalyTimeSeries:
 
         :return: Return an altair chart with the current time series and the anomalies drawn.
         """
-        array_anomalies_df = AnomalyTimeSeries.split_continuous_series(anomalies)
+        array_anomalies_df = AnomalyPlot.split_continuous_series(anomalies)
         chart_total = actual_chart
         for anomalies_df in array_anomalies_df:
             anomalies_df["anomalies_y"] = (
-                anomalies_df["anomalies"] * data["random_walk"]
+                anomalies_df["anomalies"] * data[AnomalyPlot._DATA_COLUMN_NAME]
             )
             chart = (
                 alt.Chart(anomalies_df.reset_index())
-                .mark_line(color="red")
+                .mark_line(color="red", strokeWidth=2.5)
                 .encode(
                     x="time:T",
                     y="anomalies_y:Q",
@@ -110,6 +111,52 @@ class AnomalyTimeSeries:
             chart_total += chart
 
         return chart_total
+
+    @staticmethod
+    def _make_area_chart(
+        data_df: pd.DataFrame, actual_chart: alt.Chart, anomalies: BinaryTimeSeries
+    ) -> alt.Chart:
+        """
+        Adding background to the chart with the given anomalies.
+
+        :param data_df: TimeSeries within the data that are plotted in the chart.
+        :param actual_chart: Chart that will be updated with the anomalies.
+        :param anomalies: BinaryTimeSeries of anomalies that will be used to color the background in red on the chart.
+
+        :return: Return an altair chart with the current time series and the anomalies drawn.
+        """
+
+        y_max = data_df[AnomalyPlot._DATA_COLUMN_NAME].max()
+        y_min = data_df[AnomalyPlot._DATA_COLUMN_NAME].min()
+
+        delta = (y_max - y_min) * 0.1
+
+        array_anomalies_df = AnomalyPlot.split_continuous_series(anomalies)
+        chart_total = None
+        for anomalies_df in array_anomalies_df:
+
+            anomalies_df["max"] = y_max + delta
+            anomalies_df["min"] = y_min - delta
+
+            chart = (
+                alt.Chart(anomalies_df.reset_index())
+                .mark_area(color="red", opacity=0.3)
+                .encode(
+                    x="time:T",
+                    y="min:Q",
+                    y2="max:Q",
+                )
+            )
+
+            if chart_total is None:
+                chart_total = chart
+            else:
+                chart_total += chart
+
+        if chart_total is not None:
+            # Put our chart as background
+            return chart_total + actual_chart
+        return actual_chart
 
     @staticmethod
     def split_continuous_series(anomalies: BinaryTimeSeries) -> list[pd.DataFrame]:

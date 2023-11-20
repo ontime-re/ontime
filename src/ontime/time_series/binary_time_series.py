@@ -1,5 +1,3 @@
-import pandas as pd
-
 from .resticted_time_series import RestrictedTimeSeries
 import xarray as xr
 import numpy as np

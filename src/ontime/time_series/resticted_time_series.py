@@ -8,7 +8,6 @@ from typing import (
     Dict,
     Sequence,
     Callable,
-    Type,
 )
 import pandas as pd
 from .time_series import TimeSeries

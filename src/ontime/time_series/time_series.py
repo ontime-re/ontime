@@ -1,11 +1,8 @@
 from __future__ import annotations
 from typing import List
-
 from darts import TimeSeries as DartsTimeSeries
 import pandas as pd
 import xarray as xr
-
-from ..plots import plots
 
 
 class TimeSeries(DartsTimeSeries):
