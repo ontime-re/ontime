@@ -45,5 +45,5 @@ clean:
 ## must be run at ./ontime
 check-notebooks:
 	@echo "Checking notebooks"
-	pytest --nbmake -n=auto notebooks
+	poetry run pytest --nbmake -n=auto notebooks
 
