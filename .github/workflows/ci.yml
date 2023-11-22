@@ -2,7 +2,8 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ 'main', 'develop' ]
+    # edit for testing
+    branches: [ 'main', 'develop', '28-notebooks-error' ]
   pull_request:
     branches: [ 'main', 'develop' ]
 
@@ -42,3 +43,17 @@ jobs:
 
       - name: Build package
         run: make build
+
+  # --------------------------------
+  # Test if notebooks build
+  # --------------------------------
+
+  notebooks:
+    name: notebooks check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: make install-dependencies
+
+      - name: check notebooks
+        run: make check-notebooks

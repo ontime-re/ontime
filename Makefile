@@ -12,8 +12,8 @@ get-informations:
 	@echo "Pre-commit version: $(shell pre-commit --version)"
 
 install-dependencies:
-	@echo "Installing..."
-	poetry install
+	@echo "Installing with option dev packages..."
+	poetry install --with dev
 	poetry run pre-commit install
 
 activate:
@@ -41,3 +41,9 @@ clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
 	rm -rf .pytest_cache
+
+## must be run at ./ontime
+check-notebooks:
+	@echo "Checking notebooks"
+	pytest --nbmake -n=auto ./notebooks
+
