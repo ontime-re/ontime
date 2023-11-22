@@ -3,7 +3,7 @@ name: Continuous Integration
 on:
   push:
     # edit for testing
-    branches: [ 'main', 'develop', '28-notebooks-error' ]
+    branches: [ 'main', 'develop']
   pull_request:
     branches: [ 'main', 'develop' ]
 
@@ -60,9 +60,6 @@ jobs:
 
       - name: Install dependencies
         run: make install-dependencies
-
-      - name: Listing for tests
-        run: ls -l
 
       - name: check notebooks
         run: make check-notebooks
