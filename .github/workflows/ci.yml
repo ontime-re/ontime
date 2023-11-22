@@ -3,7 +3,7 @@ name: Continuous Integration
 on:
   push:
     # edit for testing
-    branches: [ 'main', 'develop']
+    branches: [ 'main', 'develop', '28-notebooks-error' ]
   pull_request:
     branches: [ 'main', 'develop' ]
 
