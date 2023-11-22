@@ -3,7 +3,7 @@ name: Continuous Integration
 on:
   push:
     # edit for testing
-    branches: [ 'main', 'develop', '28-notebooks-error' ]
+    branches: [ 'main', 'develop', '28-notebooks-error']
   pull_request:
     branches: [ 'main', 'develop' ]
 
@@ -54,6 +54,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Set CUDA_VISIBLE_DEVICES
+        run: echo "CUDA_VISIBLE_DEVICES=-1" >> $GITHUB_ENV
 
       - name: Install dependency manager
         uses: snok/install-poetry@v1
