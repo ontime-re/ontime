@@ -61,11 +61,8 @@ jobs:
       - name: Install dependencies
         run: make install-dependencies
 
-      - name: Install dependencies
+      - name: Listing for tests
         run: ls -l
-
-      - name: Install dependencies
-        run: cd ontime
 
       - name: check notebooks
         run: make check-notebooks
