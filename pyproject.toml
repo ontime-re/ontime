@@ -28,6 +28,14 @@ black = "^23.7.0"
 nbmake = "^1.4.6"
 pytest-xdist = "^3.5.0"
 
+[tool.poetry.group.ci]
+optional = true
+
+[tool.poetry.group.ci.dependencies]
+python = "^3.10"
+torch = { version = "^2.0.1+cpu", markers = "cpu" }
+torchvision = { version = "^2.0.1+cpu", markers = "cpu" }
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

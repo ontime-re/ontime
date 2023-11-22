@@ -62,6 +62,9 @@ jobs:
         uses: snok/install-poetry@v1
 
       - name: Install dependencies
+        run: make install-ci-dependencies
+
+      - name: Install dependencies
         run: make install-dependencies
 
       - name: check notebooks
