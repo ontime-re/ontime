@@ -16,10 +16,6 @@ install-dependencies:
 	poetry install --with dev
 	poetry run pre-commit install
 
-install-ci-dependencies:
-	@echo "Installing with option dev packages..."
-	poetry install --only ci
-
 activate:
 	@echo "Activating virtual environment"
 	poetry shell
