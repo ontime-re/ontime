@@ -48,21 +48,25 @@ jobs:
   # Test if notebooks build
   # --------------------------------
 
-  notebooks:
-    name: notebooks check
+  run_notebooks:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name: Set CUDA_VISIBLE_DEVICES
-        run: echo "CUDA_VISIBLE_DEVICES=-1" >> $GITHUB_ENV
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
-      - name: Install dependency manager
-        uses: snok/install-poetry@v1
+      - name: Install Poetry
+        run: |
+          pip install poetry
+          poetry install
 
-      - name: Install dependencies
-        run: make install-dependencies
+      - name: Install PyTorch (CPU only)
+        run: poetry add torch==1.10.0+cpu torchvision==0.11.1+cpu torchaudio==0.10.0+cpu -D
 
-      - name: check notebooks
-        run: make check-notebooks
+      - name: Run Notebooks
+        run: poetry run jupyter nbconvert --execute notebooks/**/*.ipynb
