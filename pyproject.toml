@@ -17,6 +17,7 @@ vegafusion-python-embed = "^1.4.1"
 vegafusion = {extras = ["embed"], version = "^1.4.1"}
 protobuf = "^4.24.4"
 vega-datasets = "^0.9.0"
+lightning = "^2.1.2"
 
 [tool.poetry.group.dev.dependencies]
 jupyterlab = "^4.0.5"

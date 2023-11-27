@@ -57,12 +57,13 @@ def train_test_split(ts: TimeSeries, test_split=None, train_split=None) -> tuple
     return train_set, test_set
 
 
-def split_by_length(ts: TimeSeries, length: int, drop_last: bool = True) -> list:
+def split_by_length(ts: TimeSeries, length: int, shift: int = 1, drop_last: bool = True) -> list:
     """
     Split a TimeSeries into parts of a given length
 
     :param ts: TimeSeries to split
     :param length: int length of each part
+    :param shift: int shift between each part
     :param drop_last: bool, whether to drop the last part if it is shorter than n
     :return: list of TimeSeries
     """
@@ -70,18 +71,20 @@ def split_by_length(ts: TimeSeries, length: int, drop_last: bool = True) -> list
     # Get DataFrame
     df = ts.pd_dataframe()
 
-    # Calculate the total number of splits needed
-    total_splits = -(-len(df) // length)  # Ceiling division to get the number of parts
-
     # Initialize a list to hold the DataFrame splits
     splits_df = []
 
-    # Loop through the DataFrame and split it
-    for split in range(total_splits):
-        start_index = split * length
+    # Start index for the first split
+    start_index = 0
+
+    while start_index < len(df)-length:
         end_index = start_index + length
+
         # Append the part to the list, using slicing with .iloc
         splits_df.append(df.iloc[start_index:end_index])
+
+        # Update start_index for the next split
+        start_index += shift
 
     # If the last dataframe has a different length, then drop it.
     if drop_last:
