@@ -32,8 +32,8 @@ class DatasetLoader():
     # add datasets from other sources here
     
     @staticmethod
-    def load(dataset):#, **args):
+    def load(dataset, *args):
         if dataset[1] == 'darts': #if from Darts
-            return TimeSeries.from_darts(dataset[0].load())
+            return TimeSeries.from_darts(dataset[0].load(*args))
         #elif dataset[1] == 'xx':
-            #return ...
+            #load dataset + convert to TimeSeries ...
