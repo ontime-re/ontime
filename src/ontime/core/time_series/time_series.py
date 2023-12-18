@@ -51,3 +51,45 @@ class TimeSeries(DartsTimeSeries):
         :return: OnTime TimeSeries
         """
         return TimeSeries(ts.data_array())
+    
+    @staticmethod
+    def from_pandas(df: pd.DataFrame, freq=None) -> TimeSeries:
+        """
+        Convert a pandas DataFrame to an OnTime TimeSeries using Darts
+        Assumes the index is compliant with TimeEval's canonical format.
+
+        :param df: pandas dataFrame
+        :return: OnTime TimeSeries
+        """
+        ts = DartsTimeSeries.from_dataframe(df, fill_missing_dates=True, freq=freq)
+        return TimeSeries.from_darts(ts)
+
+    @staticmethod
+    def from_csv(file: str, index_col=None) -> TimeSeries:
+        """
+        Reads a csv file and converts it to an OnTime TimeSeries using Darts and pandas.
+        Assumes the csv file is compliant with TimeEval's canonical format.
+
+        :param file: location of the dataset csv file
+        :param index_col: the name of the column to be used for the index
+        :return: OnTime TimeSeries
+        """
+        df = pd.read_csv(file)
+        if index_col is not None:
+            df.index = df[index_col].astype('datetime64[ns]')
+            del df[index_col]
+        return TimeSeries.from_pandas(df)
+    
+    @staticmethod
+    def from_data(data, index=None, columns=None) -> TimeSeries:
+        """
+        Converts data to a TimeSeries. Takes data as a dict, ndarray, Iterable or pandas DataFrame.
+        Assumes the index is compliant with TimeEval's canonical format.
+        
+        :param data: a dict, ndarray, Iterable or pandas DataFrame
+        :param index: the array-like series to be used as index (will default to a range if none is specified)
+        :param columns: will be used for column names if there are none in the data parameter (will default to a range if nothing is specified)
+        :return: OnTime TimeSeries
+        """
+        df = pd.DataFrame(data, index, columns, copy = True)
+        return TimeSeries.from_pandas(df)

@@ -1,39 +1,61 @@
+from darts import TimeSeries as dTimeSeries
 from darts import datasets as dd
+from sklearn.datasets import fetch_openml
 from ...core.time_series import TimeSeries
+import pandas as pd
+from abc import abstractmethod
 
 class DatasetLoader():
-    AirPassengersDataset = (dd.AirPassengersDataset(), 'darts')
-    AusBeerDataset = (dd.AusBeerDataset(), 'darts')
-    AustralianTourismDataset = (dd.AustralianTourismDataset(), 'darts')
-    ETTh1Dataset = (dd.ETTh1Dataset(), 'darts')
-    ETTh2Dataset = (dd.ETTh2Dataset(), 'darts')
-    ETTm1Dataset = (dd.ETTm1Dataset(), 'darts')
-    ETTm2Dataset = (dd.ETTm2Dataset(), 'darts')
-    # this one won't load for an unknown reason
-    # ElectricityConsumptionZurichDataset = (dd.ElectricityConsumptionZurichDataset(), 'darts')
-    ElectricityDataset = (dd.ElectricityDataset(), 'darts')
-    EnergyDataset = (dd.EnergyDataset(), 'darts')
-    ExchangeRateDataset = (dd.ExchangeRateDataset(), 'darts')
-    GasRateCO2Dataset = (dd.GasRateCO2Dataset(), 'darts')
-    HeartRateDataset = (dd.HeartRateDataset(), 'darts')
-    ILINetDataset = (dd.ILINetDataset(), 'darts')
-    IceCreamHeaterDataset = (dd.IceCreamHeaterDataset(), 'darts')
-    MonthlyMilkDataset = (dd.MonthlyMilkDataset(), 'darts')
-    MonthlyMilkIncompleteDataset = (dd.MonthlyMilkIncompleteDataset(), 'darts')
-    SunspotsDataset = (dd.SunspotsDataset(), 'darts')
-    TaylorDataset = (dd.TaylorDataset(), 'darts')
-    TemperatureDataset = (dd.TemperatureDataset(), 'darts')
-    TrafficDataset = (dd.TrafficDataset(), 'darts')
-    USGasolineDataset = (dd.USGasolineDataset(), 'darts')
-    UberTLCDataset = (dd.UberTLCDataset(), 'darts')
-    WeatherDataset = (dd.WeatherDataset(), 'darts')
-    WineDataset = (dd.WineDataset(), 'darts')
-    WoolyDataset = (dd.WoolyDataset(), 'darts')
-    # add datasets from other sources here
+
+    class ImportedDataset():
+        def __init__(self, dataset, args = {}):
+            self.dataset = dataset
+            self.args = args
+
+        @abstractmethod
+        def load(self) -> TimeSeries:
+            pass
     
-    @staticmethod
-    def load(dataset, *args):
-        if dataset[1] == 'darts': #if from Darts
-            return TimeSeries.from_darts(dataset[0].load(*args))
-        #elif dataset[1] == 'xx':
-            #load dataset + convert to TimeSeries ...
+    class DartsDataset(ImportedDataset):
+        def load(self) -> TimeSeries:
+            return TimeSeries.from_darts(self.dataset.load(*self.args))
+    
+    class OpenMLDataset(ImportedDataset):
+        def load(self) -> TimeSeries:
+            self.dataset.index = self.dataset[self.args['time_col']]
+            dts = dTimeSeries.from_dataframe(self.dataset, **self.args)
+            return TimeSeries.from_darts(dts)
+
+    #darts datasets
+    AirPassengersDataset = DartsDataset(dd.AirPassengersDataset())
+    AusBeerDataset = DartsDataset(dd.AusBeerDataset()) 
+    AustralianTourismDataset = DartsDataset(dd.AustralianTourismDataset()) 
+    ETTh1Dataset = DartsDataset(dd.ETTh1Dataset()) 
+    ETTh2Dataset = DartsDataset(dd.ETTh2Dataset()) 
+    ETTm1Dataset = DartsDataset(dd.ETTm1Dataset()) 
+    ETTm2Dataset = DartsDataset(dd.ETTm2Dataset()) 
+    # this one won't load for an unknown reason
+    # ElectricityConsumptionZurichDataset = (dd.ElectricityConsumptionZurichDataset(), '' 
+    ElectricityDataset = DartsDataset(dd.ElectricityDataset()) 
+    EnergyDataset = DartsDataset(dd.EnergyDataset()) 
+    ExchangeRateDataset = DartsDataset(dd.ExchangeRateDataset()) 
+    GasRateCO2Dataset = DartsDataset(dd.GasRateCO2Dataset()) 
+    HeartRateDataset = DartsDataset(dd.HeartRateDataset()) 
+    ILINetDataset = DartsDataset(dd.ILINetDataset()) 
+    IceCreamHeaterDataset = DartsDataset(dd.IceCreamHeaterDataset()) 
+    MonthlyMilkDataset = DartsDataset(dd.MonthlyMilkDataset()) 
+    MonthlyMilkIncompleteDataset = DartsDataset(dd.MonthlyMilkIncompleteDataset()) 
+    SunspotsDataset = DartsDataset(dd.SunspotsDataset()) 
+    TaylorDataset = DartsDataset(dd.TaylorDataset()) 
+    TemperatureDataset = DartsDataset(dd.TemperatureDataset()) 
+    TrafficDataset = DartsDataset(dd.TrafficDataset()) 
+    USGasolineDataset = DartsDataset(dd.USGasolineDataset()) 
+    UberTLCDataset = DartsDataset(dd.UberTLCDataset()) 
+    WeatherDataset = DartsDataset(dd.WeatherDataset()) 
+    WineDataset = DartsDataset(dd.WineDataset()) 
+    WoolyDataset = DartsDataset(dd.WoolyDataset()) 
+
+    # openml datasets
+    AMDStockPrices = OpenMLDataset(fetch_openml(
+        "AMD-Stock-Prices-Historical-Data", version=1, as_frame=True, parser="pandas").frame, 
+        args = {'time_col': 'Date', 'fill_missing_dates':True, 'freq':'D'})
