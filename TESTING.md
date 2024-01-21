@@ -15,7 +15,7 @@ test file `src/tests/core/time_series/test_binary_time_series.py`.
 
 ## Naming convention
 
-All tests file must follow the follow the naming convention:
+All tests file must follow the naming convention:
 
     test_<module_name>.py
 

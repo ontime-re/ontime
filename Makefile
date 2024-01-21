@@ -22,11 +22,11 @@ activate:
 
 format:
 	@echo "Formatting codebase"
-	poetry run black src/ontime
+	poetry run black src
 
 format-check:
 	@echo "Checking code formatting"
-	poetry run black src/ontime --check
+	poetry run black src --check
 
 test:
 	@echo "Running tests"
