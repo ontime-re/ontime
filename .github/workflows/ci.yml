@@ -39,6 +39,9 @@ jobs:
       - name: Install dependencies
         run: make install-dependencies-test
 
+      - name: Get informations
+        run: make get-informations
+
       - name: Run tests
         run: make test
 
