@@ -31,9 +31,9 @@ For instance:
 
 ## Test execution
 
-The tests are executed automatically with GitHub Actions within the CI/CD pipeline.
-If you want to run the test manually, you can call the same command than the CI does
-locally by running the following command:
+The tests are executed automatically with GitHub Actions within the CI/CD pipeline on the
+`develop` and `main` branch. If you want to run the test manually, you can call the same 
+command than the CI does locally by running the following command:
     
     make test
 
