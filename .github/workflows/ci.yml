@@ -37,7 +37,7 @@ jobs:
         uses: snok/install-poetry@v1
 
       - name: Install dependencies
-        run: make install-dependencies
+        run: make install-dependencies-test
 
       - name: Run tests
         run: make test

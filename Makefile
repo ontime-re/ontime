@@ -16,6 +16,11 @@ install-dependencies:
 	poetry install
 	poetry run pre-commit install
 
+install-dependencies-test:
+	@echo "Installing..."
+	poetry install --with test
+	poetry run pre-commit install
+
 activate:
 	@echo "Activating virtual environment"
 	poetry shell
@@ -30,7 +35,7 @@ format-check:
 
 test:
 	@echo "Running tests"
-	poetry run python -m unittest discover --start-directory './src/tests' --pattern 'test_*.py'
+	poetry run pytest ./src/tests --disable-warnings
 
 build:
 	@echo "Building package"

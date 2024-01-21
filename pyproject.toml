@@ -27,6 +27,9 @@ black = "^23.7.0"
 nbmake = "^1.4.6"
 pytest-xdist = "^3.5.0"
 
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.4"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
