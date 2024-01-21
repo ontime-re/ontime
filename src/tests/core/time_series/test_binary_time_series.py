@@ -5,6 +5,7 @@ import numpy as np
 
 from ontime.core.time_series.binary_time_series import BinaryTimeSeries
 
+
 class TestBinaryTimeSeries(unittest.TestCase):
 
     def setUp(self):

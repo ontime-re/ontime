@@ -31,10 +31,12 @@ For instance:
 
 ## Test execution
 
-To run the tests, you can use the following command:
-
+The tests are executed automatically with GitHub Actions within the CI/CD pipeline.
+If you want to run the test manually, you can call the same command than the CI does
+locally by running the following command:
+    
     make test
 
-
+This will run all the tests in the `src/tests` folder.
 
 
