@@ -28,6 +28,10 @@ format-check:
 	@echo "Checking code formatting"
 	poetry run black src/ontime --check
 
+test:
+	@echo "Running tests"
+	poetry run python -m unittest discover -p 'test_*.py'
+
 build:
 	@echo "Building package"
 	poetry build
