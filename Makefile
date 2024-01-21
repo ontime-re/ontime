@@ -30,7 +30,7 @@ format-check:
 
 test:
 	@echo "Running tests"
-	poetry run python -m unittest discover -p 'test_*.py'
+	poetry run python -m unittest discover --start-directory './src/tests' --pattern 'test_*.py'
 
 build:
 	@echo "Building package"
