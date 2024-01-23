@@ -24,6 +24,8 @@ jobs:
 
   # --------------------------------
   # Test the Codebase
+  # Runs in the same dev container than 
+  # the one used to develop the project
   # --------------------------------
 
   test:
@@ -35,8 +37,8 @@ jobs:
 
       - name : Test
         uses: devcontainers/ci@v0.3
-        push: never
         with:
+          push: never
           runCmd: |
             make get-informations
             make install-dependencies-test
