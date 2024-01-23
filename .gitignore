@@ -1,5 +1,5 @@
 ## Project specific
-
+.DS_Store
 poetry.lock
 
 # Created by https://www.toptal.com/developers/gitignore/api/intellij+all,python,jupyternotebooks
