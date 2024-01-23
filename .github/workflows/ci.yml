@@ -23,6 +23,27 @@ jobs:
       - name: Format
         uses: psf/black@stable
 
+  # --------------------------------
+  # Test the Codebase
+  # Runs in the same dev container than 
+  # the one used to develop the project
+  # --------------------------------
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name : Test
+        uses: devcontainers/ci@v0.3
+        with:
+          push: never
+          runCmd: |
+            make get-informations
+            make install-dependencies-test
+            make test
 
   # --------------------------------
   # Build the Package

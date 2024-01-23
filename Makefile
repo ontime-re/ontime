@@ -11,10 +11,19 @@ get-informations:
 	@echo "Poetry version: $(shell poetry --version)"
 	@echo "Pre-commit version: $(shell pre-commit --version)"
 
+post-create-dev-container:
+	@echo "Get container ready"
+	@echo "› Installing dependencies with test"
+	make install-dependencies-test
+
 install-dependencies:
-	@echo "Installing with option dev packages..."
-	poetry install --with dev
-	poetry run pre-commit install
+	@echo "Installing..."
+	poetry install
+
+install-dependencies-test:
+	@echo "Installing..."
+	poetry lock --no-update
+	poetry install --with test
 
 activate:
 	@echo "Activating virtual environment"
@@ -22,11 +31,19 @@ activate:
 
 format:
 	@echo "Formatting codebase"
-	poetry run black src/ontime
+	poetry run black src
 
 format-check:
 	@echo "Checking code formatting"
-	poetry run black src/ontime --check
+	poetry run black src --check
+
+jupyter:
+	@echo "Running Jupyter Lab"
+	poetry run jupyter-lab .
+
+test:
+	@echo "Running tests"
+	poetry run pytest ./src/tests --disable-warnings
 
 build:
 	@echo "Building package"

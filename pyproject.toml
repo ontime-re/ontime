@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ontime"
-version = "0.5"
+version = "0.6"
 description = ""
 authors = ["Fred Montet <fredmontet@gmail.com>"]
 readme = "README.md"
@@ -12,11 +12,14 @@ darts = "^0.25.0"
 catboost = "^1.2"
 altair = "^5.1.0"
 skforecast = "^0.10.0"
-torch = "^2.0.1"
+torch = ">=2.0.0, !=2.0.1, !=2.1.0"
 vegafusion-python-embed = "^1.4.1"
 vegafusion = {extras = ["embed"], version = "^1.4.1"}
 protobuf = "^4.24.4"
 vega-datasets = "^0.9.0"
+ipywidgets = "^8.1.1"
+altair-viewer = "^0.4.0"
+nbdime = "^4.0.1"
 
 [tool.poetry.group.dev]
 optional = true
@@ -27,6 +30,9 @@ pre-commit = "^3.3.3"
 black = "^23.7.0"
 nbmake = "^1.4.6"
 pytest-xdist = "^3.5.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.4"
 
 [build-system]
 requires = ["poetry-core"]
