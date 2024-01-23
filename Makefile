@@ -22,6 +22,7 @@ install-dependencies:
 
 install-dependencies-test:
 	@echo "Installing..."
+	poetry lock --no-update
 	poetry install --with test
 
 activate:
