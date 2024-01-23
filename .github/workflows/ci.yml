@@ -66,28 +66,24 @@ jobs:
         run: make build
 
   # --------------------------------
-  # Test if notebooks build
+  # Run notebooks
   # --------------------------------
 
   run_notebooks:
+    name: Notebooks
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - name : Install dependencies
+        uses: devcontainers/ci@v0.3
         with:
-          python-version: 3.8
-
-      - name: Install Poetry
-        run: |
-          pip install poetry
-          poetry install
-
-      - name: Install PyTorch (CPU only)
-        run: poetry add torch==1.10.0+cpu torchvision==0.11.1+cpu torchaudio==0.10.0+cpu -D
+          push: never
+          runCmd: |
+            make get-informations
+            make install-dependencies-test
 
       - name: Run Notebooks
         run: poetry run jupyter nbconvert --execute notebooks/**/*.ipynb
