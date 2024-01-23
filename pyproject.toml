@@ -12,7 +12,7 @@ darts = "^0.25.0"
 catboost = "^1.2"
 altair = "^5.1.0"
 skforecast = "^0.10.0"
-torch = "^2.0.1"
+torch = ">=2.0.0, !=2.0.1, !=2.1.0"
 vegafusion-python-embed = "^1.4.1"
 vegafusion = {extras = ["embed"], version = "^1.4.1"}
 protobuf = "^4.24.4"
