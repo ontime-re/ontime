@@ -3,7 +3,7 @@ import unittest
 import pandas as pd
 import numpy as np
 
-from ontime.core.time_series.binary_time_series import ((BinaryTimeSeries))
+from ontime.core.time_series.binary_time_series import BinaryTimeSeries
 
 
 class TestBinaryTimeSeries(unittest.TestCase):

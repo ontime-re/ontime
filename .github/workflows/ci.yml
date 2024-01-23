@@ -33,17 +33,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install dependency manager
-        uses: snok/install-poetry@v1
-
-      - name: Install dependencies
-        run: make install-dependencies-test
-
-      - name: Get informations
-        run: make get-informations
-
-      - name: Run tests
-        run: make test
+      - name : Test
+        uses: devcontainers/ci@v0.3
+        with:
+          runCmd: |
+            make get-informations
+            make install-dependencies-test
+            make test
 
   # --------------------------------
   # Build the Package
