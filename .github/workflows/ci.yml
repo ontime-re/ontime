@@ -35,6 +35,7 @@ jobs:
 
       - name : Test
         uses: devcontainers/ci@v0.3
+        push: never
         with:
           runCmd: |
             make get-informations
