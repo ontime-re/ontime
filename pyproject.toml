@@ -30,10 +30,10 @@ black = "^23.7.0"
 nbmake = "^1.4.6"
 pytest-xdist = "^3.5.0"
 nbdime = "^4.0.1"
-jupyter = "^1.0.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.4"
+jupyter = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core"]

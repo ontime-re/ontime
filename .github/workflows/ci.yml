@@ -49,7 +49,7 @@ jobs:
   # --------------------------------
 
   run_notebooks:
-    name: Test - Run Notebooks
+    name: Test - Run notebooks
     runs-on: ubuntu-latest
 
     steps:
