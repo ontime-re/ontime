@@ -3,7 +3,7 @@ name: Continuous Integration
 on:
   push:
     # edit for testing
-    branches: [ 'main', 'develop', '28-notebooks-error']
+    branches: [ 'main', 'develop']
   pull_request:
     branches: [ 'main', 'develop' ]
 
@@ -63,7 +63,8 @@ jobs:
           runCmd: |
             make get-informations
             make install-dependencies-test
-            poetry run jupyter nbconvert --execute notebooks/**/*.ipynb
+            cd notebooks
+            poetry run python run.py
 
 
   # --------------------------------
