@@ -63,7 +63,6 @@ jobs:
           runCmd: |
             make get-informations
             make install-dependencies-test
-            cd notebooks
             make run-notebooks
 
 
