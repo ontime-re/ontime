@@ -41,6 +41,10 @@ jupyter:
 	@echo "Running Jupyter Lab"
 	poetry run jupyter-lab .
 
+run-notebooks:
+	@echo "Running notebooks"
+	poetry run python notebooks/run.py
+
 test:
 	@echo "Running tests"
 	poetry run pytest ./src/tests --disable-warnings
@@ -57,6 +61,7 @@ publish:
 clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
+	find . -type d -name ".ipynb_checkpoints" -exec rm -rf {} \;
 	rm -rf .pytest_cache
 
 ## must be run at ./ontime

@@ -5,7 +5,7 @@ on:
     # edit for testing
     branches: [ 'main', 'develop']
   pull_request:
-    branches: [ 'main', 'develop' ]
+    branches: [ 'main', 'develop']
 
 jobs:
 
@@ -64,7 +64,7 @@ jobs:
             make get-informations
             make install-dependencies-test
             cd notebooks
-            poetry run python run.py
+            make run-notebooks
 
 
   # --------------------------------
