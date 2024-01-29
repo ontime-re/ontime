@@ -60,6 +60,7 @@ jobs:
   # --------------------------------
 
   deploy:
+    name: Deploy
     needs: [build]
     environment:
       name: github-pages

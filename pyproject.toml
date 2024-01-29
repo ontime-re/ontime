@@ -36,7 +36,6 @@ pytest = "^7.4.4"
 jupyter = "^1.0.0"
 papermill = "^2.5.0"
 
-
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.2.6"
 nbsphinx = "^0.9.3"
