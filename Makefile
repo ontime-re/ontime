@@ -28,6 +28,7 @@ install-dependencies-test:
 
 install-dependencies-docs:
 	@echo "Installing..."
+	apt install -y pandoc
 	poetry lock --no-update
 	poetry install --with docs
 
