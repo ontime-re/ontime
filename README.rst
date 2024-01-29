@@ -41,25 +41,6 @@ The library objectives are :
 
 In case you have any questions, don't hesitate to ask them by opening an issue or email.
 
-Contribute
-----------
-
-We welcome contributions to onTime. If you want to contribute code, please open an issue first or assign 
-yourself to one.
-
-As of the 15th of January 2024, since the project is small, we add ourselves to the repository as
-contributors and we don't use pull requests. We will use pull requests when the project will be bigger.
-
-Still, please respect the following branch naming convention : 
-
-.. code-block::
-
-   <issue number>-<issue slug>
-
-
-For example, if you are working on issue #1, you should create a branch named ``1-add-readme``. If you are
-on an issue page, there is a button to create a branch with the correct name in the sidebar.
-
 Authors
 -------
 
