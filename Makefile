@@ -15,6 +15,7 @@ post-create-dev-container:
 	@echo "Get container ready"
 	@echo "› Installing dependencies with test"
 	make install-dependencies-test
+	make install-dependencies-docs
 
 install-dependencies:
 	@echo "Installing..."
