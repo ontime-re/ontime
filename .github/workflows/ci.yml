@@ -1,12 +1,13 @@
+# ===============================
+# Continuous Integration Pipeline
+# ===============================
+
 name: Continuous Integration
 
 on:
   push:
-    # edit for testing
     branches: [ 'main', 'develop']
-  pull_request:
-    branches: [ 'main', 'develop']
-
+  
 jobs:
 
   # --------------------------------
