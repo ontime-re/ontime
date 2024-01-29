@@ -25,6 +25,11 @@ install-dependencies-test:
 	poetry lock --no-update
 	poetry install --with test
 
+install-dependencies-docs:
+	@echo "Installing..."
+	poetry lock --no-update
+	poetry install --with docs
+
 activate:
 	@echo "Activating virtual environment"
 	poetry shell
