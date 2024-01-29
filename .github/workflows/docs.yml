@@ -46,7 +46,7 @@ jobs:
           runCmd: |
             make get-informations
             make install-dependencies-docs
-            pip install sphinx
+            make activate
             make build-docs
     
       - name: Upload documentation artifact

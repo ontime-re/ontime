@@ -62,6 +62,7 @@ build:
 build-docs:
 	@echo "Building docs"
 	poetry run m2r README.md --overwrite
+	poetry shell
 	cd ./docs && make html
 
 publish:
