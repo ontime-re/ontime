@@ -53,6 +53,11 @@ build:
 	@echo "Building package"
 	poetry build
 
+build-docs:
+	@echo "Building docs"
+	poetry run m2r README.md --overwrite
+	cd ./docs && make html
+
 publish:
 	@echo "Publishing package"
 	poetry publish
