@@ -18,8 +18,8 @@ print(sys.path[0])
 # -- Project information -----------------------------------------------------
 
 project = 'onTime'
-copyright = '2024, onTime development team'
-author = 'Frédéric Montet'
+copyright = '2024, onTime'
+author = 'onTime'
 
 
 # -- General configuration ---------------------------------------------------
@@ -69,12 +69,17 @@ autosummary_generate = True
 
 # -- Pydata Sphinx Theme configuration ----------------------------------------
 
-html_logo = "_static/logo-inline.png"
+html_logo = "_static/ontime-logo.png"
+
 html_theme_options = {
-    "github_url": "https://github.com/fredmontet/ontime",
+    "github_url": "https://github.com/ontime-re/ontime",
     "external_links": [
-        {"name": "Releases", "url": "https://github.com/fredmontet/ontime/releases"},
+        {"name": "Releases", "url": "https://github.com/ontime-re/ontime/releases"},
     ],
-    "show_prev_next": True
+    "show_prev_next": True,
+        "logo": {
+        "text": "onTime Python Package Documentation",
+        "link": "https://ontime.re",
+    }
 }
 

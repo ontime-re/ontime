@@ -57,9 +57,9 @@ jobs:
           name: documentation
           path: ./docs/_build/html
 
-  # --------------------------------
+  # ---------------------------------
   # Deploy : Deploy the Documentation
-  # --------------------------------
+  # ---------------------------------
 
   deploy:
     name: Deploy

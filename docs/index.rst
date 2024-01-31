@@ -1,5 +1,4 @@
-.. Add the README from the root directory (must be transformed in rst with m2r)
-.. include:: ../README.rst
+.. Add the README from the root directory (must be transformed in rst with m2r) .. include:: ../README.rst
 
 .. toctree::
    :hidden:
@@ -17,12 +16,11 @@
                     <h3 class="card-title">Getting started</h3>
                     <div class="card-body flex-fill">
                         <p class="card-text">
-                            Start to use TimeAtlas to handle your time series.
+                            Start to use onTime to handle your time series.
                             This guide provides you with an installation guide
-                            and short tutorials to explain the main concepts of
-                            the library.
+                            and tutorials to explain the concepts the library.
                         </p>
-                        <a href="https://timeatlas.dev/getting_started"
+                        <a href="https://ontime.re/getting_started"
                            class="btn btn-secondary btn-sm"
                            role="button" aria-pressed="true">
                             Go to the Getting Started guide
@@ -36,11 +34,11 @@
                     <div class="card-body flex-fill">
                         <p class="card-text">
                             The pages in this section provide detailed tutorials
-                            so that you can make great use of TimeAtlas'
+                            so that you can make great use of onTime's
                             workflows. Also, we present some real world
                             scenarios.
                         </p>
-                        <a href="https://timeatlas.dev/user_guide"
+                        <a href="https://ontime.re/user_guide"
                            class="btn btn-secondary btn-sm"
                            role="button" aria-pressed="true">
                             Go to the User Guide
@@ -57,9 +55,9 @@
                         <p class="card-text">
                             This reference is the classical developer's
                             documentation. It explains the classes, methods and
-                            variables that can be used within TimeAtlas.
+                            variables that can be used within onTime.
                         </p>
-                        <a href="https://timeatlas.dev/api_reference"
+                        <a href="https://ontime.re/api_reference"
                            class="btn btn-secondary btn-sm"
                            role="button" aria-pressed="true">
                             Go to the API Reference
@@ -73,10 +71,10 @@
                     <div class="card-body flex-fill">
                         <p class="card-text">
                             Finally, if you are a developer and you want to
-                            involve yourself in TimeAtlas' quest, the following
+                            involve yourself in onTime's quest, the following
                             pages contains all the information you need.
                         </p>
-                        <a href="https://timeatlas.dev/contributing"
+                        <a href="https://ontime.re/contributing"
                            class="btn btn-secondary btn-sm"
                            role="button" aria-pressed="true">
                             Go to the Contribution guide
@@ -86,9 +84,3 @@
             </div>
         </div>
     </div>
-
-Authors
-=======
-
-- Frédéric Montet - frederic.montet@hefr.ch
-- Lorenz Rychener - lorenz.rychener@hefr.ch

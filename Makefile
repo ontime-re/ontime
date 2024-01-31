@@ -65,6 +65,10 @@ build-docs:
 	poetry run m2r README.md --overwrite
 	cd ./docs && poetry run make html
 
+dev-docs:
+	@echo "Start a development server for the documentation"
+	sphinx-autobuild docs docs/_build/html
+
 publish:
 	@echo "Publishing package"
 	poetry publish
