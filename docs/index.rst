@@ -7,6 +7,25 @@
    user_guide/index
    contributing/index
 
+
+.. image:: https://github.com/fredmontet/ontime/actions/workflows/ci.yml/badge.svg
+   :target: https://github.com/fredmontet/ontime/actions/workflows/ci.yml
+   :alt: Continuous Integration
+
+
+.. image:: https://badge.fury.io/py/ontime.svg
+   :target: https://badge.fury.io/py/ontime
+   :alt: PyPI version
+
+|
+
+**onTime** Documentation
+========================
+
+| onTime is an open source library for sensor data analysis and more. It aims at providing
+| a comprehensive API for time series analysis, prediction, as well as anomaly detections.
+|
+
 .. raw:: html
 
     <div class="container">

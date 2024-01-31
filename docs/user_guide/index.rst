@@ -7,7 +7,8 @@ This guides provides you with a topical introduction to use onTime. Its aim
 is to showcase concrete use case of the library.
 
 .. note::
-    For the complete documentation, browse the API reference 
+    It is unavailable for now, but for the complete documentation, you should
+    browse the API reference.
 
 .. toctree::
 

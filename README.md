@@ -8,7 +8,14 @@
 
 ## Getting Started
 
-For now, the best is to look at the examples in the `notebooks` folder.
+Install the library with :
+
+  pip install ontime
+
+Then, take a look at documentation on [ontime.re](https://ontime.re) with : 
+
+- a [Getting Started](https://ontime.re/getting_started) as usual,
+- a [User Guide](https://ontime.re/user_guide) with many notebooks as examples.
 
 ## Purpose of the library
 
