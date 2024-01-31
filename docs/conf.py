@@ -78,7 +78,7 @@ html_theme_options = {
     ],
     "show_prev_next": True,
         "logo": {
-        "text": "onTime Python Package Documentation",
+        "alt_text": "onTime Python Package Documentation",
         "link": "https://ontime.re",
     }
 }
