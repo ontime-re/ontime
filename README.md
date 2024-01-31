@@ -1,10 +1,10 @@
-<div align="center">
-    <img src="docs/_static/ontime-logo.png" width="180" title="hover text">
-    <h1>onTime—<i>your library to work with time series</i></h1>
-</div>
-
 [![Continuous Integration](https://github.com/ontime-re/ontime/actions/workflows/ci.yml/badge.svg)](https://github.com/ontime-re/ontime/actions/workflows/ci.yml)
 [![PyPI version](https://badge.fury.io/py/ontime.svg)](https://badge.fury.io/py/ontime)
+
+<div align="center">
+    <img src="docs/_static/ontime-logo.png" width="180" title="hover text">
+    <h1><i>your library to work with time series</i></h1>
+</div>
 
 ## Getting Started
 
