@@ -7,7 +7,6 @@
    user_guide/index
    contributing/index
 
-
 .. image:: https://github.com/fredmontet/ontime/actions/workflows/ci.yml/badge.svg
    :target: https://github.com/fredmontet/ontime/actions/workflows/ci.yml
    :alt: Continuous Integration
@@ -25,6 +24,7 @@
 | onTime is an open source library for sensor data analysis and more. It aims at providing
 | a comprehensive API for time series analysis, prediction, as well as anomaly detections.
 |
+|
 
 .. raw:: html
 
@@ -40,7 +40,7 @@
                             and tutorials to explain the concepts the library.
                         </p>
                         <a href="https://ontime.re/getting_started"
-                           class="btn btn-secondary btn-sm"
+                           class="btn btn-outline-secondary btn-sm"
                            role="button" aria-pressed="true">
                             Go to the Getting Started guide
                         </a>
@@ -58,7 +58,7 @@
                             scenarios.
                         </p>
                         <a href="https://ontime.re/user_guide"
-                           class="btn btn-secondary btn-sm"
+                           class="btn btn-outline-secondary btn-sm"
                            role="button" aria-pressed="true">
                             Go to the User Guide
                         </a>
@@ -72,15 +72,15 @@
                     <h3 class="card-title">API Reference</h3>
                     <div class="card-body flex-fill">
                         <p class="card-text">
-                            This reference is the classical developer's
+                            <i>Coming soon</i>—This reference is the classical developer's
                             documentation. It explains the classes, methods and
-                            variables that can be used within onTime.
+                            variables that can be used within onTime. 
                         </p>
-                        <a href="https://ontime.re/api_reference"
+                        <!--<a href="https://ontime.re/api_reference"
                            class="btn btn-secondary btn-sm"
                            role="button" aria-pressed="true">
                             Go to the API Reference
-                        </a>
+                        </a>-->
                     </div>
                 </div>
             </div>
@@ -94,7 +94,7 @@
                             pages contains all the information you need.
                         </p>
                         <a href="https://ontime.re/contributing"
-                           class="btn btn-secondary btn-sm"
+                           class="btn btn-outline-secondary btn-sm"
                            role="button" aria-pressed="true">
                             Go to the Contribution guide
                         </a>

@@ -61,6 +61,10 @@ html_theme = "pydata_sphinx_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+html_css_files = [
+    './css/custom.css',
+]
+
 # -- NB Sphinx configuration --------------------------------------------------
 
 nbsphinx_allow_errors = True
@@ -71,8 +75,6 @@ autosummary_generate = True
 
 # -- Pydata Sphinx Theme configuration ----------------------------------------
 
-html_logo = "_static/ontime-logo.png"
-
 html_theme_options = {
     "github_url": "https://github.com/ontime-re/ontime",
     "external_links": [
@@ -82,6 +84,9 @@ html_theme_options = {
         "logo": {
         "alt_text": "onTime Python Package Documentation",
         "link": "https://ontime.re",
+    },
+    "logo": {
+      "image_light": "ontime-logo.png",
+      "image_dark": "ontime-logo_wh.png",
     }
 }
-
