@@ -3,14 +3,25 @@
 User Guide
 ==========
 
+
 This guides provides you with a topical introduction to use onTime. Its aim
 is to showcase concrete use case of the library.
 
+
+.. note::
+
+    This guide is a work in progress. If you have any questions or suggestions, please feel free to contact us.
+    
+
 The user guide is divided into several sections:
 
-- `Core`: For everything related to the core function of the library
-- `Module`: For modules that are made to target a specific use case in the field of time series
-- `Context`: For modules that are made to target a specific real-world context
+1. `core` : for all basic features
+2. `module` : for all features using core features. E.g. benchmarking, ml preprocessing, etc.
+3. `context` : for all features related to the usage of onTime in an applied scenario
+
+
+Core
+----
 
 .. toctree::
 
@@ -22,6 +33,17 @@ The user guide is divided into several sections:
     0_core/0.6-anomaly-frequency
     0_core/0.7-anomaly-time-series-plot
 
-    1_module/0-preprocessing/1.0-preprocessing
+
+Module
+------
+
+.. toctree::
+
+    1_module/0-preprocessing/1.0-preprocessing-common
+
+Context
+-------
+
+.. toctree::
 
     2_context/2.0-context-common
