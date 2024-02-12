@@ -1,11 +1,13 @@
+from __future__ import annotations
 import torch
 import torch.nn as nn
+from torch import Tensor
 import torch.nn.functional as F
 from .autoencoder import Encoder, Decoder, Autoencoder
-from ..time_series import TimeSeries
+from ontime.core.time_series import TimeSeries
 
 class VariationalEncoder(Encoder):
-    def __init__(self, entry_size, latent_dims):
+    def __init__(self, entry_size: int, latent_dims: int):
         super(VariationalEncoder, self).__init__(entry_size, latent_dims)
         self.insize = entry_size
         self.midsize = latent_dims + (entry_size - latent_dims)//2
@@ -20,7 +22,7 @@ class VariationalEncoder(Encoder):
         self.kl = 0
         self.double()
         
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         x = torch.flatten(x, start_dim=1)
         x = F.relu(self.linear1(x))
         mu =  self.linear2(x)
@@ -38,13 +40,13 @@ class VariationalEncoder(Encoder):
         return s
     
 class VariationalAutoencoder(Autoencoder):
-    def __init__(self, entry_size, latent_dims):
+    def __init__(self, entry_size: int, latent_dims: int):
         super(VariationalAutoencoder, self).__init__(entry_size, latent_dims)
         self.encoder = VariationalEncoder(entry_size, latent_dims)
         self.decoder = Decoder(latent_dims, entry_size)
         self.double()
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         z = self.encoder(x)
         return self.decoder(z)
     
@@ -54,7 +56,7 @@ class VariationalAutoencoder(Autoencoder):
     #train method should be correctly inherited from AutoEncoder
     
     @staticmethod
-    def new_encoder_for_dataset(dataset: TimeSeries, period):
+    def new_encoder_for_dataset(dataset: TimeSeries, period) -> 'VariationalAutoencoder':
         entry_size = len(dataset.columns.tolist())*period
         latent_dims = entry_size//4 # arbitrary choice
         return VariationalAutoencoder(entry_size, latent_dims)

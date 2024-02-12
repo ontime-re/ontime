@@ -1,13 +1,15 @@
+from __future__ import annotations
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ..time_series import TimeSeries
-from ontime.core.model.VAEdataset import VAEDataset
+from ontime.core.time_series import TimeSeries
+from ontime.core.model.sliced_dataset import SlicedDataset
+from torch import Tensor
 
 device = 'cpu'
 
 class Encoder(nn.Module):
-    def __init__(self, entry_size, latent_dims):
+    def __init__(self, entry_size: int, latent_dims: int):
         super(Encoder, self).__init__()
         self.insize = entry_size
         self.midsize = latent_dims + (entry_size - latent_dims)//2
@@ -16,7 +18,7 @@ class Encoder(nn.Module):
         self.linear2 = nn.Linear(self.midsize, latent_dims)
         self.double()
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         x = torch.flatten(x, start_dim=1)
         x = F.relu(self.linear1(x))
         return self.linear2(x)
@@ -29,7 +31,7 @@ class Encoder(nn.Module):
         return s
     
 class Decoder(nn.Module):
-    def __init__(self, latent_dims, output_size):
+    def __init__(self, latent_dims: int, output_size: int):
         super(Decoder, self).__init__()
         self.insize = latent_dims
         self.midsize = latent_dims + (output_size - latent_dims)//2
@@ -38,7 +40,7 @@ class Decoder(nn.Module):
         self.linear2 = nn.Linear(self.midsize, output_size)
         self.double()
 
-    def forward(self, z):
+    def forward(self, z: Tensor) -> Tensor:
         z = F.relu(self.linear1(z))
         z = self.linear2(z)
         return z
@@ -51,21 +53,21 @@ class Decoder(nn.Module):
         return s
 
 class Autoencoder(nn.Module):
-    def __init__(self, entry_size, latent_dims):
+    def __init__(self, entry_size: int, latent_dims: int):
         super(Autoencoder, self).__init__()
         self.encoder = Encoder(entry_size, latent_dims)
         self.decoder = Decoder(latent_dims, entry_size)
         self.double()
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         z = self.encoder(x)
         return self.decoder(z)
 
-    def loss(self, x, x_hat):
+    def loss(self, x: float, x_hat: float) -> float:
         return ((x - x_hat)**2).sum()
 
-    def get_reconstructed(self, dataset, period, labels = None, verbose = False):
-        ds = VAEDataset(dataset, period, labels)
+    def get_reconstructed(self, dataset: TimeSeries, period: int, labels: TimeSeries = None, verbose: bool = False) -> list[list]:
+        ds = SlicedDataset(dataset, period, labels)
         data = torch.utils.data.DataLoader(
             ds,
             batch_size=1,
@@ -93,7 +95,7 @@ class Autoencoder(nn.Module):
             return [results_x, results_xhat, results_loss, results_y]
         return [results_x, results_xhat, results_loss]
 
-    def train(self, data, device, epochs=20):
+    def train(self, data: SlicedDataset, device: str, epochs: int = 20):
         opt = torch.optim.Adam(self.parameters())
         for epoch in range(epochs):
             for x, y in data:
@@ -106,7 +108,7 @@ class Autoencoder(nn.Module):
                 opt.step()
     
     @staticmethod
-    def new_encoder_for_dataset(dataset: TimeSeries, period):
+    def new_encoder_for_dataset(dataset: TimeSeries, period: int) -> 'Autoencoder':
         entry_size = len(dataset.columns.tolist())*period
         latent_dims = entry_size//4 # arbitrary choice
         return Autoencoder(entry_size, latent_dims)
