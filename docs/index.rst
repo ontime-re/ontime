@@ -24,7 +24,12 @@
 | onTime is an open source library for sensor data analysis and more. It aims at providing
 | a comprehensive API for time series analysis, prediction, as well as anomaly detections.
 |
-|
+
+.. note::
+
+    This documentation is a **work in progress**. If you have any questions or suggestions, please
+    feel free to contact us or open an issue on the GitHub repository.
+
 
 .. raw:: html
 

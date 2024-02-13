@@ -79,7 +79,7 @@ autosummary_generate = True
 html_theme_options = {
     "github_url": "https://github.com/ontime-re/ontime",
     "external_links": [
-        {"name": "Releases", "url": "https://github.com/ontime-re/ontime/releases"},
+        {"name": "Releases", "url": "https://pypi.org/project/ontime/#history"},
     ],
     "show_prev_next": True,
     "logo": {
