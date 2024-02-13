@@ -14,14 +14,15 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../src/ontime'))
+
+sys.path.insert(0, os.path.abspath("../src/ontime"))
 print(sys.path[0])
 
 # -- Project information -----------------------------------------------------
 
-project = 'onTime'
-copyright = '2024, onTime'
-author = 'onTime'
+project = "onTime"
+copyright = "2024, onTime"
+author = "onTime"
 
 
 # -- General configuration ---------------------------------------------------
@@ -30,22 +31,22 @@ author = 'onTime'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'nbsphinx',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.coverage',
-    'sphinx.ext.napoleon',
-    'recommonmark'
+    "nbsphinx",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.coverage",
+    "sphinx.ext.napoleon",
+    "recommonmark",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -59,10 +60,10 @@ html_theme = "pydata_sphinx_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 html_css_files = [
-    './css/custom.css',
+    "./css/custom.css",
 ]
 
 # -- NB Sphinx configuration --------------------------------------------------
@@ -81,12 +82,12 @@ html_theme_options = {
         {"name": "Releases", "url": "https://github.com/ontime-re/ontime/releases"},
     ],
     "show_prev_next": True,
-        "logo": {
+    "logo": {
         "alt_text": "onTime Python Package Documentation",
         "link": "https://ontime.re",
     },
     "logo": {
-      "image_light": "ontime-logo.png",
-      "image_dark": "ontime-logo_wh.png",
-    }
+        "image_light": "ontime-logo.png",
+        "image_dark": "ontime-logo_wh.png",
+    },
 }
