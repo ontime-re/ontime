@@ -12,23 +12,26 @@ class Dataset:
 
     class ImportedDataset:
         """Class for dataset loaders"""
-        def __init__(self, dataset, args = {}):
+
+        def __init__(self, dataset, args={}):
             self.dataset = dataset
             self.args = args
 
         @abstractmethod
         def load(self) -> TimeSeries:
             pass
-    
+
     class DartsDataset(ImportedDataset):
         """Darts dataset loader"""
+
         def load(self) -> TimeSeries:
             return TimeSeries.from_darts(self.dataset.load(*self.args))
-    
+
     class OpenMLDataset(ImportedDataset):
         """OpenML dataset loader"""
+
         def load(self) -> TimeSeries:
-            self.dataset.index = self.dataset[self.args['time_col']]
+            self.dataset.index = self.dataset[self.args["time_col"]]
             dts = dTimeSeries.from_dataframe(self.dataset, **self.args)
             return TimeSeries.from_darts(dts)
 
@@ -62,6 +65,12 @@ class Dataset:
     WoolyDataset = DartsDataset(dd.WoolyDataset())
 
     # OpenML datasets
-    AMDStockPrices = OpenMLDataset(fetch_openml(
-        "AMD-Stock-Prices-Historical-Data", version=1, as_frame=True, parser="pandas").frame,
-        args = {'time_col': 'Date', 'fill_missing_dates':True, 'freq':'D'})
+    AMDStockPrices = OpenMLDataset(
+        fetch_openml(
+            "AMD-Stock-Prices-Historical-Data",
+            version=1,
+            as_frame=True,
+            parser="pandas",
+        ).frame,
+        args={"time_col": "Date", "fill_missing_dates": True, "freq": "D"},
+    )
