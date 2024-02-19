@@ -1,6 +1,5 @@
 import xarray as xr
 import numpy as np
-
 from .resticted_time_series import RestrictedTimeSeries
 
 

@@ -30,8 +30,8 @@ Commit and push
 
 Tag the version
     
-    git tag -a x.y.z-suffix -m 'Version x.y.z-suffix'
-    git push origin x.y.z-suffix
+    git tag -a v<x.y.z-suffix> -m 'Version x.y.z-suffix'
+    git push origin v<x.y.z-suffix>
 
 Build
 

@@ -16,7 +16,7 @@ class ForecastingModel(AbstractModel):
         super().__init__()
         self.model = model(**params)
 
-    def fit(self, ts, **params):
+    def fit(self, ts, **params) -> "ForecastingModel":
         """
         Fit the model to the given time series
 
@@ -27,7 +27,7 @@ class ForecastingModel(AbstractModel):
         self.model.fit(ts, **params)
         return self
 
-    def predict(self, n, **params):
+    def predict(self, n, **params) -> TimeSeries:
         """
         Predict n steps into the future
 
