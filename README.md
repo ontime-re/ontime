@@ -1,14 +1,21 @@
-<div align="center">
-    <img src="res/ontime-logo.png" width="180" title="hover text">
-    <h1>onTime—<i>your library to work with time series</i></h1>
-</div>
-
-[![Continuous Integration](https://github.com/fredmontet/ontime/actions/workflows/ci.yml/badge.svg)](https://github.com/fredmontet/ontime/actions/workflows/ci.yml)
+[![Continuous Integration](https://github.com/ontime-re/ontime/actions/workflows/ci.yml/badge.svg)](https://github.com/ontime-re/ontime/actions/workflows/ci.yml)
 [![PyPI version](https://badge.fury.io/py/ontime.svg)](https://badge.fury.io/py/ontime)
+
+<div align="center">
+    <img src="docs/_static/ontime-logo.png" width="180" title="hover text">
+    <h1><i>your library to work with time series</i></h1>
+</div>
 
 ## Getting Started
 
-For now, the best is to look at the examples in the `notebooks` folder.
+Install the library with :
+
+  pip install ontime
+
+Then, take a look at documentation on [ontime.re](https://ontime.re) with : 
+
+- a [Getting Started](https://ontime.re/getting_started) as usual,
+- a [User Guide](https://ontime.re/user_guide) with many notebooks as examples.
 
 ## Purpose of the library
 
@@ -24,10 +31,6 @@ The library objectives are :
   3. to provide domain specific tools (e.g. for energy consumption, district heating networks, etc.)
 
 In case you have any questions, don't hesitate to ask them by opening an issue or email.
-
-## Authors
-
-Frédéric Montet (frederic.montet@hefr.ch)
 
 ## License
 
