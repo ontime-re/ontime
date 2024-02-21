@@ -1,4 +1,4 @@
-from ontime.module.data.datasets import DatasetLoader as dl
+from ontime.module.data.dataset import Dataset as dl
 from ontime.core.time_series.time_series import TimeSeries
 from ontime.core.model.model import Model
 from ontime.core.model.abstract_model import AbstractModel
