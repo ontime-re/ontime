@@ -14,7 +14,7 @@ Features contained in `module` and `context` are accessible through the `onTime`
 For instance :
 
     import ontime.module as onm
-    onm.preprocessing.common.my_function()
+    onm.processing.common.my_function()
 
 """
 
