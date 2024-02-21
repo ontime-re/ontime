@@ -6,10 +6,11 @@ from darts.metrics import metrics
 import pandas as pd
 import time
 import copy
+from typing import List
 
 class Benchmark:
 
-    def __init__(self, datasets = None, models = None):
+    def __init__(self, datasets: List[TimeSeries] = None, models: List[AbstractModel] = None):
         self.datasets = []
         self.models = []
         if datasets is not None:
@@ -24,7 +25,7 @@ class Benchmark:
                 i+=1
         self.results = None
 
-    def add_model(self, model, name = None):
+    def add_model(self, model: AbstractModel, name: str = None):
         if not isinstance(model, AbstractModel):
                     raise TypeError(f"models must implement {AbstractModel}")
         if name is None:
@@ -37,7 +38,7 @@ class Benchmark:
     def get_models(self):
         return [m['model'] for m in self.models]
     
-    def add_dataset(self, dataset, name = None):
+    def add_dataset(self, dataset: TimeSeries, name: str = None):
         if not isinstance(dataset, TimeSeries):
                     raise TypeError(f"datasets must be of type {TimeSeries}, found type {type(dataset)}")
         multivariate = True
@@ -54,7 +55,7 @@ class Benchmark:
     def get_datasets(self):
         return [d['dataset'] for d in self.datasets]
     
-    def run(self, test_proportion = 0.3, verbose = False):
+    def run(self, test_proportion: float = 0.3, verbose: bool = False):
         #TODO: throw error if models or datasets is empty
         self.results = []
         if verbose: print("Starting evaluation...")
@@ -62,9 +63,9 @@ class Benchmark:
         for sourcemodel in self.models:
             self.results.append([])
             if verbose: print(f"Evaluation for model {sourcemodel['name']}")
-            resi = pd.DataFrame(index = ['nb features', 'train size', 'train time', 'test size', 'test time', 'mape'])
-            nb_mv = len([x for x in self.datasets if x['is_multivariate']])
-            nb_uv = len(self.datasets) - nb_mv
+            results_i = pd.DataFrame(index = ['nb features', 'train size', 'train time', 'test size', 'test time', 'mape'])
+            nb_mv_run_failed = len([x for x in self.datasets if x['is_multivariate']])
+            nb_uv_run_failed = len(self.datasets) - nb_mv_run_failed
             mv0 = len([x for x in self.datasets if x['is_multivariate']])
             for dataset in self.datasets:
                 if verbose: print(f"on dataset {dataset['name']} ")
@@ -73,11 +74,9 @@ class Benchmark:
                 nb_features = len(dataset['dataset'].columns)
                 train_size = len(train_set.time_index)
                 test_size = len(test_set.time_index)
-                #test multivariate
-                #train 
                 if verbose: print(f"train ", end="")
-                #print(train_set)
                 try:
+                    #train
                     start_time = time.time()
                     model.fit(train_set)
                     train_time = time.time() - start_time    
@@ -89,24 +88,24 @@ class Benchmark:
                     inference_time = time.time() - start_time
                     if verbose: print(f"done, took {inference_time}")
                     mape = metrics.mape(test_set, pred)
-                    resi[dataset['name']] = [nb_features, train_size, train_time, test_size, inference_time, mape]
+                    results_i[dataset['name']] = [nb_features, train_size, train_time, test_size, inference_time, mape]
                 except: # can't train on this dataset
                     if dataset['is_multivariate']:
-                        nb_mv -= 1
+                        nb_mv_run_failed -= 1
                     else:
-                        nb_uv -= 1
+                        nb_uv_run_failed -= 1
                     if verbose: print(f"Couldn't complete training.")
 
-            suni = None
+            supports_uni = None
             if len(self.datasets)-mv0 > 0: # if we have univariate ds in our batch
-                 suni = (nb_uv > 0)
-            smul = None
+                 supports_uni = (nb_uv_run_failed > 0)
+            supports_mult = None
             if mv0>0:
-                smul = (nb_mv > 0)
+                supports_mult = (nb_mv_run_failed > 0)
             self.results[i] = {
-                 'metrics': resi,
-                 'supports univariate': suni,
-                 'supports multivariate': smul
+                 'metrics': results_i,
+                 'supports univariate': supports_uni,
+                 'supports multivariate': supports_mult
             }
             i+=1
         #return self.results
