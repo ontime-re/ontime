@@ -69,7 +69,7 @@ class Benchmark:
             for dataset in self.datasets:
                 if verbose: print(f"on dataset {dataset['name']} ")
                 model = copy.deepcopy(sourcemodel['model'])
-                train_set, test_set = TimeSeries.train_test_split(dataset['dataset'], test_proportion)
+                train_set, test_set = dataset['dataset'].split_before(test_proportion)
                 nb_features = len(dataset['dataset'].columns)
                 train_size = len(train_set.time_index)
                 test_size = len(test_set.time_index)
