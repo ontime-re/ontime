@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -67,8 +69,9 @@ class Autoencoder(nn.Module):
         z = self.encoder(x)
         return self.decoder(z)
 
-    def loss(self, x: float, x_hat: float) -> float:
-        return ((x - x_hat) ** 2).sum()
+    def loss(self, x: Tensor, x_hat: Tensor) -> float:
+        loss = F.smooth_l1_loss(x, x_hat, reduction='mean')
+        return loss
 
     def get_reconstructed(self, dataset: TimeSeries, period: int, labels: TimeSeries = None, verbose: bool = False) -> \
     list[list]:
@@ -87,8 +90,9 @@ class Autoencoder(nn.Module):
             x_hat = self(x)
             if verbose:
                 print(f'x:{x.size()} -> x_hat {x_hat.size()}')
-            x_hat = x_hat.reshape(x.size()).to('cpu').detach().numpy()
+            x_hat = x_hat.reshape(x.size()).to('cpu').detach()
             loss = self.loss(x, x_hat)
+            x_hat = x_hat.numpy()
             x = x.cpu().numpy()
             loss = loss.detach().cpu().numpy().item()
             results_x.append(x)
@@ -102,7 +106,11 @@ class Autoencoder(nn.Module):
     def train(self, data: SlicedDataset, device: str, epochs: int = 20):
         opt = torch.optim.Adam(self.parameters())
         for epoch in range(epochs):
+            print(f'epoch {epoch+1}/{epochs}')
+            i=1
             for x, y in data:
+                print(f'{i}/{len(data)}')
+                i+=1
                 x = x.to(device)  # CPU
                 opt.zero_grad()
                 x_hat = self(x)
