@@ -25,7 +25,7 @@ class VariationalEncoder(Encoder):
     def forward(self, x: Tensor) -> Tensor:
         x = torch.flatten(x, start_dim=1)
         x = F.relu(self.linear1(x))
-        mu =  self.linear2(x)
+        mu = self.linear2(x)
         sigma = torch.exp(self.linear3(x))
         z = mu + sigma*self.N.sample(mu.shape)
         self.kl = (sigma**2 + mu**2 - torch.log(sigma) - 1/2).sum()

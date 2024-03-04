@@ -100,7 +100,7 @@ class Autoencoder(nn.Module):
             results_loss.append(loss)
             if ds.labels is not None:
                 results_y.append(y)
-        reconstructed_dataset = Autoencoder._into_dataset(dataset, results_xhat, results_loss, results_y, period)
+        reconstructed_dataset = Autoencoder._into_timeseries(dataset, results_xhat, results_loss, results_y, period)
         return reconstructed_dataset
 
     def train(self, data: SlicedDataset, device: str, epochs: int = 20):
@@ -129,7 +129,7 @@ class Autoencoder(nn.Module):
         return str(self.encoder) + "\n" + str(self.decoder)
 
     @staticmethod
-    def _into_dataset(input_dataset, xhat, loss, y, period):
+    def _into_timeseries(input_dataset, xhat, loss, y, period):
         # flatten x_hat
         x_hat_flat = []
         for i in range(0, len(xhat)):
