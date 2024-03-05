@@ -6,8 +6,8 @@ from darts.metrics import metrics
 import pandas as pd
 import time
 import copy
-from typing import List, Union
-
+from typing import List, Union, Tuple
+import traceback
 
 class Benchmark:
     class BenchmarkDataset:
@@ -22,7 +22,17 @@ class Benchmark:
                 return self.training_set.split_before(test_proportion)
             return self.training_set, self.test_set
 
-    def __init__(self, datasets: List[Union[TimeSeries, (TimeSeries, TimeSeries)]] = None,
+    class BenchmarkModel(AbstractModel):
+        def __init__(self, model):
+            self.model = model
+
+        def fit(self, training_set: TimeSeries):
+            self.model.fit(training_set)
+
+        def predict(self, horizon, test_set):
+            return self.model.predict(horizon)
+
+    def __init__(self, datasets: List[Union[TimeSeries, Tuple[TimeSeries, TimeSeries]]] = None,
                  models: List[AbstractModel] = None):
         self.datasets = []
         self.models = []
@@ -51,7 +61,7 @@ class Benchmark:
     def get_models(self):
         return [m['model'] for m in self.models]
 
-    def add_dataset(self, dataset: Union[TimeSeries, (TimeSeries, TimeSeries)], name: str = None):
+    def add_dataset(self, dataset: Union[TimeSeries, Tuple[TimeSeries, TimeSeries]], name: str = None):
         if not isinstance(dataset, TimeSeries) and not isinstance(dataset, (TimeSeries, TimeSeries)):
             raise TypeError(
                 f"datasets must be of type {TimeSeries} or {(TimeSeries, TimeSeries)}, found type {type(dataset)}")
@@ -92,7 +102,7 @@ class Benchmark:
                 train_size = len(train_set.time_index)
                 test_size = len(test_set.time_index)
                 if verbose:
-                    print(f"train ", end="")
+                    print(f"training... ", end="")
                 try:
                     # train
                     start_time = time.time()
@@ -100,15 +110,15 @@ class Benchmark:
                     train_time = time.time() - start_time
                     # test
                     if verbose:
-                        print(f"infer ", end="")
+                        print(f"testing... ", end="")
                     steps_to_predict = len(test_set.time_index.tolist())
                     start_time = time.time()
-                    pred = model.predict(steps_to_predict)
+                    pred = model.predict(steps_to_predict, test_set)
                     inference_time = time.time() - start_time
                     if verbose:
                         print(f"done, took {inference_time}")
                     mape = metrics.mape(test_set, pred)
-                    results_i[dataset['name']] = [nb_features, train_size, train_time, test_size, inference_time, mape]
+                    results_i[dataset.name] = [nb_features, train_size, train_time, test_size, inference_time, mape]
                 except:  # can't train on this dataset
                     if dataset.multivariate:
                         nb_mv_run_failed -= 1
@@ -116,6 +126,7 @@ class Benchmark:
                         nb_uv_run_failed -= 1
                     if verbose:
                         print(f"Couldn't complete training.")
+                        traceback.print_exc()
 
             supports_uni = None
             if len(self.datasets) - mv0 > 0:  # if we have univariate ds in our batch

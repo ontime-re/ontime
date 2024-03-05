@@ -8,6 +8,9 @@ import pandas as pd
 from ontime.core.time_series import TimeSeries
 from ontime.module.data.sliced_dataset import SlicedDataset
 from torch import Tensor
+import periodicity_detection as pyd
+from ontime.module.benchmark.benchmarking import Benchmark
+from torch.utils.data import DataLoader
 
 device = 'cpu'
 
@@ -59,6 +62,24 @@ class Decoder(nn.Module):
 
 
 class Autoencoder(nn.Module):
+    class BenchmarkAutoEncoder(Benchmark.BenchmarkModel):
+        def __init__(self):
+            super().__init__(None)
+            self.model = None
+            self.period = None
+
+        def fit(self, ts: TimeSeries, *args, **kwargs):
+            self.model, self.period = Autoencoder.new_encoder_for_dataset(ts)
+            tsds = SlicedDataset(ts, self.period)
+            tsds = DataLoader(tsds, batch_size=1, shuffle=False)
+            self.model.train(tsds, 'cpu')
+
+        def predict(self, horizon: Any, dataset: TimeSeries, *args, **kwargs) -> Any:
+            r = self.model.get_reconstructed(dataset, period=self.period)
+            r = r.pd_dataframe()
+            del r['loss']
+            return TimeSeries.from_pandas(r)
+
     def __init__(self, entry_size: int, latent_dims: int):
         super(Autoencoder, self).__init__()
         self.encoder = Encoder(entry_size, latent_dims)
@@ -106,10 +127,8 @@ class Autoencoder(nn.Module):
     def train(self, data: SlicedDataset, device: str, epochs: int = 20):
         opt = torch.optim.Adam(self.parameters())
         for epoch in range(epochs):
-            print(f'epoch {epoch+1}/{epochs}')
             i=1
             for x, y in data:
-                print(f'{i}/{len(data)}')
                 i+=1
                 x = x.to(device)  # CPU
                 opt.zero_grad()
@@ -120,10 +139,17 @@ class Autoencoder(nn.Module):
                 opt.step()
 
     @staticmethod
-    def new_encoder_for_dataset(dataset: TimeSeries, period: int) -> 'Autoencoder':
+    def new_encoder_for_dataset(dataset: TimeSeries, period: int = None) -> 'Autoencoder':
+        if period is None:
+            periods = []
+            for col in dataset.columns:
+                periods.append(pyd.findfrequency(dataset.pd_dataframe()[col].to_numpy(), detrend=True))
+            period = max(periods)
+            while period < 15:
+                period += period
         entry_size = len(dataset.columns.tolist()) * period
         latent_dims = entry_size // 4  # arbitrary choice
-        return Autoencoder(entry_size, latent_dims)
+        return Autoencoder(entry_size, latent_dims), period
 
     def __str__(self):
         return str(self.encoder) + "\n" + str(self.decoder)
