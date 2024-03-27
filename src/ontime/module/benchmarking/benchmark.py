@@ -1,6 +1,8 @@
+import sys
+
+sys.path.insert(0, '../../..')
 import numpy as np
 from ontime.core.time_series.time_series import TimeSeries
-from ontime.core.model.abstract_model import AbstractModel
 import pandas as pd
 import time
 from typing import List, Union, Tuple
@@ -114,8 +116,14 @@ class Benchmark:
         else:  # it's a BenchmarkDataset
             self.datasets.append(dataset)
 
-    def get_datasets(self):
+    def get_datasets(self, metric):
         return [d for d in self.datasets]
+
+    def add_metric(self, metric: BenchmarkMetric):
+        self.metrics.append(metric)
+
+    def get_metrics(self):
+        return self.metrics
 
     def run(self, verbose: bool = False, debug: bool = False):
         # TODO: throw error if models or datasets is empty
@@ -157,9 +165,10 @@ class Benchmark:
                     source_model.fit(train_set, test_set)
                     train_time = time.time() - start_time
 
+
                     # test
                     if verbose:
-                        print(f"testing... ", end="")
+                        print(f"done, took {train_time}\ntesting... ", end="")
                     start_time = time.time()
                     pred = source_model.predict(test_size, test_set)
                     inference_time = time.time() - start_time
@@ -177,27 +186,27 @@ class Benchmark:
                         if debug:
                             traceback.print_exc()
 
-                    if train_success:
-                        # compute metrics
-                        self.results[source_model.name][dataset.name] = {
-                            'nb features': nb_features,
-                            'training set size': train_size,
-                            'training time': train_time,
-                            'test set size': test_size,
-                            'testing time': inference_time
-                        }
-                        # compute user-submitted metrics
-                        for metric in self.metrics:
-                            try:
-                                if verbose:
-                                    print(f"{metric.name}: ", end="")
-                                self.results[source_model.name][dataset.name][metric.name] = metric.compute(test_set, pred)
-                                if verbose:
-                                    print(self.results[source_model.name][dataset.name][metric.name])
-                            except: # can't compute current metric
-                                print(f"Couldn't compute {metric}")
-                                if debug:
-                                    traceback.print_exc()
+                if train_success:
+                    # compute metrics
+                    self.results[source_model.name][dataset.name] = {
+                        'nb features': nb_features,
+                        'training set size': train_size,
+                        'training time': train_time,
+                        'test set size': test_size,
+                        'testing time': inference_time
+                    }
+                    # compute user-submitted metrics
+                    for metric in self.metrics:
+                        try:
+                            if verbose:
+                                print(f"{metric.name}: ", end="")
+                            self.results[source_model.name][dataset.name][metric.name] = metric.compute(test_set, pred)
+                            if verbose:
+                                print(self.results[source_model.name][dataset.name][metric.name])
+                        except:  # can't compute current metric
+                            print(f"Couldn't compute {metric}")
+                            if debug:
+                                traceback.print_exc()
 
             # back to model-level stats
             supports_uni = None
@@ -209,7 +218,6 @@ class Benchmark:
             self.results[source_model.name]['supports univariate'] = Benchmark._bool_to_symbol(supports_uni)
             self.results[source_model.name]['supports multivariate'] = Benchmark._bool_to_symbol(supports_mult)
             i += 1
-
 
     @staticmethod
     def _bool_to_symbol(b: bool) -> str:
@@ -235,9 +243,8 @@ class Benchmark:
                 else:
                     for key in self.results[model.name][dataset.name].keys():
                         s += f"{key}: {self.results[model.name][dataset.name][key]}\n"
-
             txt.append(s)
-        report = "\n".join(txt)
+        report = "\n\n".join(txt)
         return report
 
     def get_report_dataframes(self) -> dict:
