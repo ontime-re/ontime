@@ -5,24 +5,14 @@ import pandas as pd
 import xarray as xr
 
 
-class TimeSeries:
+class TimeSeries(DartsTimeSeries):
     """
     Main class to handle time series
     This is a wrapper around Darts TimeSeries, functions are added to handle various operations
     """
 
     def __init__(self, xa: xr.DataArray):
-        self.series = DartsTimeSeries.from_xarray(xa)
-
-    def __getattr__(self, name):
-        """Delegate method access to the DartsTimeSeries object."""
-        attribute = getattr(self.series, name)
-        if callable(attribute):
-            def method(*args, **kwargs):
-                return attribute(*args, **kwargs)
-            return method
-        else:
-            return attribute
+        super().__init__(xa)
 
     def split_by_period(self, period: str) -> List[TimeSeries]:
         """

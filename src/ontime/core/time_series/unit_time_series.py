@@ -1,26 +1,31 @@
 import xarray as xr
 import numpy as np
+
 from .restricted_time_series import RestrictedTimeSeries
+from .restriction import Restriction
 
 
-class UnitTimeSeries(RestrictedTimeSeries["UnitTimeSeries"]):
+class UnitTimeSeries(RestrictedTimeSeries):
+    """
+    A time series with restrictions on the data so that all values are between 0 and 1.
+    """
+
     def __init__(self, xa: xr.DataArray):
+        """
+        Initialize the UnitTimeSeries.
+
+        :param xa: Xarray DataArray to use.
+        """
         super().__init__(xa)
-        if not self.check(xa):
-            raise ValueError("Input DataArray contains values outside the range [0, 1]")
+        self.restriction = Restriction("Unit Restriction", self.unit_restriction)
+        self.add_restriction(self.restriction)
 
-    def check(self, xa: xr.DataArray):
+    @staticmethod
+    def unit_restriction(xa: xr.DataArray) -> bool:
         """
-        Check if all values in the xarray DataArray are between 0 and 1.
+        Check if all values in the data array are between 0 and 1.
 
-        Parameters:
-        data_array (xr.DataArray): The xarray DataArray to be checked.
-
-        Returns:
-        bool: True if all values are between 0 and 1, False otherwise.
+        :param xa: The Xarray DataArray to check.
+        :return: bool
         """
-        if isinstance(xa, xr.DataArray):
-            # Check if all values in the DataArray are within the range [0, 1]
-            return np.all((xa >= 0) & (xa <= 1))
-        else:
-            raise ValueError("Input is not an xarray DataArray")
+        return np.all((xa >= 0) & (xa <= 1))
