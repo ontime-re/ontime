@@ -35,4 +35,4 @@ class Threshold(ThresholdDetector, AbstractDetector):
         :return: BinaryTimeSeries
         """
         ts_detected = super().detect(ts)
-        return BinaryTimeSeries.from_darts(ts_detected)
+        return BinaryTimeSeries(ts_detected.data_array())
