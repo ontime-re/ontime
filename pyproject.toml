@@ -11,7 +11,7 @@ python = ">=3.10,<3.13"
 darts = "^0.25.0"
 catboost = "^1.2"
 altair = "^5.1.0"
-skforecast = "^0.10.0"
+skforecast = "^0.11.0"
 torch = ">=2.0.0, !=2.0.1, !=2.1.0"
 vegafusion-python-embed = "^1.4.1"
 vegafusion = {extras = ["embed"], version = "^1.4.1"}
@@ -19,6 +19,7 @@ protobuf = "^4.24.4"
 vega-datasets = "^0.9.0"
 ipywidgets = "^8.1.1"
 altair-viewer = "^0.4.0"
+tensorflow = "^2.16.1"
 
 [tool.poetry.group.dev]
 optional = true

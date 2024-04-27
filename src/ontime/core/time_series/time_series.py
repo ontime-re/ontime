@@ -1,8 +1,10 @@
 from __future__ import annotations
 from typing import List
+
 from darts import TimeSeries as DartsTimeSeries
 import pandas as pd
 import xarray as xr
+from torch import Tensor
 
 
 class TimeSeries(DartsTimeSeries):
@@ -93,3 +95,9 @@ class TimeSeries(DartsTimeSeries):
         """
         df = pd.DataFrame(data, index, columns, copy=True)
         return TimeSeries.from_pandas(df)
+
+    def to_tensor(self):
+        """
+        Convert the TimeSeries to a tensor
+        """
+        return Tensor(self.values())

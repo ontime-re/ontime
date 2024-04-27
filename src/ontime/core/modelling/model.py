@@ -59,6 +59,7 @@ class Model(AbstractModel):
 
     def _set_model(self, ts):
         size_of_ts = ts.n_components
+
         if issubclass(self.model.__class__, ModelMeta):
             # Darts Models
             self.model = DartsForecastingModel(self.model, **self.params)
