@@ -24,7 +24,7 @@ class RestrictedTimeSeries(TimeSeries):
                 assert isinstance(r, Restriction), "All restrictions must be of type Restriction"
                 self.add_restriction(r)
 
-    def check(self) -> None:
+    def check(self) -> bool:
         """
         Check the restrictions on the time series.
 
@@ -33,6 +33,7 @@ class RestrictedTimeSeries(TimeSeries):
         """
         for restriction in self.restrictions:
             restriction.check(self.data_array())
+        return True
 
     def add_restriction(self, restriction: Restriction) -> None:
         """
