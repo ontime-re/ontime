@@ -18,12 +18,11 @@ class RestrictedTimeSeries(TimeSeries):
         """
         super().__init__(xa)
 
-        if restrictions is None:
-            self.restrictions = []
-
-        for r in restrictions:
-            assert isinstance(r, Restriction), "All restrictions must be of type Restriction"
-            self.add_restriction(r)
+        self.restrictions = []
+        if restrictions is not None:
+            for r in restrictions:
+                assert isinstance(r, Restriction), "All restrictions must be of type Restriction"
+                self.add_restriction(r)
 
     def check(self) -> None:
         """
