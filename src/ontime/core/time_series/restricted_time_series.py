@@ -218,7 +218,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         Rescales the time series so that the first value is equal to the given value.
 
         :param value_at_first_step: The value at the first step of the rescaled time series.
-        :return: The rescaled time series. **It changes the type of the ProbabilisticTimeSeries to TimeSeries.**
+        :return: The rescaled time series. **It changes the type of the UnitTimeSeries to TimeSeries.**
         TODO Check if this action make sense to implement.
         """
         raise NotImplementedError
@@ -228,7 +228,7 @@ class RestrictedTimeSeries(TimeSeries, Generic[T]):
         Stacks this time series with another one, along the time axis.
 
         :param other: The time series to stack with.
-        :return: The stacked time series.  **It changes the type of the ProbabilisticTimeSeries to TimeSeries.**
+        :return: The stacked time series.  **It changes the type of the UnitTimeSeries to TimeSeries.**
         TODO Check if this action make sense to implement.
         """
         return NotImplementedError

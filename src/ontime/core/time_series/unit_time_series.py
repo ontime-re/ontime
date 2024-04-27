@@ -1,9 +1,9 @@
 import xarray as xr
 import numpy as np
-from .resticted_time_series import RestrictedTimeSeries
+from .restricted_time_series import RestrictedTimeSeries
 
 
-class ProbabilisticTimeSeries(RestrictedTimeSeries["ProbabilisticTimeSeries"]):
+class UnitTimeSeries(RestrictedTimeSeries["UnitTimeSeries"]):
     def __init__(self, xa: xr.DataArray):
         super().__init__(xa)
         if not self.check(xa):
