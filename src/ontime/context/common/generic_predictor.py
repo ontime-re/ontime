@@ -1,7 +1,7 @@
 from darts.models import CatBoostModel
 from darts.utils.statistics import check_seasonality
 
-from ...core.model import Model
+from ...core.modelling import Model
 
 
 class GenericPredictor:

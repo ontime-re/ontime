@@ -1,7 +1,7 @@
 import xarray as xr
 
 from .time_series import TimeSeries
-from .restriction import Restriction
+from ..utils.restriction import Restriction
 
 
 class RestrictedTimeSeries(TimeSeries):

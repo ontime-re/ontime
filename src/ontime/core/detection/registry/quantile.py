@@ -15,6 +15,7 @@ class Quantile(QuantileDetector, AbstractDetector):
     def fit(self, ts: TimeSeries) -> None:
         """
         Fits the detector to the given time series.
+
         :param ts: TimeSeries
         :return: None
         """
@@ -23,6 +24,7 @@ class Quantile(QuantileDetector, AbstractDetector):
     def detect(self, ts: TimeSeries) -> BinaryTimeSeries:
         """
         Detects anomalies in the given time series.
+
         :param ts: TimeSeries
         :return: BinaryTimeSeries
         """

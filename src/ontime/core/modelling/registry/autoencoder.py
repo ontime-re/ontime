@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ontime.core.time_series import TimeSeries
-from ontime.core.model.sliced_dataset import SlicedDataset
+from ontime.core.modelling.sliced_dataset import SlicedDataset
 from torch import Tensor
 
 device = 'cpu'

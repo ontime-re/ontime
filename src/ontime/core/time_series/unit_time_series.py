@@ -2,7 +2,7 @@ import xarray as xr
 import numpy as np
 
 from .restricted_time_series import RestrictedTimeSeries
-from .restriction import Restriction
+from ..utils.restriction import Restriction
 
 
 class UnitTimeSeries(RestrictedTimeSeries):

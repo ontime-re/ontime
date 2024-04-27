@@ -3,8 +3,8 @@ from typing import NoReturn
 
 
 class AbstractGenerator(ABC):
-    """Abstract class to define methods to implement
-    for a Generator class.
+    """
+    Abstract class to define methods to implement for a Generator class.
     """
 
     @abstractmethod

@@ -5,7 +5,8 @@ from ..time_series import TimeSeries
 
 
 class AbstractModel(ABC):
-    """Abstract class to define methods to implement
+    """
+    Abstract class to define methods to implement
     for a Model class inspired by Scikit Learn API.
     """
 

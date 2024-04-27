@@ -43,4 +43,4 @@ class Holiday(AbstractGenerator):
         ts = holidays_timeseries(
             time_index, country_code, prov, state, column_name, until, add_length, dtype
         )
-        return TimeSeries.from_darts(ts)
+        return TimeSeries(ts.data_array())

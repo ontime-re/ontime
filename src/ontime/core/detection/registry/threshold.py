@@ -17,7 +17,6 @@ class Threshold(ThresholdDetector, AbstractDetector):
         high_threshold: Union[int, float, Sequence[float], None] = None,
     ):
         """
-
         :param low_threshold: (Sequence of) lower bounds.
             If a sequence, must match the dimensionality of the series
             The lower bound is included in the valid interval. So if the lower bound is 0, the value 0 is valid.

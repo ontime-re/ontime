@@ -56,4 +56,4 @@ class Sine(AbstractGenerator):
             column_name,
             dtype,
         )
-        return TimeSeries.from_darts(ts)
+        return TimeSeries(ts.data_array())

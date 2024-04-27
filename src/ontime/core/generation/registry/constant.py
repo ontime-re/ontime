@@ -39,4 +39,4 @@ class Constant(AbstractGenerator):
         :return: TimeSeries
         """
         ts = constant_timeseries(value, start, end, length, freq, column_name, dtype)
-        return TimeSeries.from_darts(ts)
+        return TimeSeries(ts.data_array())

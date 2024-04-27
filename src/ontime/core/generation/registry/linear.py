@@ -43,4 +43,4 @@ class Linear(AbstractGenerator):
         ts = linear_timeseries(
             start_value, end_value, start, end, length, freq, column_name, dtype
         )
-        return TimeSeries.from_darts(ts)
+        return TimeSeries(ts.data_array())

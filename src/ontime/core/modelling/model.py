@@ -13,7 +13,13 @@ from .libs.skforecast.forecaster_autoreg_multi_variate import (
 
 class Model(AbstractModel):
     """
-    Generic wrapper around SkForecast and DartsForecast time series libraries
+    Generic wrapper around time series libraries
+
+    At the moment the following libraries are supported :
+
+    - onTime models
+    - Darts models
+    - Scikit-learn models
 
     The model is automatically selected based on the size of the time series.
     It is chosen once and then kept for the whole lifecycle of the model.

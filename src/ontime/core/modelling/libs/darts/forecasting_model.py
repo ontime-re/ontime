@@ -16,7 +16,7 @@ class ForecastingModel(AbstractModel):
         super().__init__()
         self.model = model(**params)
 
-    def fit(self, ts, **params) -> "ForecastingModel":
+    def fit(self, ts: TimeSeries, **params) -> "ForecastingModel":
         """
         Fit the model to the given time series
 
@@ -27,7 +27,7 @@ class ForecastingModel(AbstractModel):
         self.model.fit(ts, **params)
         return self
 
-    def predict(self, n, **params) -> TimeSeries:
+    def predict(self, n: int, **params) -> TimeSeries:
         """
         Predict n steps into the future
 
@@ -36,4 +36,4 @@ class ForecastingModel(AbstractModel):
         :return: TimeSeries
         """
         pred = self.model.predict(n, **params)
-        return TimeSeries.from_darts(pred)
+        return TimeSeries(pred.data_array())
