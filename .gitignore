@@ -1,6 +1,7 @@
 ## Project specific
 .DS_Store
 poetry.lock
+dev
 
 # Created by https://www.toptal.com/developers/gitignore/api/intellij+all,python,jupyternotebooks
 # Edit at https://www.toptal.com/developers/gitignore?templates=intellij+all,python,jupyternotebooks
