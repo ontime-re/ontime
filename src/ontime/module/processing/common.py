@@ -57,45 +57,43 @@ def train_test_split(ts: TimeSeries, test_split=None, train_split=None) -> tuple
     return train_set, test_set
 
 
-def split_by_length(ts: TimeSeries, length: int, drop_last: bool = True) -> list:
+def split_in_windows(ts: TimeSeries, window_length: int, stride_length: int) -> list:
     """
-    Split a TimeSeries into parts of a given length
+    Split a TimeSeries into parts of a given length, thus forming a window.
+
+    When making the last window, some values of the input TimeSeries might be
+    dropped so that all windows have the same length.
 
     :param ts: TimeSeries to split
-    :param length: int length of each part
-    :param drop_last: bool, whether to drop the last part if it is shorter than n
+    :param window_length: int length of each window
+    :param stride_length: int distance in step between the start of the current window and the next one
     :return: list of TimeSeries
     """
+    # Check stride_length
+    assert stride_length != 0, "stride_length can't be equal to 0, minimum is 1."
 
     # Get DataFrame
     df = ts.pd_dataframe()
-
-    # Calculate the total number of splits needed
-    total_splits = -(-len(df) // length)  # Ceiling division to get the number of parts
 
     # Initialize a list to hold the DataFrame splits
     splits_df = []
 
     # Loop through the DataFrame and split it
-    for split in range(total_splits):
-        start_index = split * length
-        end_index = start_index + length
-        # Append the part to the list, using slicing with .iloc
-        splits_df.append(df.iloc[start_index:end_index])
-
-    # If the last dataframe has a different length, then drop it.
-    if drop_last:
-        last_df = splits_df[-1]
-        second_last = splits_df[-2]
-        if len(last_df) != len(second_last):
-            splits_df = splits_df[:-1]
+    for i in range(len(df.index)):
+        start_index = stride_length * i
+        end_index = start_index + window_length
+        if end_index <= len(df.index):
+            splits_df.append(df.iloc[start_index:end_index])
 
     # Change the data structure from DataFrame to TimeSeries
     return list(map(TimeSeries.from_dataframe, splits_df))
 
 
 def split_inputs_from_targets(
-    ts_list: list, input_length: int, target_length: int
+        ts_list: list,
+        input_length: int,
+        target_length: int,
+        gap_length: int = 0,
 ) -> tuple:
     """
     Split a list of TimeSeries into input and target TimeSeries
@@ -103,9 +101,9 @@ def split_inputs_from_targets(
     :param ts_list: list of TimeSeries
     :param input_length: int length of the input TimeSeries
     :param target_length: int length of the target TimeSeries
+    :param gap_length: int length of the gap between input end and target start
     :return: tuple of list of TimeSeries
     """
-
     # Change inner data structure to DataFrame
     dfs = [ts.pd_dataframe() for ts in ts_list]
 
@@ -115,18 +113,19 @@ def split_inputs_from_targets(
 
     # Iterate over each DataFrame in the list
     for df in dfs:
-        # Check if the DataFrame is large enough to accommodate input_length and label_len
-        if len(df) >= input_length + target_length:
-            # Get the first input_length items
-            input_series = df.iloc[:input_length]
-            input_series_list.append(input_series)
-            # Get the last label_len items
-            target_series = df.iloc[-target_length:]
-            target_series_list.append(target_series)
-        else:
-            raise Exception(
-                "input_length + label_len is longer that the total length of the DataFrame"
-            )
+        # Check
+        assert input_length + target_length + gap_length <= len(df), \
+            "input_length + target_length + gap_length is longer that the total length of the DataFrame."
+
+        # Create inputs
+        input_series = df.iloc[:input_length]
+        input_series_list.append(input_series)
+
+        # Create targets
+        start_target = input_length + gap_length
+        end_target = start_target + target_length
+        target_series = df.iloc[start_target:end_target]
+        target_series_list.append(target_series)
 
     input_ts_list = list(map(TimeSeries.from_dataframe, input_series_list))
     target_ts_list = list(map(TimeSeries.from_dataframe, target_series_list))
@@ -141,4 +140,4 @@ def timeseries_list_to_numpy(ts_list: list) -> np.array:
     :param ts_list: list of TimeSeries
     :return: np.array
     """
-    return np.array([ts.pd_dataframe().to_numpy() for ts in ts_list])
+    return np.array([ts.pd_dataframe().T.to_numpy() for ts in ts_list])

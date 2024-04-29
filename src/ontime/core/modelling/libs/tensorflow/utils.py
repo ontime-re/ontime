@@ -1,48 +1,36 @@
 import numpy as np
-from tensorflow.keras.preprocessing import timeseries_dataset_from_array
 from tensorflow.data import Dataset
-
+from ontime.module.processing.common import split_in_windows, split_inputs_from_targets, timeseries_list_to_numpy
 from ontime.core.time_series import TimeSeries
 
 
-def create_dataset(ts: TimeSeries, input_length: int, target_length: int, step_length: int, stride_length: int) -> Dataset:
+def create_dataset(ts: TimeSeries,
+                   window_length: int,
+                   stride_length: int,
+                   input_length: int,
+                   target_length: int,
+                   gap_length: int = 0):
     """
     Create a Tensorflow Dataset given a TimeSeries
 
     :param ts: the TimeSeries to create a Dataset with
-    :param input_length: the length of the input for the model (x)
-    :param target_length: the length of the output for the model (y)
-    :param step_length: the distance between input end and target start in nb of steps
+    :param window_length: the length of the full window (input, gap and target)
     :param stride_length: the distance between input start from a sample to the next
-    :return:
+    :param input_length: the length of the input for the model (x)
+    :param gap_length: the length of the gap between input end and target start
+    :param target_length: the length of the output for the model (y)
+    :return: Dataset
     """
 
-    # Define features and labels
-    X = ts[:-input_length].values().flatten()
-    Y = ts[input_length+step_length:].values().flatten()
-
-    # Create features dataset
-    input_ds = timeseries_dataset_from_array(
-        X,
-        targets=None,
-        sequence_stride=stride_length,
-        batch_size=1,
-        sequence_length=input_length
-    )
-
-    # Create labels dataset
-    target_ds = timeseries_dataset_from_array(
-        Y,
-        targets=None,
-        sequence_stride=stride_length,
-        batch_size=1,
-        sequence_length=target_length
-    )
-
-    # Zip the two datasets in one
-    dataset = Dataset.zip(input_ds, target_ds)
-
-    return dataset
+    ts_list = split_in_windows(ts, window_length, stride_length)
+    input_ts_list, target_ts_list = split_inputs_from_targets(
+        ts_list, input_length=input_length, target_length=target_length, gap_length=gap_length)
+    features = timeseries_list_to_numpy(input_ts_list)
+    labels = timeseries_list_to_numpy(target_ts_list)
+    ds_feature = Dataset.from_tensor_slices(features)
+    ds_labels = Dataset.from_tensor_slices(labels)
+    ds = Dataset.zip((ds_feature, ds_labels))
+    return ds
 
 
 def dataset_to_numpy(dataset: Dataset):
