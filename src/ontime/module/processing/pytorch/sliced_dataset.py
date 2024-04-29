@@ -1,18 +1,21 @@
 from torch.utils.data import Dataset
-from darts import TimeSeries as dts
 from ontime.core.time_series.time_series import TimeSeries
 import numpy as np
-import pandas as pd
-from ontime.module import preprocessing as pp
+from ontime.module import processing as pp
 from typing import Tuple
 
+
 class SlicedDataset(Dataset):
-    def __init__(self, data: TimeSeries , period: int, 
-                 labels: TimeSeries = None, transform: bool = False, 
-                 target_transform: bool = False): 
+    def __init__(self,
+                 data: TimeSeries,
+                 period: int,
+                 labels: TimeSeries = None):
+        """
+        :param data: TimeSeries of the data to model
+        :param period: length of the input window
+        :param labels: TimeSeries of the target
+        """
         self.data, self.labels = self.slice(data, period, labels)
-        self.transform = transform
-        self.target_transform = target_transform
 
     def __len__(self):
         return len(self.data)
