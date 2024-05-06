@@ -25,14 +25,14 @@ Core
 
 .. toctree::
 
-    0_core/0.1-time-series-custom-class
-    0_core/0.2-detectors-generators
-    0_core/0.3-processing
-    0_core/0.4-modelling
-    0_core/0.5-plots
-    0_core/0.6-anomaly-frequency
-    0_core/0.7-anomaly-time-series-plot
-
+    0_core/0.1_time-series
+    0_core/0.1.1_time-series_data-loading
+    0_core/0.1.2_time-series_custom-class
+    0_core/0.2_detectors
+    0_core/0.3_generators
+    0_core/0.4_models
+    0_core/0.5_plots
+    0_core/0.6-processors
 
 Module
 ------

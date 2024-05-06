@@ -54,11 +54,12 @@ class TimeSeries(DartsTimeSeries):
     @staticmethod
     def from_pandas(df: pd.DataFrame, freq=None) -> TimeSeries:
         """
-        Convert a pandas DataFrame to an OnTime TimeSeries using Darts
+        Convert a pandas DataFrame to an onTime TimeSeries using Darts
         Assumes the index is compliant with TimeEval's canonical format.
 
         :param df: pandas dataFrame
-        :return: OnTime TimeSeries
+        :param freq: frequency of the time series
+        :return: onTime TimeSeries
         """
         ts = DartsTimeSeries.from_dataframe(df, fill_missing_dates=True, freq=freq)
         return TimeSeries.from_darts(ts)
@@ -66,12 +67,12 @@ class TimeSeries(DartsTimeSeries):
     @staticmethod
     def from_csv(file: str, index_col=None) -> TimeSeries:
         """
-        Reads a csv file and converts it to an OnTime TimeSeries using Darts and pandas.
+        Reads a csv file and converts it to an onTime TimeSeries using Darts and pandas.
         Assumes the csv file is compliant with TimeEval's canonical format.
 
         :param file: location of the dataset csv file
         :param index_col: the name of the column to be used for the index
-        :return: OnTime TimeSeries
+        :return: onTime TimeSeries
         """
         df = pd.read_csv(file)
         if index_col is not None:
