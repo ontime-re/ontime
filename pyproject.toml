@@ -20,6 +20,8 @@ vega-datasets = "^0.9.0"
 ipywidgets = "^8.1.1"
 altair-viewer = "^0.4.0"
 tensorflow = "^2.16.1"
+lightning = "^2.2.4"
+numpy = "^1.26.4"
 
 [tool.poetry.group.dev]
 optional = true
