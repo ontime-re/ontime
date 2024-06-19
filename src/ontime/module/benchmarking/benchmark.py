@@ -13,13 +13,16 @@ class Benchmark:
     # a wrapper for datasets used in Benchmark
     class BenchmarkDataset:
         def __init__(self, training_set: TimeSeries, multivariate: bool = None, name: str = None,
-                     test_set: TimeSeries = None, *args):
+                     test_set: TimeSeries = None, target_columns=None, *args):
             self.training_set = training_set
             self.test_set = test_set
             if multivariate is None:
                 multivariate = len(training_set.columns) > 1
             self.multivariate = multivariate
             self.name = name
+            if target_columns is None and multivariate:
+                target_columns = [training_set.columns.tolist()[0]]
+            self.target_columns = target_columns
 
         def get_train_test_split(self, train_proportion=0.7):
             if self.test_set is None:
@@ -36,14 +39,26 @@ class Benchmark:
             self.args = arguments_dict
             self.name = name
 
-        def instantiate(self, train_set: TimeSeries, test_set: TimeSeries, ):
-            self.model_instance = self.model(**self.args)
+        def instantiate(self, train_set: TimeSeries, test_set: TimeSeries, **kwargs):
+            self.model_instance = self.model(**self.args, **kwargs)
 
-        def fit(self, training_set: TimeSeries, test_set: TimeSeries):
-            self.model_instance.fit(training_set)
+        def fit(self, training_set: TimeSeries, test_set: TimeSeries, target_column=None, **kwargs):
+            if self.model.is_multivariate:
+                if target_column is None:
+                    target_column = training_set.columns.tolist()[0]
+                train = training_set.drop_columns(target_column)
+                target = training_set[target_column]
+                self.model_instance.fit(train, target, **kwargs)
+            else:
+                self.model_instance.fit(training_set, **kwargs)
 
-        def predict(self, horizon, test_set: TimeSeries):
-            return self.model_instance.predict(horizon)
+        def predict(self, horizon, test_set: TimeSeries, target_column=None, **kwargs):
+            if self.model.is_multivariate:
+                if target_column is None:
+                    target_column = test_set.columns.tolist()[0]
+                test = test_set.drop_columns(target_column)
+                return self.model_instance.predict(test, horizon, **kwargs)
+            return self.model_instance.predict(horizon, **kwargs)
 
         def name(self):
             return self.name
@@ -57,7 +72,8 @@ class Benchmark:
         def compute(self, data: TimeSeries, pred: TimeSeries):
             return self.metric(data, pred)
 
-    def __init__(self, datasets: List[Union[TimeSeries, Tuple[TimeSeries, TimeSeries], BenchmarkDataset]] = None,
+    def __init__(self,
+                 datasets: List[Union[TimeSeries, Tuple[TimeSeries, TimeSeries], BenchmarkDataset]] = None,
                  models: List[BenchmarkModelHolder] = None,
                  metrics: List[BenchmarkMetric] = None,
                  train_proportion=0.7):
@@ -94,7 +110,8 @@ class Benchmark:
     def get_models(self):
         return [m.model_class for m in self.models]
 
-    def add_dataset(self, dataset: Union[TimeSeries, Tuple[TimeSeries, TimeSeries], BenchmarkDataset], name=None):
+    def add_dataset(self, dataset: Union[TimeSeries, Tuple[TimeSeries, TimeSeries], BenchmarkDataset],
+                    target_columns=None, name=None):
         if not (isinstance(dataset, TimeSeries) or
                 isinstance(dataset, Tuple) or
                 isinstance(dataset, Benchmark.BenchmarkDataset)):
@@ -110,9 +127,10 @@ class Benchmark:
         if name is None:
             name = str(len(self.models))
         if isinstance(dataset, TimeSeries):
-            self.datasets.append(Benchmark.BenchmarkDataset(dataset, multivariate, name))
+            self.datasets.append(Benchmark.BenchmarkDataset(dataset, multivariate, name, target_columns=target_columns))
         elif isinstance(dataset, Tuple):
-            self.datasets.append(Benchmark.BenchmarkDataset(dataset[0], multivariate, name, dataset[1]))
+            self.datasets.append(
+                Benchmark.BenchmarkDataset(dataset[0], multivariate, name, dataset[1], target_columns=target_columns))
         else:  # it's a BenchmarkDataset
             self.datasets.append(dataset)
 
@@ -144,69 +162,72 @@ class Benchmark:
 
             # evaluation time!
             for dataset in self.datasets:
-                if verbose:
-                    print(f"on dataset {dataset.name} ")
-
-                # initialize variables
-                train_set, test_set = dataset.get_train_test_split(self.train_proportion)
-                nb_features = len(train_set.columns)
-                train_size = len(train_set.time_index)
-                test_size = len(test_set.time_index)
-                train_time = 0
-                inference_time = 0
-                # create new model
-                source_model.instantiate(train_set=train_set, test_set=test_set)
-                if verbose:
-                    print(f"training... ", end="")
-                train_success = True
-                try:
-                    # train
-                    start_time = time.time()
-                    source_model.fit(train_set, test_set)
-                    train_time = time.time() - start_time
-
-
-                    # test
+                for target in dataset.target_columns:
                     if verbose:
-                        print(f"done, took {train_time}\ntesting... ", end="")
-                    start_time = time.time()
-                    pred = source_model.predict(test_size, test_set)
-                    inference_time = time.time() - start_time
-                    if verbose:
-                        print(f"done, took {inference_time}")
+                        print(f"on dataset {dataset.name}, column {target} ")
 
-                except:  # can't train or test on this dataset
-                    train_success = False
-                    if dataset.multivariate:
-                        nb_mv_run_failed -= 1
-                    else:
-                        nb_uv_run_failed -= 1
+                    # initialize variables
+                    train_set, test_set = dataset.get_train_test_split(self.train_proportion)
+                    nb_features = len(train_set.columns)
+                    train_size = len(train_set.time_index)
+                    test_size = len(test_set.time_index)
+                    train_time = 0
+                    inference_time = 0
+                    # create new model
+                    source_model.instantiate(train_set=train_set, test_set=test_set)
                     if verbose:
-                        print(f"Couldn't complete training.")
-                        if debug:
-                            traceback.print_exc()
+                        print(f"training... ", end="")
+                    train_success = True
+                    try:
+                        # train
+                        start_time = time.time()
+                        source_model.fit(train_set, test_set, target_column=target)
+                        train_time = time.time() - start_time
 
-                if train_success:
-                    # compute metrics
-                    self.results[source_model.name][dataset.name] = {
-                        'nb features': nb_features,
-                        'training set size': train_size,
-                        'training time': train_time,
-                        'test set size': test_size,
-                        'testing time': inference_time
-                    }
-                    # compute user-submitted metrics
-                    for metric in self.metrics:
-                        try:
-                            if verbose:
-                                print(f"{metric.name}: ", end="")
-                            self.results[source_model.name][dataset.name][metric.name] = metric.compute(test_set, pred)
-                            if verbose:
-                                print(self.results[source_model.name][dataset.name][metric.name])
-                        except:  # can't compute current metric
-                            print(f"Couldn't compute {metric}")
+                        # test
+                        if verbose:
+                            print(f"done, took {train_time}\ntesting... ", end="")
+                        start_time = time.time()
+                        pred = source_model.predict(test_size, test_set, target_column=target)
+                        inference_time = time.time() - start_time
+                        if verbose:
+                            print(f"done, took {inference_time}")
+
+                    except:  # can't train or test on this dataset
+                        train_success = False
+                        if dataset.multivariate:
+                            nb_mv_run_failed -= 1
+                        else:
+                            nb_uv_run_failed -= 1
+                        if verbose:
+                            print(f"Couldn't complete training.")
                             if debug:
                                 traceback.print_exc()
+
+                    if train_success:
+                        # compute metrics
+                        self.results[source_model.name][self._c(dataset.name, target)] = {
+                            'nb features': nb_features,
+                            'target column': target,
+                            'training set size': train_size,
+                            'training time': train_time,
+                            'test set size': test_size,
+                            'testing time': inference_time,
+                            'prediction': pred
+                        }
+                        # compute user-submitted metrics
+                        for metric in self.metrics:
+                            try:
+                                if verbose:
+                                    print(f"{metric.name}: ", end="")
+                                self.results[source_model.name][self._c(dataset.name, target)][metric.name] = metric.compute(test_set[target][:len(pred)],
+                                                                                                            pred)
+                                if verbose:
+                                    print(self.results[source_model.name][self._c(dataset.name, target)][metric.name])
+                            except:  # can't compute current metric
+                                print(f"Couldn't compute {metric.name}")
+                                if debug:
+                                    traceback.print_exc()
 
             # back to model-level stats
             supports_uni = None
@@ -237,12 +258,13 @@ class Benchmark:
             s += f"Supported univariate datasets: {self.results[model.name]['supports univariate']}\n"
             s += f"Supported multivariate datasets: {self.results[model.name]['supports multivariate']}\n"
             for dataset in self.datasets:
-                s += f"Dataset {dataset.name}:\n"
-                if dataset.name not in self.results[model.name].keys():
-                    s += f"{dataset.name}: couldn't complete training\n"
-                else:
-                    for key in self.results[model.name][dataset.name].keys():
-                        s += f"{key}: {self.results[model.name][dataset.name][key]}\n"
+                for target in dataset.target_columns:
+                    s += f"Dataset {dataset.name}, {target}:\n"
+                    if self._c(dataset.name, target) not in self.results[model.name].keys():
+                        s += f"{dataset.name}, {target}: couldn't complete training\n"
+                    else:
+                        for key in self.results[model.name][self._c(dataset.name, target)].keys():
+                            s += f"{key}: {self.results[model.name][self._c(dataset.name, target)][key]}\n"
             txt.append(s)
         report = "\n\n".join(txt)
         return report
@@ -259,10 +281,17 @@ class Benchmark:
         for model in self.models:
             report_model = pd.DataFrame(columns=me_columns, index=ds_index)
             for dataset in self.datasets:
-                if dataset.name not in self.results[model.name].keys():
-                    report_dict = {n: np.nan for n in me_columns}
-                else:
-                    report_dict = self.results[model.name][dataset.name]
-                report_model.loc[dataset.name] = report_dict
+                for target in dataset.target_columns:
+                    if self._c(dataset.name, target) not in self.results[model.name].keys():
+                        report_dict = {n: np.nan for n in me_columns}
+                    else:
+                        report_dict = self.results[model.name][self._c(dataset.name, target)]
+                    report_model.loc[dataset.name] = report_dict
             reports[model.name] = report_model
         return reports
+
+    def get_results(self):
+        return self.results
+
+    def _c(self, a, b):
+        return f'{a} {b}'
