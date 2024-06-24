@@ -22,6 +22,8 @@ class Benchmark:
             self.name = name
             if target_columns is None and multivariate:
                 target_columns = [training_set.columns.tolist()[0]]
+            elif not multivariate:
+                target_columns = [training_set.columns.tolist()[0]]
             self.target_columns = target_columns
 
         def get_train_test_split(self, train_proportion=0.7):
@@ -42,8 +44,8 @@ class Benchmark:
         def instantiate(self, train_set: TimeSeries, test_set: TimeSeries, **kwargs):
             self.model_instance = self.model(**self.args, **kwargs)
 
-        def fit(self, training_set: TimeSeries, test_set: TimeSeries, target_column=None, **kwargs):
-            if self.model.is_multivariate:
+        def fit(self, training_set: TimeSeries, test_set: TimeSeries, target_column=None, multivariate=False, **kwargs):
+            if multivariate:
                 if target_column is None:
                     target_column = training_set.columns.tolist()[0]
                 train = training_set.drop_columns(target_column)
@@ -52,8 +54,8 @@ class Benchmark:
             else:
                 self.model_instance.fit(training_set, **kwargs)
 
-        def predict(self, horizon, test_set: TimeSeries, target_column=None, **kwargs):
-            if self.model.is_multivariate:
+        def predict(self, horizon, test_set: TimeSeries, target_column=None, multivariate=False, **kwargs):
+            if multivariate:
                 if target_column is None:
                     target_column = test_set.columns.tolist()[0]
                 test = test_set.drop_columns(target_column)
@@ -125,7 +127,7 @@ class Benchmark:
             multivariate = False
 
         if name is None:
-            name = str(len(self.models))
+            name = str(len(self.datasets))
         if isinstance(dataset, TimeSeries):
             self.datasets.append(Benchmark.BenchmarkDataset(dataset, multivariate, name, target_columns=target_columns))
         elif isinstance(dataset, Tuple):
@@ -181,14 +183,15 @@ class Benchmark:
                     try:
                         # train
                         start_time = time.time()
-                        source_model.fit(train_set, test_set, target_column=target)
+                        source_model.fit(train_set, test_set, target_column=target, multivariate=dataset.multivariate)
                         train_time = time.time() - start_time
 
                         # test
                         if verbose:
                             print(f"done, took {train_time}\ntesting... ", end="")
                         start_time = time.time()
-                        pred = source_model.predict(test_size, test_set, target_column=target)
+                        pred = source_model.predict(test_size, test_set, target_column=target,
+                                                    multivariate=dataset.multivariate)
                         inference_time = time.time() - start_time
                         if verbose:
                             print(f"done, took {inference_time}")
@@ -220,8 +223,10 @@ class Benchmark:
                             try:
                                 if verbose:
                                     print(f"{metric.name}: ", end="")
-                                self.results[source_model.name][self._c(dataset.name, target)][metric.name] = metric.compute(test_set[target][:len(pred)],
-                                                                                                            pred)
+                                    print(f'{test_set.columns} {target}')
+                                self.results[source_model.name] \
+                                    [self._c(dataset.name, target)] \
+                                    [metric.name] = metric.compute(test_set[target][:len(pred)], pred)
                                 if verbose:
                                     print(self.results[source_model.name][self._c(dataset.name, target)][metric.name])
                             except:  # can't compute current metric
@@ -264,6 +269,8 @@ class Benchmark:
                         s += f"{dataset.name}, {target}: couldn't complete training\n"
                     else:
                         for key in self.results[model.name][self._c(dataset.name, target)].keys():
+                            if key == 'prediction':
+                                continue
                             s += f"{key}: {self.results[model.name][self._c(dataset.name, target)][key]}\n"
             txt.append(s)
         report = "\n\n".join(txt)
@@ -273,20 +280,19 @@ class Benchmark:
         # DISCLAIMER: this is still bugged
         # 1 dataframe per model
         # index = datasets
-        # columns = metric
-        ds_index = [x for x in self.results[self.models[0].name].keys() if
-                    'supports' not in x]  # remove model-only stats
-        me_columns = self.results[self.models[0].name][self.datasets[0].name].keys()
+        # columns = metric and details
+        col0 = self.datasets[0].training_set.columns.tolist()[0]
+        me_columns = self.results[self.models[0].name][self._c(self.datasets[0].name, col0)].keys()
         reports = {}
         for model in self.models:
-            report_model = pd.DataFrame(columns=me_columns, index=ds_index)
+            report_model = pd.DataFrame(columns=me_columns)
             for dataset in self.datasets:
                 for target in dataset.target_columns:
-                    if self._c(dataset.name, target) not in self.results[model.name].keys():
-                        report_dict = {n: np.nan for n in me_columns}
-                    else:
+                    if self._c(dataset.name, target) in self.results[model.name].keys():
                         report_dict = self.results[model.name][self._c(dataset.name, target)]
-                    report_model.loc[dataset.name] = report_dict
+                        del report_dict["prediction"]
+                        report_model.loc[dataset.name] = report_dict
+
             reports[model.name] = report_model
         return reports
 
