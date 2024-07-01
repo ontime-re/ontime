@@ -49,3 +49,32 @@ def dataset_to_numpy(dataset: Dataset):
     data_array = np.array(data_list)
     labels_array = np.array(labels_list)
     return data_array, labels_array
+
+
+def arr_to_ts(arr: np.array) -> TimeSeries:
+    """
+    Converts on array obtained as output of a model to a TimeSeries
+    
+    :param arr: Numpy array
+    :return: TimeSeries
+    """
+    arr = np.concatenate(arr, axis=-1)
+    return TimeSeries.from_data(arr.T)
+
+
+def get_input(dataset: Dataset) -> np.array:
+    """
+    Get the input from a Tensorflow Dataset
+    
+    :param dataset: Tensorflow Dataset
+    """
+    return np.array([x for x, y in dataset])
+
+
+def get_target(dataset: Dataset) -> np.array:
+    """
+    Get the target from a Tensorflow Dataset
+
+    :param dataset: Tensorflow Dataset
+    """
+    return np.array([y for x, y in dataset])
