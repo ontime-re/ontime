@@ -26,8 +26,10 @@ class Quantile(QuantileDetector, AbstractDetector):
         """
         super().__init__(low_quantile, high_quantile)
         self.enable_logging = enable_logging
+        default_params = {'description': 'QuantileDetector'}
+        self.logger_params = default_params if logger_params is None else logger_params
         if enable_logging:
-            self.logger = BinaryAnomalyLogger('QuantileDetector', **logger_params)
+            self.logger = BinaryAnomalyLogger(**self.logger_params)
 
     def fit(self, ts: TimeSeries) -> None:
         """

@@ -18,6 +18,12 @@ class BinaryAnomalyLogger:
         self.max_entries = max_entries
         self.log = pd.DataFrame(columns=['Timestamp', 'Description', 'Value'])
 
+    def reset_log(self):
+        """
+        Reset the log
+        """
+        self.log = pd.DataFrame(columns=['Timestamp', 'Description', 'Value'])
+
     def log_anomalies(self, ts: BinaryTimeSeries) -> pd.DataFrame:
         """
         Log the BinaryTimeSeries

@@ -28,8 +28,10 @@ class Threshold(ThresholdDetector, AbstractDetector):
         """
         super().__init__(low_threshold, high_threshold)
         self.enable_logging = enable_logging
+        default_params = {'description': 'ThresholdDetector'}
+        self.logger_params = default_params if logger_params is None else logger_params
         if enable_logging:
-            self.logger = BinaryAnomalyLogger('ThresholdDetector', **logger_params)
+            self.logger = BinaryAnomalyLogger(**self.logger_params)
 
     def detect(self, ts: TimeSeries) -> BinaryTimeSeries:
         """
