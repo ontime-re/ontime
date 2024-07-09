@@ -25,6 +25,7 @@ numpy = "^1.26.4"
 prefect = "^2.19.7"
 networkx = "<3.0.0"
 dagviz = "^0.4.0"
+cftime = "^1.6.4"
 
 [tool.poetry.group.dev]
 optional = true
@@ -50,6 +51,7 @@ recommonmark = "^0.7.1"
 m2r = "^0.3.1"
 pandoc = "^2.3"
 sphinx-autobuild = "^2021.3.14"
+lxml = {extras = ["html-clean"], version = "^5.2.2"}
 
 [build-system]
 requires = ["poetry-core"]
