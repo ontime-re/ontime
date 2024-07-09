@@ -22,6 +22,9 @@ altair-viewer = "^0.4.0"
 tensorflow = "^2.16.1"
 lightning = "^2.2.4"
 numpy = "^1.26.4"
+prefect = "^2.19.7"
+networkx = "<3.0.0"
+dagviz = "^0.4.0"
 
 [tool.poetry.group.dev]
 optional = true
