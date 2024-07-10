@@ -2,6 +2,7 @@ from darts.ad.detectors.quantile_detector import QuantileDetector
 
 from ..abstract_detector import AbstractDetector
 from ...time_series import BinaryTimeSeries, TimeSeries
+from ...utils.anomaly_logger import BinaryAnomalyLogger
 
 
 class Quantile(QuantileDetector, AbstractDetector):
@@ -9,8 +10,26 @@ class Quantile(QuantileDetector, AbstractDetector):
     Wrapper around Darts QuantileDetector.
     """
 
-    def __init__(self, low_quantile=None, high_quantile=None):
+    def __init__(
+            self,
+            low_quantile: float = None,
+            high_quantile: float = None,
+            enable_logging: bool = False,
+            logger_params: dict = None
+    ):
+        """
+        Constructor for QuantileDetector
+
+        :param low_quantile: lower quantile
+        :param high_quantile: higher quantile
+        :param enable_logging:
+        """
         super().__init__(low_quantile, high_quantile)
+        self.enable_logging = enable_logging
+        default_params = {'description': 'QuantileDetector'}
+        self.logger_params = default_params if logger_params is None else logger_params
+        if enable_logging:
+            self.logger = BinaryAnomalyLogger(**self.logger_params)
 
     def fit(self, ts: TimeSeries) -> None:
         """
@@ -29,4 +48,9 @@ class Quantile(QuantileDetector, AbstractDetector):
         :return: BinaryTimeSeries
         """
         ts_detected = super().detect(ts)
-        return BinaryTimeSeries(ts_detected.data_array())
+        ts_detected = BinaryTimeSeries(ts_detected.data_array())
+
+        if self.enable_logging:
+            self.logger.log_anomalies(ts_detected)
+
+        return ts_detected
