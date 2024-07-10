@@ -530,6 +530,22 @@ webencodings = "*"
 css = ["tinycss2 (>=1.1.0,<1.3)"]
 
 [[package]]
+name = "calmap"
+version = "0.0.11"
+description = "Calendar heatmaps from Pandas time series data"
+optional = false
+python-versions = "*"
+files = [
+    {file = "calmap-0.0.11-py2.py3-none-any.whl", hash = "sha256:4200ba7308c13dc5d94e444823334a10c396638bc03af2f6fce7c1cc45f20cf5"},
+    {file = "calmap-0.0.11.tar.gz", hash = "sha256:270ddedd9b470d3aef4328887ed60e1e3d3ac4fc8d3335874663d8d178d5b9bc"},
+]
+
+[package.dependencies]
+matplotlib = "*"
+numpy = "*"
+pandas = "*"
+
+[[package]]
 name = "catboost"
 version = "1.2.2"
 description = "CatBoost Python Package"
@@ -6422,4 +6438,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "7a6dfe17ac621b2195eea722cd66a1a4c7746e02093e0816aae382e092778393"
+content-hash = "631c3c5c80644aeaab7c1871f9d4dad551afb9725714e678b650685b618731de"
