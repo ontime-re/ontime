@@ -1,6 +1,6 @@
 import sys
 
-sys.path.insert(0, '../../..')
+from abc import ABC, abstractmethod
 import numpy as np
 from ontime.core.time_series.time_series import TimeSeries
 import pandas as pd
@@ -8,6 +8,41 @@ import time
 from typing import List, Union, Tuple
 import traceback
 
+class BenchmarkMetric:
+    def __init__(self, metric_function, name: str):
+        self.metric = metric_function
+        self.name = name
+
+    def compute(self, target: TimeSeries, pred: TimeSeries):
+        """
+        Compute the metric on the target and predicted time series.
+        """
+        return self.metric(target, pred)
+
+class AbstractBenchmarkModel(ABC):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def fit(self, train_ts: TimeSeries, val_ts: TimeSeries, *args, **kwargs) -> None:
+        """
+        Fit a model on training data.
+        """
+        pass
+
+    @abstractmethod
+    def evaluate(self, ts: TimeSeries, horizon: int, metrics: List[BenchmarkMetric], *args, **kwargs) -> dict:
+        """
+        Evaluate the model on test data, using the given metrics.
+        """
+        pass
+
+    @abstractmethod
+    def load_checkpoint(self, path: str) -> None:
+        """
+        Load a model checkpoint from the given path.
+        """
+        pass
 
 class Benchmark:
     # a wrapper for datasets used in Benchmark
@@ -30,40 +65,6 @@ class Benchmark:
             if self.test_set is None:
                 return self.training_set.split_before(train_proportion)
             return self.training_set, self.test_set
-
-    # a wrapper containing models used in Benchmark.
-    # can be used as is or overridden to adapt for particular models
-    class BenchmarkModelHolder:
-        def __init__(self, model_class, name: str,
-                     arguments_dict: dict = None):
-            self.model = model_class
-            self.model_instance = None
-            self.args = arguments_dict
-            self.name = name
-
-        def instantiate(self, train_set: TimeSeries, test_set: TimeSeries, **kwargs):
-            self.model_instance = self.model(**self.args, **kwargs)
-
-        def fit(self, training_set: TimeSeries, test_set: TimeSeries, target_column=None, multivariate=False, **kwargs):
-            if multivariate:
-                if target_column is None:
-                    target_column = training_set.columns.tolist()[0]
-                train = training_set.drop_columns(target_column)
-                target = training_set[target_column]
-                self.model_instance.fit(train, target, **kwargs)
-            else:
-                self.model_instance.fit(training_set, **kwargs)
-
-        def predict(self, horizon, test_set: TimeSeries, target_column=None, multivariate=False, **kwargs):
-            if multivariate:
-                if target_column is None:
-                    target_column = test_set.columns.tolist()[0]
-                test = test_set.drop_columns(target_column)
-                return self.model_instance.predict(test, horizon, **kwargs)
-            return self.model_instance.predict(horizon, **kwargs)
-
-        def name(self):
-            return self.name
 
     # wrapper for user-submitted metrics to be used in Benchmark
     class BenchmarkMetric:
