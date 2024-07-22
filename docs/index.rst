@@ -5,6 +5,7 @@
 
    getting_started
    user_guide/index
+   tutorials/index
    contributing/index
 
 .. image:: https://github.com/fredmontet/ontime/actions/workflows/ci.yml/badge.svg
