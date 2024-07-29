@@ -77,7 +77,7 @@ class Benchmark:
 
     def __init__(self,
                  datasets: List[Union[TimeSeries, Tuple[TimeSeries, TimeSeries], BenchmarkDataset]] = None,
-                 models: List[BenchmarkModelHolder] = None,
+                 models: List[AbstractBenchmarkModel] = None,
                  metrics: List[BenchmarkMetric] = None,
                  train_proportion=0.7):
 
