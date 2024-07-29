@@ -20,13 +20,17 @@ class BenchmarkMetric:
         return self.metric(target, pred)
 
 class AbstractBenchmarkModel(ABC):
-    def __init__(self, *args, **kwargs):
-        pass
-
     @abstractmethod
     def fit(self, train_ts: TimeSeries, val_ts: TimeSeries, *args, **kwargs) -> None:
         """
         Fit a model on training data.
+        """
+        pass
+
+    @abstractmethod
+    def predict(self, ts: TimeSeries, horizon: int, *args, **kwargs) -> TimeSeries:
+        """
+        Predict the next `horizon` steps of the time series.
         """
         pass
 
