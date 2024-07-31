@@ -12,15 +12,16 @@ class BenchmarkMode(Enum):
         FULL_SHOT = 3 # full training
     
 class BenchmarkMetric:
-    def __init__(self, metric_function, name: str):
+    def __init__(self, name: str, metric_function, component_reduction = None):
         self.metric = metric_function
         self.name = name
+        self.component_reduction = component_reduction
 
     def compute(self, target: TimeSeries, pred: TimeSeries):
         """
         Compute the metric on the target and predicted time series.
         """
-        return self.metric(target, pred)
+        return self.metric(target, pred, component_reduction=self.component_reduction)
 
 class AbstractBenchmarkModel(ABC):
     @abstractmethod
