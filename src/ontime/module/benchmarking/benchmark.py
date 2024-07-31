@@ -1,13 +1,16 @@
-import sys
+from ontime.core.time_series.time_series import TimeSeries
 
 from abc import ABC, abstractmethod
-import numpy as np
-from ontime.core.time_series.time_series import TimeSeries
+from typing import List, Optional
+from enum import Enum
 import pandas as pd
 import time
-from typing import List, Union, Tuple
 import traceback
 
+class BenchmarkMode(Enum):
+        ZERO_SHOT = 1 # no training, only inference
+        FULL_SHOT = 3 # full training
+    
 class BenchmarkMetric:
     def __init__(self, metric_function, name: str):
         self.metric = metric_function
@@ -47,40 +50,38 @@ class AbstractBenchmarkModel(ABC):
         Load a model checkpoint from the given path.
         """
         pass
+    
+    @abstractmethod
+    def get_benchmark_mode(self) -> BenchmarkMode:
+        """
+        Return the benchmark mode of the model.
+        """
+        pass
 
-class Benchmark:
-    # a wrapper for datasets used in Benchmark
-    class BenchmarkDataset:
-        def __init__(self, training_set: TimeSeries, multivariate: bool = None, name: str = None,
-                     test_set: TimeSeries = None, target_columns=None, *args):
-            self.training_set = training_set
-            self.test_set = test_set
-            if multivariate is None:
-                multivariate = len(training_set.columns) > 1
-            self.multivariate = multivariate
-            self.name = name
-            if target_columns is None and multivariate:
-                target_columns = [training_set.columns.tolist()[0]]
-            elif not multivariate:
-                target_columns = [training_set.columns.tolist()[0]]
-            self.target_columns = target_columns
+class BenchmarkDataset:
+    def __init__(self, ts: TimeSeries, input_length: int, gap: int, stride: int, horizon: int, name: str, target_columns: Optional[List[str]] = None):
+        self.ts = ts
+        self.input_length = input_length
+        self.gap = gap
+        self.stride = stride
+        self.horizon = horizon
+        self.name = name
+        # if target columns is None, we use all columns
+        if target_columns is None:
+            target_columns = list(ts.columns)
+        self.target_columns = target_columns
+    
+    def get_data(self):
+        return self.ts
 
-        def get_train_test_split(self, train_proportion=0.7):
-            if self.test_set is None:
-                return self.training_set.split_before(train_proportion)
-            return self.training_set, self.test_set
+    def get_train_test_split(self, train_proportion=0.7):
+        return self.ts.split_before(train_proportion)
 
-    # wrapper for user-submitted metrics to be used in Benchmark
-    class BenchmarkMetric:
-        def __init__(self, metric_function, name: str):
-            self.metric = metric_function
-            self.name = name
 
-        def compute(self, data: TimeSeries, pred: TimeSeries):
-            return self.metric(data, pred)
 
+class Benchmark:                
     def __init__(self,
-                 datasets: List[Union[TimeSeries, Tuple[TimeSeries, TimeSeries], BenchmarkDataset]] = None,
+                 datasets: List[BenchmarkDataset] = None,
                  models: List[AbstractBenchmarkModel] = None,
                  metrics: List[BenchmarkMetric] = None,
                  train_proportion=0.7):
@@ -110,38 +111,20 @@ class Benchmark:
                 self.add_model(m)
 
     def add_model(self, model):
-        if not isinstance(model, Benchmark.BenchmarkModelHolder):
-            raise TypeError(f"models must implement {Benchmark.BenchmarkModelHolder}, found{type(model)}.")
+        if not isinstance(model, AbstractBenchmarkModel):
+            raise TypeError(f"models must implement {AbstractBenchmarkModel}, found{type(model)}.")
         self.models.append(model)
 
     def get_models(self):
         return [m.model_class for m in self.models]
 
-    def add_dataset(self, dataset: Union[TimeSeries, Tuple[TimeSeries, TimeSeries], BenchmarkDataset],
-                    target_columns=None, name=None):
-        if not (isinstance(dataset, TimeSeries) or
-                isinstance(dataset, Tuple) or
-                isinstance(dataset, Benchmark.BenchmarkDataset)):
+    def add_dataset(self, dataset: BenchmarkDataset):
+        if not isinstance(dataset, BenchmarkDataset):
             raise TypeError(
-                f"datasets must be of type {Benchmark.BenchmarkDataset}, {TimeSeries} or {(TimeSeries, TimeSeries)}, "
-                f"found type {type(dataset)}")
-        multivariate = True
-        if (isinstance(dataset, Benchmark.BenchmarkDataset) and len(dataset.training_set.columns) < 2) \
-                or (isinstance(dataset, TimeSeries) and len(dataset.columns) < 2) \
-                or (isinstance(dataset, Tuple) and len(dataset[0].columns) < 2):
-            multivariate = False
+                f"datasets must be of type {BenchmarkDataset}, found type {type(dataset)}")
+        self.datasets.append(dataset)
 
-        if name is None:
-            name = str(len(self.datasets))
-        if isinstance(dataset, TimeSeries):
-            self.datasets.append(Benchmark.BenchmarkDataset(dataset, multivariate, name, target_columns=target_columns))
-        elif isinstance(dataset, Tuple):
-            self.datasets.append(
-                Benchmark.BenchmarkDataset(dataset[0], multivariate, name, dataset[1], target_columns=target_columns))
-        else:  # it's a BenchmarkDataset
-            self.datasets.append(dataset)
-
-    def get_datasets(self, metric):
+    def get_datasets(self):
         return [d for d in self.datasets]
 
     def add_metric(self, metric: BenchmarkMetric):
@@ -162,90 +145,77 @@ class Benchmark:
                 print(f"Evaluation for model {source_model.name}")
 
             # internal metrics (computed during run time)
-            # multivariate/univariate support measures
-            nb_mv_run_failed = len([x for x in self.datasets if x.multivariate])
-            nb_uv_run_failed = len(self.datasets) - nb_mv_run_failed
             mv0 = len([x for x in self.datasets if x.multivariate])
+            nb_mv_run_succeeded = mv0
+            nb_uv_run_succeeded = len(self.datasets) - mv0
 
             # evaluation time!
             for dataset in self.datasets:
-                for target in dataset.target_columns:
-                    if verbose:
-                        print(f"on dataset {dataset.name}, column {target} ")
+                    print(f"on dataset {dataset.name}")
 
                     # initialize variables
+                    nb_features = len(dataset.ts.columns)
                     train_set, test_set = dataset.get_train_test_split(self.train_proportion)
-                    nb_features = len(train_set.columns)
                     train_size = len(train_set.time_index)
                     test_size = len(test_set.time_index)
                     train_time = 0
                     inference_time = 0
-                    # create new model
-                    source_model.instantiate(train_set=train_set, test_set=test_set)
-                    if verbose:
-                        print(f"training... ", end="")
-                    train_success = True
+                    run_success = True
                     try:
                         # train
-                        start_time = time.time()
-                        source_model.fit(train_set, test_set, target_column=target, multivariate=dataset.multivariate)
-                        train_time = time.time() - start_time
+                        if source_model.get_benchmark_mode() != BenchmarkMode.ZERO_SHOT:
+                            if verbose:
+                                print(f"training... ", end="")
+                            start_time = time.time()
+                            source_model.fit(train_set)
+                            train_time = time.time() - start_time
 
+                        
+                            if verbose:
+                                print(f"done, took {train_time}", end="")
                         # test
                         if verbose:
-                            print(f"done, took {train_time}\ntesting... ", end="")
+                            print(f"testing... ", end="")
                         start_time = time.time()
-                        pred = source_model.predict(test_size, test_set, target_column=target,
-                                                    multivariate=dataset.multivariate)
+                        metrics = source_model.evaluate(test_set, dataset.horizon, self.metrics)
                         inference_time = time.time() - start_time
                         if verbose:
                             print(f"done, took {inference_time}")
 
                     except:  # can't train or test on this dataset
-                        train_success = False
-                        if dataset.multivariate:
-                            nb_mv_run_failed -= 1
+                        run_success = False
+                        if nb_features == 1:
+                            nb_uv_run_succeeded -= 1
                         else:
-                            nb_uv_run_failed -= 1
+                            nb_mv_run_succeeded -= 1
                         if verbose:
-                            print(f"Couldn't complete training.")
+                            print(f"Couldn't complete evaluation.")
                             if debug:
                                 traceback.print_exc()
 
-                    if train_success:
+                    if run_success:
                         # compute metrics
-                        self.results[source_model.name][self._c(dataset.name, target)] = {
+                        self.results[source_model.name][dataset.name] = {
                             'nb features': nb_features,
-                            'target column': target,
+                            'target column': dataset.target_columns,
                             'training set size': train_size,
                             'training time': train_time,
                             'test set size': test_size,
                             'testing time': inference_time,
-                            'prediction': pred
                         }
                         # compute user-submitted metrics
-                        for metric in self.metrics:
-                            try:
-                                if verbose:
-                                    print(f"{metric.name}: ", end="")
-                                    print(f'{test_set.columns} {target}')
-                                self.results[source_model.name] \
-                                    [self._c(dataset.name, target)] \
-                                    [metric.name] = metric.compute(test_set[target][:len(pred)], pred)
-                                if verbose:
-                                    print(self.results[source_model.name][self._c(dataset.name, target)][metric.name])
-                            except:  # can't compute current metric
-                                print(f"Couldn't compute {metric.name}")
-                                if debug:
-                                    traceback.print_exc()
-
+                        if verbose:
+                            print(f"Computed metrics: {metrics}")
+                            
+                        self.results[source_model.name][dataset.name]['metrics'] = metrics
+                  
             # back to model-level stats
             supports_uni = None
             if len(self.datasets) - mv0 > 0:  # if we have univariate ds in our batch
-                supports_uni = (nb_uv_run_failed > 0)
+                supports_uni = (nb_uv_run_succeeded > 0)
             supports_mult = None
             if mv0 > 0:
-                supports_mult = (nb_mv_run_failed > 0)
+                supports_mult = (nb_mv_run_succeeded > 0)
             self.results[source_model.name]['supports univariate'] = Benchmark._bool_to_symbol(supports_uni)
             self.results[source_model.name]['supports multivariate'] = Benchmark._bool_to_symbol(supports_mult)
             i += 1
@@ -268,15 +238,14 @@ class Benchmark:
             s += f"Supported univariate datasets: {self.results[model.name]['supports univariate']}\n"
             s += f"Supported multivariate datasets: {self.results[model.name]['supports multivariate']}\n"
             for dataset in self.datasets:
-                for target in dataset.target_columns:
-                    s += f"Dataset {dataset.name}, {target}:\n"
-                    if self._c(dataset.name, target) not in self.results[model.name].keys():
-                        s += f"{dataset.name}, {target}: couldn't complete training\n"
+                    s += f"Dataset {dataset.name}:\n"
+                    if dataset.name not in self.results[model.name].keys():
+                        s += f"dataset.name couldn't complete training\n"
                     else:
-                        for key in self.results[model.name][self._c(dataset.name, target)].keys():
+                        for key in self.results[model.name][dataset.name].keys():
                             if key == 'prediction':
                                 continue
-                            s += f"{key}: {self.results[model.name][self._c(dataset.name, target)][key]}\n"
+                            s += f"{key}: {self.results[model.name][self.dataset.name][key]}\n"
             txt.append(s)
         report = "\n\n".join(txt)
         return report
@@ -303,6 +272,3 @@ class Benchmark:
 
     def get_results(self):
         return self.results
-
-    def _c(self, a, b):
-        return f'{a} {b}'
