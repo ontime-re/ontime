@@ -105,7 +105,7 @@ class Benchmark:
         if datasets is not None:
             i = 1
             for d in datasets:
-                self.add_dataset(d, str(i))
+                self.add_dataset(d)
                 i += 1
         if models is not None:
             for m in models:
