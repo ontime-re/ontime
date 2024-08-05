@@ -1,8 +1,10 @@
-from ontime.core.time_series.time_series import TimeSeries
-
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import List, Optional
 from enum import Enum
+
+from ontime.core.time_series.time_series import TimeSeries
+
 import pandas as pd
 import time
 import traceback
@@ -46,9 +48,9 @@ class AbstractBenchmarkModel(ABC):
         pass
 
     @abstractmethod
-    def load_checkpoint(self, path: str) -> None:
+    def load_checkpoint(self, path: str) -> AbstractBenchmarkModel:
         """
-        Load a model checkpoint from the given path.
+        Load a model checkpoint from the given path, and return the model.
         """
         pass
     
