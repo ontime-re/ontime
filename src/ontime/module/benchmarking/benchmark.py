@@ -71,6 +71,9 @@ class BenchmarkDataset:
         if target_columns is None:
             target_columns = list(ts.columns)
         self.target_columns = target_columns
+        
+    def is_multivariate(self):
+        return self.ts.n_components > 1
     
     def get_data(self):
         return self.ts
@@ -146,7 +149,7 @@ class Benchmark:
                 print(f"Evaluation for model {source_model.name}")
 
             # internal metrics (computed during run time)
-            mv0 = len([x for x in self.datasets if x.multivariate])
+            mv0 = len([x for x in self.datasets if x.is_multivariate()])
             nb_mv_run_succeeded = mv0
             nb_uv_run_succeeded = len(self.datasets) - mv0
 
@@ -155,7 +158,7 @@ class Benchmark:
                     print(f"on dataset {dataset.name}")
 
                     # initialize variables
-                    nb_features = len(dataset.ts.columns)
+                    nb_features = dataset.ts.n_components
                     train_set, test_set = dataset.get_train_test_split(self.train_proportion)
                     train_size = len(train_set.time_index)
                     test_size = len(test_set.time_index)
@@ -178,7 +181,7 @@ class Benchmark:
                         if verbose:
                             print(f"testing... ", end="")
                         start_time = time.time()
-                        metrics = source_model.evaluate(test_set, dataset.horizon, self.metrics)
+                        metrics = source_model.evaluate(test_set, dataset.horizon, self.metrics, context_length=dataset.input_length, stride_length=dataset.stride)
                         inference_time = time.time() - start_time
                         if verbose:
                             print(f"done, took {inference_time}")
