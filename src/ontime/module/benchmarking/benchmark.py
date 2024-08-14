@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from enum import Enum
 
 from ontime.core.time_series.time_series import TimeSeries
@@ -23,7 +23,7 @@ class BenchmarkMetric:
         """
         Compute the metric on the target and predicted time series.
         """
-        return self.metric(target, pred, reduction=self.reduction)
+        return self.metric(target, pred, component_reduction=self.reduction)
 
 class AbstractBenchmarkModel(ABC):
     @abstractmethod
@@ -102,7 +102,8 @@ class Benchmark:
 
         # for holding results
         self.metrics_results = []
-        self.results = None
+        self.model_stats = {}
+        self.results = {}
 
         # initialize datasets, models and metrics
         if metrics is not None:
@@ -141,12 +142,12 @@ class Benchmark:
 
     def run(self, verbose: bool = False, debug: bool = False):
         # TODO: throw error if models or datasets is empty
-        self.results = {}  # self.results[model name][dataset name] = {metric name: value, metric name: value,...}
         if verbose:
             print("Starting evaluation...")
         i = 0
         for source_model in self.models:
             self.results[source_model.name] = {}
+            self.model_stats[source_model.name] = {}
             if verbose:
                 print(f"Evaluation for model {source_model.name}")
 
@@ -222,8 +223,8 @@ class Benchmark:
             supports_mult = None
             if mv0 > 0:
                 supports_mult = (nb_mv_run_succeeded > 0)
-            self.results[source_model.name]['supports univariate'] = Benchmark._bool_to_symbol(supports_uni)
-            self.results[source_model.name]['supports multivariate'] = Benchmark._bool_to_symbol(supports_mult)
+            self.model_stats[source_model.name]['supports univariate'] = Benchmark._bool_to_symbol(supports_uni)
+            self.model_stats[source_model.name]['supports multivariate'] = Benchmark._bool_to_symbol(supports_mult)
             i += 1
 
     @staticmethod
@@ -241,8 +242,8 @@ class Benchmark:
 
         for model in self.models:
             s = f"Model {model.name}:\n"
-            s += f"Supported univariate datasets: {self.results[model.name]['supports univariate']}\n"
-            s += f"Supported multivariate datasets: {self.results[model.name]['supports multivariate']}\n"
+            s += f"Supported univariate datasets: {self.model_stats[model.name]['supports univariate']}\n"
+            s += f"Supported multivariate datasets: {self.model_stats[model.name]['supports multivariate']}\n"
             for dataset in self.datasets:
                     s += f"Dataset {dataset.name}:\n"
                     if dataset.name not in self.results[model.name].keys():
@@ -251,30 +252,33 @@ class Benchmark:
                         for key in self.results[model.name][dataset.name].keys():
                             if key == 'prediction':
                                 continue
-                            s += f"{key}: {self.results[model.name][self.dataset.name][key]}\n"
+                            s += f"{key}: {self.results[model.name][dataset.name][key]}\n"
             txt.append(s)
         report = "\n\n".join(txt)
         return report
 
-    def get_report_dataframes(self) -> dict:
-        # DISCLAIMER: this is still bugged
-        # 1 dataframe per model
-        # index = datasets
-        # columns = metric and details
-        col0 = self.datasets[0].training_set.columns.tolist()[0]
-        me_columns = self.results[self.models[0].name][self._c(self.datasets[0].name, col0)].keys()
-        reports = {}
-        for model in self.models:
-            report_model = pd.DataFrame(columns=me_columns)
-            for dataset in self.datasets:
-                for target in dataset.target_columns:
-                    if self._c(dataset.name, target) in self.results[model.name].keys():
-                        report_dict = self.results[model.name][self._c(dataset.name, target)]
-                        del report_dict["prediction"]
-                        report_model.loc[dataset.name] = report_dict
-
-            reports[model.name] = report_model
-        return reports
-
+    def get_report_df(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        flat_results = {}
+        for model_name, datasets in self.results.items():
+            for dataset_name, dataset_results in datasets.items():
+                for result_name, result_value in dataset_results.items():
+                    if result_name == 'metrics':
+                        for metric_name, metric_value in result_value.items():
+                            flat_results[(dataset_name, metric_name)] = flat_results.get((dataset_name, metric_name), {})
+                            flat_results[(dataset_name, metric_name)][model_name] = metric_value
+                    elif result_name in ['training time', 'testing time']:
+                        flat_results[(dataset_name, result_name)] = flat_results.get((dataset_name, result_name), {})
+                        flat_results[(dataset_name, result_name)][model_name] = result_value
+                    
+        results_df = pd.DataFrame.from_dict(flat_results, orient='index')
+        results_df.index.names = ['Dataset', 'Metric']
+        model_stats_df = pd.DataFrame(self.model_stats)
+        model_stats_df.index.name = 'Statistic'
+                        
+        return model_stats_df, results_df
+        
     def get_results(self):
         return self.results
+    
+    def get_model_stats(self):
+        return self.model_stats
