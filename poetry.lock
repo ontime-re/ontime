@@ -1059,13 +1059,13 @@ files = [
 
 [[package]]
 name = "darts"
-version = "0.25.0"
+version = "0.30.0"
 description = "A python library for easy manipulation and forecasting of time series."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "darts-0.25.0-py3-none-any.whl", hash = "sha256:52fb0305e7cfff7a605f67a86176b0de710ff1e9038eadfe43eb5f315f1a142a"},
-    {file = "darts-0.25.0.tar.gz", hash = "sha256:de2f8e021090648f8905c5a0752d2f883b1c2591ff03064c8b11844ccc4dff57"},
+    {file = "darts-0.30.0-py3-none-any.whl", hash = "sha256:1c2c4e4b836c8aaf958c5abe5b15b5916972a908b7a79dec3f65695fd8b376c4"},
+    {file = "darts-0.30.0.tar.gz", hash = "sha256:41ffb6c19adb0aad89fd215a477c0b71ad44bbfc75f8b06dcc7e57ff09f3d419"},
 ]
 
 [package.dependencies]
@@ -1073,7 +1073,7 @@ holidays = ">=0.11.1"
 joblib = ">=0.16.0"
 matplotlib = ">=3.3.0"
 nfoursid = ">=1.0.0"
-numpy = ">=1.19.0"
+numpy = ">=1.19.0,<2.0.0"
 pandas = {version = ">=1.0.5", markers = "python_version >= \"3.9\""}
 pmdarima = ">=1.8.0"
 pyod = ">=0.9.5"
@@ -6621,4 +6621,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "230022fa973fac40175405aaa91afbbb98a691925cc0d7a6d5b3912c4fc232fb"
+content-hash = "24e9a733968a2907cf3912f47f6a652041f667714be2d6165874a5f68fde75fd"
