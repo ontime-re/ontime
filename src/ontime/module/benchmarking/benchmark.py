@@ -4,86 +4,11 @@ from typing import List, Optional, Tuple
 from enum import Enum
 
 from ontime.core.time_series.time_series import TimeSeries
+from ontime.module.benchmarking import BenchmarkDataset, AbstractBenchmarkModel, BenchmarkMetric, BenchmarkMode
 
 import pandas as pd
 import time
 import traceback
-
-class BenchmarkMode(Enum):
-        ZERO_SHOT = 1 # no training, only inference
-        FULL_SHOT = 3 # full training
-    
-class BenchmarkMetric:
-    def __init__(self, name: str, metric_function, reduction = None):
-        self.metric = metric_function
-        self.name = name
-        self.reduction = reduction
-
-    def compute(self, target: TimeSeries, pred: TimeSeries):
-        """
-        Compute the metric on the target and predicted time series.
-        """
-        return self.metric(target, pred, component_reduction=self.reduction)
-
-class AbstractBenchmarkModel(ABC):
-    @abstractmethod
-    def fit(self, train_ts: TimeSeries, val_ts: TimeSeries, *args, **kwargs) -> None:
-        """
-        Fit a model on training data.
-        """
-        pass
-
-    @abstractmethod
-    def predict(self, ts: TimeSeries, horizon: int, *args, **kwargs) -> TimeSeries:
-        """
-        Predict the next `horizon` steps of the time series.
-        """
-        pass
-
-    @abstractmethod
-    def evaluate(self, ts: TimeSeries, horizon: int, metrics: List[BenchmarkMetric], *args, **kwargs) -> dict:
-        """
-        Evaluate the model on test data, using the given metrics.
-        """
-        pass
-
-    @abstractmethod
-    def load_checkpoint(self, path: str) -> AbstractBenchmarkModel:
-        """
-        Load a model checkpoint from the given path, and return the model.
-        """
-        pass
-    
-    @abstractmethod
-    def get_benchmark_mode(self) -> BenchmarkMode:
-        """
-        Return the benchmark mode of the model.
-        """
-        pass
-
-class BenchmarkDataset:
-    def __init__(self, ts: TimeSeries, input_length: int, gap: int, stride: int, horizon: int, name: str, target_columns: Optional[List[str]] = None):
-        self.ts = ts
-        self.input_length = input_length
-        self.gap = gap
-        self.stride = stride
-        self.horizon = horizon
-        self.name = name
-        # if target columns is None, we use all columns
-        if target_columns is None:
-            target_columns = list(ts.columns)
-        self.target_columns = target_columns
-        
-    def is_multivariate(self):
-        return self.ts.n_components > 1
-    
-    def get_data(self):
-        return self.ts
-
-    def get_train_test_split(self, train_proportion=0.7):
-        return self.ts.split_before(train_proportion)
-
-
 
 class Benchmark:                
     def __init__(self,
@@ -93,11 +18,8 @@ class Benchmark:
                  train_proportion=0.7):
 
         self.train_proportion = train_proportion
-        # contains BenchmarkDatasets
         self.datasets = []
-        # contains BenchmarkModelHolders
         self.models = []
-        # contains BenchmarkMetrics
         self.metrics = []
 
         # for holding results
