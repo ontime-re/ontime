@@ -18,7 +18,7 @@ For instance :
 
 """
 
-from ..core import detectors, generators, Model, models, Plot, processors, TimeSeries
+from ..core import detectors, generators, Model, models, Plot, marks, processors, TimeSeries
 
 from .. import module
 from .. import context
@@ -30,6 +30,7 @@ __all__ = [
     "Model",
     "models",
     "Plot",
+    "marks",
     "processors",
     "TimeSeries",
     # module

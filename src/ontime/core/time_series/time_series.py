@@ -16,6 +16,22 @@ class TimeSeries(DartsTimeSeries):
     def __init__(self, xa: xr.DataArray):
         super().__init__(xa)
 
+    def plot(self, width: int = 400, height: int = 200, **kwargs):
+        """
+        Plot the TimeSeries
+
+        :param width: width of the plot
+        :param height: height of the plot
+        :param kwargs: additional arguments to pass to the line mark
+        :return: Altair LayerChart
+        """
+        from ..plotting.plot import Plot
+        from ..plotting._marks.line import line
+        return Plot(self)\
+            .add(line, **kwargs)\
+            .properties(width=width, height=height)\
+            .show()
+
     def rename(self, columns: dict):
         """
         Rename the columns of the TimeSeries

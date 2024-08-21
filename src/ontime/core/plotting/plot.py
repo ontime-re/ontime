@@ -2,6 +2,7 @@ from typing import Callable
 
 from pandas import DataFrame
 import altair as alt
+
 from ..time_series import TimeSeries
 
 
