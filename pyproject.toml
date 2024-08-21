@@ -22,6 +22,7 @@ altair-viewer = "^0.4.0"
 tensorflow = "^2.16.1"
 lightning = "^2.2.4"
 numpy = "^1.26.4"
+calmap = "^0.0.11"
 
 [tool.poetry.group.dev]
 optional = true
@@ -47,6 +48,7 @@ recommonmark = "^0.7.1"
 m2r = "^0.3.1"
 pandoc = "^2.3"
 sphinx-autobuild = "^2021.3.14"
+lxml = {extras = ["html-clean"], version = "^5.2.2"}
 
 [build-system]
 requires = ["poetry-core"]
