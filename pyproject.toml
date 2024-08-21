@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "ontime"
-version = "0.6"
-description = ""
+version = "0.6.1"
+description = "Your library to work with time series"
 authors = ["Fred Montet <fredmontet@gmail.com>"]
 readme = "README.md"
 packages = [{include = "ontime", from = "src"}]
