@@ -6,10 +6,9 @@ from ...time_series import TimeSeries
 from ..plot import Plot
 
 
-def mark(ts: TimeSeries,
-         data: TimeSeries,
-         type: str = None,
-         encode_kwargs: dict = None) -> Chart:
+def mark(
+    ts: TimeSeries, data: TimeSeries, type: str = None, encode_kwargs: dict = None
+) -> Chart:
     """
     Create a plot with marks on it
 
@@ -24,9 +23,9 @@ def mark(ts: TimeSeries,
         Internal function to merge two TimeSeries
         where one is the original and the other is
         a binary mask.
-        
+
         This is useful for dots or highlights
-        
+
         :param ts: TimeSeries
         :param data: BinaryTimeSeries
         :return: TimeSeries
@@ -47,14 +46,16 @@ def mark(ts: TimeSeries,
         :return:
         """
         df = Plot.melt(data)
-        df['mark_start'] = (df['value'] == 1) & (df['value'].shift(1) != 1)
-        df['mark_end'] = (df['value'] == 1) & (df['value'].shift(-1) != 1)
-        mark_ranges = pd.DataFrame({
-            'start': df.loc[df['mark_start'], 'time'],
-            'end': df.loc[df['mark_end'], 'time']
-        })
-        mark_ranges['start'] = mark_ranges['start'].ffill()
-        mark_ranges['end'] = mark_ranges['end'].bfill()
+        df["mark_start"] = (df["value"] == 1) & (df["value"].shift(1) != 1)
+        df["mark_end"] = (df["value"] == 1) & (df["value"].shift(-1) != 1)
+        mark_ranges = pd.DataFrame(
+            {
+                "start": df.loc[df["mark_start"], "time"],
+                "end": df.loc[df["mark_end"], "time"],
+            }
+        )
+        mark_ranges["start"] = mark_ranges["start"].ffill()
+        mark_ranges["end"] = mark_ranges["end"].bfill()
         mark_ranges = mark_ranges.drop_duplicates()
         return mark_ranges
 
@@ -68,39 +69,35 @@ def mark(ts: TimeSeries,
     }
 
     match type:
+        case "dot":
+            encode_kwargs = (
+                encode_kwargs if encode_kwargs is not None else default_kwargs
+            )
+            ts = get_marked_ts(ts, data)
+            df = Plot.melt(ts)
+            chart = Chart(df).mark_circle().encode(**encode_kwargs)
 
-        case 'dot':
-            encode_kwargs = encode_kwargs if encode_kwargs is not None else default_kwargs
+        case "highlight":
+            encode_kwargs = (
+                encode_kwargs if encode_kwargs is not None else default_kwargs
+            )
             ts = get_marked_ts(ts, data)
             df = Plot.melt(ts)
             chart = (
-                Chart(df)
-                .mark_circle()
-                .encode(**encode_kwargs)
+                Chart(df).mark_line(strokeWidth=5, opacity=0.5).encode(**encode_kwargs)
             )
 
-        case 'highlight':
-            encode_kwargs = encode_kwargs if encode_kwargs is not None else default_kwargs
-            ts = get_marked_ts(ts, data)
-            df = Plot.melt(ts)
-            chart = (
-                Chart(df)
-                .mark_line(
-                    strokeWidth=5,
-                    opacity=0.5
-                )
-                .encode(**encode_kwargs)
-            )
-
-        case 'background':
+        case "background":
             background_kwargs = {
                 "x": "start:T",
                 "x2": "end:T",
                 "color": "variable:N",
             }
-            encode_kwargs = encode_kwargs if encode_kwargs is not None else background_kwargs
+            encode_kwargs = (
+                encode_kwargs if encode_kwargs is not None else background_kwargs
+            )
             df = get_marked_ranges(data)
-            df['variable'] = data.columns[0]
+            df["variable"] = data.columns[0]
             chart = (
                 Chart(df)
                 .mark_rect(

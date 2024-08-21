@@ -5,4 +5,13 @@ from .plotting import Plot, marks
 from .processing import processors, abstract_processor
 from .time_series import TimeSeries
 
-__all__ = ["detectors", "generators", "Model", "models", "Plot", "marks", "processors", "TimeSeries"]
+__all__ = [
+    "detectors",
+    "generators",
+    "Model",
+    "models",
+    "Plot",
+    "marks",
+    "processors",
+    "TimeSeries",
+]

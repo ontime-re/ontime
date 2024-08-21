@@ -13,11 +13,11 @@ class Threshold(ThresholdDetector, AbstractDetector):
     """
 
     def __init__(
-            self,
-            low_threshold: Union[int, float, None] = None,
-            high_threshold: Union[int, float, None] = None,
-            enable_logging: bool = False,
-            logger_params: dict = None
+        self,
+        low_threshold: Union[int, float, None] = None,
+        high_threshold: Union[int, float, None] = None,
+        enable_logging: bool = False,
+        logger_params: dict = None,
     ):
         """
         :param low_threshold: lower bounds
@@ -28,7 +28,7 @@ class Threshold(ThresholdDetector, AbstractDetector):
         """
         super().__init__(low_threshold, high_threshold)
         self.enable_logging = enable_logging
-        default_params = {'description': 'ThresholdDetector'}
+        default_params = {"description": "ThresholdDetector"}
         self.logger_params = default_params if logger_params is None else logger_params
         if enable_logging:
             self.logger = BinaryAnomalyLogger(**self.logger_params)

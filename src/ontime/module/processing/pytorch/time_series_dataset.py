@@ -25,4 +25,3 @@ class TimeSeriesDataset(Dataset):
         label_tensor = torch.tensor(self.labels_array[index], dtype=torch.float32)
 
         return data_tensor, label_tensor
-

@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 from ...time_series import TimeSeries
 
 
-def activity(ts: TimeSeries, resampling_method='sum', cmap='YlGn', linewidth=2, figsize=(12, 10)) -> tuple:
+def activity(
+    ts: TimeSeries, resampling_method="sum", cmap="YlGn", linewidth=2, figsize=(12, 10)
+) -> tuple:
     """
     Plot the activity of a TimeSeries in the style of a GitHub activity plot
 
@@ -23,8 +25,8 @@ def activity(ts: TimeSeries, resampling_method='sum', cmap='YlGn', linewidth=2, 
         cmap=cmap,
         how=resampling_method,
         linewidth=linewidth,
-        fillcolor='#ADADAD',
-        ax=ax
+        fillcolor="#ADADAD",
+        ax=ax,
     )
 
     plt.gca().grid(False)

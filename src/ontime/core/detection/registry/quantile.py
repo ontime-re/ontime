@@ -11,11 +11,11 @@ class Quantile(QuantileDetector, AbstractDetector):
     """
 
     def __init__(
-            self,
-            low_quantile: float = None,
-            high_quantile: float = None,
-            enable_logging: bool = False,
-            logger_params: dict = None
+        self,
+        low_quantile: float = None,
+        high_quantile: float = None,
+        enable_logging: bool = False,
+        logger_params: dict = None,
     ):
         """
         Constructor for QuantileDetector
@@ -26,7 +26,7 @@ class Quantile(QuantileDetector, AbstractDetector):
         """
         super().__init__(low_quantile, high_quantile)
         self.enable_logging = enable_logging
-        default_params = {'description': 'QuantileDetector'}
+        default_params = {"description": "QuantileDetector"}
         self.logger_params = default_params if logger_params is None else logger_params
         if enable_logging:
             self.logger = BinaryAnomalyLogger(**self.logger_params)

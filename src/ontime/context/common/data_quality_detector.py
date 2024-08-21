@@ -7,10 +7,12 @@ class DataQualityDetector:
     Detects anomalies in a time series given a threshold or quantile.
     """
 
-    def __init__(self,
-                 threshold_type: str,
-                 upper_threshold: float = None,
-                 lower_threshold: float = None):
+    def __init__(
+        self,
+        threshold_type: str,
+        upper_threshold: float = None,
+        lower_threshold: float = None,
+    ):
         """
         Constructor for the DataQualityDetector class.
 
@@ -30,19 +32,18 @@ class DataQualityDetector:
         :param ts: TimeSeries
         """
         match self.threshold_type:
-            case 'quantile':
+            case "quantile":
                 self.detector = Quantile(
                     low_quantile=self.lower_threshold,
-                    high_quantile=self.upper_threshold
+                    high_quantile=self.upper_threshold,
                 )
                 self.detector.fit(ts)
-            case 'threshold':
+            case "threshold":
                 self.detector = Threshold(
                     low_threshold=self.lower_threshold,
-                    high_threshold=self.upper_threshold
+                    high_threshold=self.upper_threshold,
                 )
         self.is_fitted = True
-
 
     def detect(self, ts: TimeSeries) -> BinaryTimeSeries:
         """

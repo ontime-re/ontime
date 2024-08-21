@@ -15,4 +15,3 @@ class MissingDataDetector:
         :return: BinaryTimeSeries with 0 for normal values and 1 for anomalies
         """
         return BinaryTimeSeries.from_series(ts.pd_series().isna())
-

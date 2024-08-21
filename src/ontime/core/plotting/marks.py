@@ -7,11 +7,13 @@ from ._marks.line import line
 from ._marks.mark import mark
 
 # Export all marks in a DotDict
-marks = DotDict({
-    'activity': activity,
-    'area': area,
-    'dots': dots,
-    'heatmap': heatmap,
-    'line': line,
-    'mark': mark
-})
+marks = DotDict(
+    {
+        "activity": activity,
+        "area": area,
+        "dots": dots,
+        "heatmap": heatmap,
+        "line": line,
+        "mark": mark,
+    }
+)

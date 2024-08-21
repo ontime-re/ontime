@@ -4,9 +4,7 @@ from ...time_series import TimeSeries
 from ..plot import Plot
 
 
-def line(ts: TimeSeries,
-         type: str = None,
-         encode_kwargs: dict = None) -> Chart:
+def line(ts: TimeSeries, type: str = None, encode_kwargs: dict = None) -> Chart:
     """
     Line plot for TimeSeries
 
@@ -26,9 +24,8 @@ def line(ts: TimeSeries,
     encode_kwargs = encode_kwargs if encode_kwargs is not None else default_kwargs
 
     match type:
-
         # Dashed line
-        case 'dashed':
+        case "dashed":
             chart = (
                 Chart(df)
                 .mark_line(
@@ -40,10 +37,6 @@ def line(ts: TimeSeries,
 
         # Default line
         case _:
-            chart = (
-                Chart(df)
-                .mark_line()
-                .encode(**encode_kwargs)
-            )
+            chart = Chart(df).mark_line().encode(**encode_kwargs)
 
     return chart

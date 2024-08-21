@@ -18,7 +18,16 @@ For instance :
 
 """
 
-from ..core import detectors, generators, Model, models, Plot, marks, processors, TimeSeries
+from ..core import (
+    detectors,
+    generators,
+    Model,
+    models,
+    Plot,
+    marks,
+    processors,
+    TimeSeries,
+)
 
 from .. import module
 from .. import context

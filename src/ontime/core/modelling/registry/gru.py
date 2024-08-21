@@ -2,13 +2,20 @@ import torch
 from torch import nn
 import pytorch_lightning as pl
 
-from ontime.core.modelling.libs.pytorch.abstract_pytorch_model import AbstractPytorchModel
+from ontime.core.modelling.libs.pytorch.abstract_pytorch_model import (
+    AbstractPytorchModel,
+)
 
 
 class GRU(AbstractPytorchModel):
     def __init__(self, input_dim, hidden_dim, output_steps, num_layers=1):
         super(GRU, self).__init__()
-        self.gru = nn.GRU(input_size=input_dim, hidden_size=hidden_dim, num_layers=num_layers, batch_first=True)
+        self.gru = nn.GRU(
+            input_size=input_dim,
+            hidden_size=hidden_dim,
+            num_layers=num_layers,
+            batch_first=True,
+        )
         self.linear = nn.Linear(hidden_dim, output_steps)
 
     def forward(self, x):
@@ -20,7 +27,7 @@ class GRU(AbstractPytorchModel):
         x, y = batch
         y_hat = self(x)
         loss = nn.functional.mse_loss(y_hat, y)
-        self.log('train_loss', loss)
+        self.log("train_loss", loss)
         return loss
 
     def configure_optimizers(self):
@@ -38,6 +45,7 @@ class GRU(AbstractPytorchModel):
         self.eval()
         with torch.no_grad():
             return self(dummy_input)
+
 
 # Example usage
 # model = TimeSeriesGRU(input_dim=10, hidden_dim=20, output_steps=5)

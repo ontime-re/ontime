@@ -9,6 +9,7 @@ class BinaryTimeSeries(RestrictedTimeSeries):
     """
     A time series with restrictions on the data so that all values are either 0 or 1.
     """
+
     def __init__(self, xa: xr.DataArray):
         """
         Initialize the BinaryTimeSeries.

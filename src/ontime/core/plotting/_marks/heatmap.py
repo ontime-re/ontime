@@ -35,7 +35,7 @@ def heatmap(ts: TimeSeries) -> Chart:
             ),
             alt.Y("variable:N").title(None),
             alt.Color("sum(value)").title("Value"),
-            )
+        )
     )
 
     return chart

@@ -27,10 +27,10 @@ class TimeSeries(DartsTimeSeries):
         """
         from ..plotting.plot import Plot
         from ..plotting._marks.line import line
-        return Plot(self)\
-            .add(line, **kwargs)\
-            .properties(width=width, height=height)\
-            .show()
+
+        return (
+            Plot(self).add(line, **kwargs).properties(width=width, height=height).show()
+        )
 
     def rename(self, columns: dict):
         """
@@ -40,7 +40,9 @@ class TimeSeries(DartsTimeSeries):
         """
         col_names = list(columns.keys())
         col_names_new = list(columns.values())
-        return self.with_columns_renamed(col_names=col_names, col_names_new=col_names_new)
+        return self.with_columns_renamed(
+            col_names=col_names, col_names_new=col_names_new
+        )
 
     def split_by_period(self, period: str) -> List[TimeSeries]:
         """

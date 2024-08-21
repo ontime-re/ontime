@@ -7,17 +7,13 @@ from ..time_series import TimeSeries
 
 
 class Plot:
-
     def __init__(self, ts: TimeSeries = None, **kwargs):
         super().__init__(**kwargs)
         Plot.config()
         self.ts = ts
         self.layers = []
 
-    def add(self,
-            mark: Callable,
-            ts: TimeSeries = None,
-            **kwargs):
+    def add(self, mark: Callable, ts: TimeSeries = None, **kwargs):
         """
         Add a mark to the plot
 
@@ -69,4 +65,3 @@ class Plot:
         :return: None
         """
         alt.data_transformers.enable("vegafusion")
-
