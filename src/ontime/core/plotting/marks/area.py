@@ -6,10 +6,17 @@ from ..plot import Plot
 
 
 def area(ts: TimeSeries,
-         type: str = None,
          title: str = 'Area',
          encode_kwargs: dict = None
          ) -> Chart:
+
+    # Define type given the number of components
+    if ts.is_univariate:
+        type = 'single'
+    elif len(ts.components) == 2:
+        type = 'double'
+    else:
+        raise ValueError("TimeSeries must be univariate or have exactly two components")
 
     df = Plot.melt(ts)
 
