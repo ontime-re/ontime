@@ -33,7 +33,7 @@ def line(ts: TimeSeries,
                 Chart(df)
                 .mark_line(
                     strokeDash=[5, 2],
-                    opacity=0.7
+                    opacity=0.7,
                 )
                 .encode(**encode_kwargs)
             )
