@@ -16,6 +16,16 @@ class TimeSeries(DartsTimeSeries):
     def __init__(self, xa: xr.DataArray):
         super().__init__(xa)
 
+    def rename(self, columns: dict):
+        """
+        Rename the columns of the TimeSeries
+
+        :param columns: dict with {"old_name": "new_name"}
+        """
+        col_names = list(columns.keys())
+        col_names_new = list(columns.values())
+        return self.with_columns_renamed(col_names=col_names, col_names_new=col_names_new)
+
     def split_by_period(self, period: str) -> List[TimeSeries]:
         """
         Split a time series given a period
