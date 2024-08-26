@@ -1,8 +1,10 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import List
 from enum import Enum
 
 from ontime.core.time_series.time_series import TimeSeries
+from ontime.module.benchmarking import BenchmarkMetric
 
 class BenchmarkMode(Enum):
         ZERO_SHOT = 1 # no training, only inference
