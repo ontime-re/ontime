@@ -10,20 +10,19 @@ from ontime.module.processing.pytorch.utils import create_dataset
 
 
 class TimeSeriesDataModule(L.LightningDataModule):
-
-    def __init__(self,
-                 series,
-                 window_length: int,
-                 stride_length: int,
-                 input_length: int,
-                 target_length: int,
-                 gap_length: int,
-                 batch_size: int = 32,
-                 num_workers: int = 0,
-                 train_split: Union[float, int or pd.TimeStamp] = None,
-                 transform: Pipeline = None,
-                 ):
-
+    def __init__(
+        self,
+        series,
+        window_length: int,
+        stride_length: int,
+        input_length: int,
+        target_length: int,
+        gap_length: int,
+        batch_size: int = 32,
+        num_workers: int = 0,
+        train_split: Union[float, int or pd.TimeStamp] = None,
+        transform: Pipeline = None,
+    ):
         super().__init__()
         # Main dataset
         self.series = series
@@ -63,9 +62,10 @@ class TimeSeriesDataModule(L.LightningDataModule):
         """
         Splits the series from the datamodule given the parameters defined in the instance
         """
-        tmp_ts_train, self.ts_test = train_test_split(self.series, train_split=self.train_split)
+        tmp_ts_train, self.ts_test = train_test_split(
+            self.series, train_split=self.train_split
+        )
         self.ts_train, self.ts_val = train_test_split(tmp_ts_train, train_split=0.8)
-
 
     def compute_transform(self):
         """
@@ -77,7 +77,6 @@ class TimeSeriesDataModule(L.LightningDataModule):
         self.ts_test_enc = self.transform.transform(self.ts_test)
 
     def setup(self, stage: str):
-
         self.compute_split()
         if self.transform is not None:
             self.compute_transform()
@@ -89,7 +88,7 @@ class TimeSeriesDataModule(L.LightningDataModule):
                 self.stride_length,
                 self.input_length,
                 self.target_length,
-                self.gap_length
+                self.gap_length,
             )
         elif stage == "validate":
             self.val = create_dataset(
@@ -98,7 +97,7 @@ class TimeSeriesDataModule(L.LightningDataModule):
                 self.stride_length,
                 self.input_length,
                 self.target_length,
-                self.gap_length
+                self.gap_length,
             )
         elif stage == "test":
             self.test = create_dataset(
@@ -107,25 +106,25 @@ class TimeSeriesDataModule(L.LightningDataModule):
                 self.stride_length,
                 self.input_length,
                 self.target_length,
-                self.gap_length
+                self.gap_length,
             )
         elif stage == "predict":
             raise NotImplementedError
 
     def train_dataloader(self):
-        return DataLoader(self.train,
-                          batch_size=self.batch_size,
-                          num_workers=self.num_workers)
+        return DataLoader(
+            self.train, batch_size=self.batch_size, num_workers=self.num_workers
+        )
 
     def val_dataloader(self):
-        return DataLoader(self.val,
-                          batch_size=self.batch_size,
-                          num_workers=self.num_workers)
+        return DataLoader(
+            self.val, batch_size=self.batch_size, num_workers=self.num_workers
+        )
 
     def test_dataloader(self):
-        return DataLoader(self.test,
-                          batch_size=self.batch_size,
-                          num_workers=self.num_workers)
+        return DataLoader(
+            self.test, batch_size=self.batch_size, num_workers=self.num_workers
+        )
 
     def predict_dataloader(self):
         raise NotImplementedError

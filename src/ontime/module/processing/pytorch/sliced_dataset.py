@@ -6,10 +6,7 @@ from typing import Tuple
 
 
 class SlicedDataset(Dataset):
-    def __init__(self,
-                 data: TimeSeries,
-                 period: int,
-                 labels: TimeSeries = None):
+    def __init__(self, data: TimeSeries, period: int, labels: TimeSeries = None):
         """
         :param data: TimeSeries of the data to model
         :param period: length of the input window
@@ -20,7 +17,7 @@ class SlicedDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, idx: int) -> Tuple[np.ndarray, np.ndarray] :
+    def __getitem__(self, idx: int) -> Tuple[np.ndarray, np.ndarray]:
         input = self.data[idx]
         if self.labels is not None:
             output = self.labels[idx]
@@ -28,7 +25,9 @@ class SlicedDataset(Dataset):
             output = self.data[idx]
         return input, output
 
-    def slice(self, data: TimeSeries, period: int, labels: TimeSeries = None) -> Tuple[list, list]:
+    def slice(
+        self, data: TimeSeries, period: int, labels: TimeSeries = None
+    ) -> Tuple[list, list]:
         sliced_data = pp.common.split_in_windows(data, period, period)
         sliced_data = [elt.pd_dataframe().to_numpy() for elt in sliced_data]
         sliced_labels = None

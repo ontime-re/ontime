@@ -24,6 +24,7 @@ Core
 ----
 
 .. toctree::
+    :maxdepth: 1
 
     0_core/0.1_time-series
     0_core/0.1.1_time-series_data-loading
@@ -38,6 +39,7 @@ Module
 ------
 
 .. toctree::
+    :maxdepth: 1
 
     1_module/0-preprocessing/1.0-preprocessing-common
 
@@ -45,5 +47,6 @@ Context
 -------
 
 .. toctree::
+    :maxdepth: 1
 
     2_context/2.0-context-common

@@ -1,2 +1,2 @@
-from . import plots
-from . import anomaly_plot
+from .plot import Plot
+from .marks import marks

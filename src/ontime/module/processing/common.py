@@ -90,10 +90,10 @@ def split_in_windows(ts: TimeSeries, window_length: int, stride_length: int) -> 
 
 
 def split_inputs_from_targets(
-        ts_list: list,
-        input_length: int,
-        target_length: int,
-        gap_length: int = 0,
+    ts_list: list,
+    input_length: int,
+    target_length: int,
+    gap_length: int = 0,
 ) -> tuple:
     """
     Split a list of TimeSeries into input and target TimeSeries
@@ -114,8 +114,9 @@ def split_inputs_from_targets(
     # Iterate over each DataFrame in the list
     for df in dfs:
         # Check
-        assert input_length + target_length + gap_length <= len(df), \
-            "input_length + target_length + gap_length is longer that the total length of the DataFrame."
+        assert input_length + target_length + gap_length <= len(
+            df
+        ), "input_length + target_length + gap_length is longer that the total length of the DataFrame."
 
         # Create inputs
         input_series = df.iloc[:input_length]

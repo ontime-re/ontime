@@ -152,10 +152,10 @@ class Benchmark:
     @staticmethod
     def _bool_to_symbol(b: bool) -> str:
         if b is None:
-            return 'unknown'
+            return "unknown"
         if b:
-            return '✓'
-        return 'X'
+            return "✓"
+        return "X"
 
     def get_report(self):
         if self.results is None:

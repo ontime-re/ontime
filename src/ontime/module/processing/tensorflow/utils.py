@@ -1,15 +1,21 @@
 import numpy as np
 from tensorflow.data import Dataset
-from ontime.module.processing.common import split_in_windows, split_inputs_from_targets, timeseries_list_to_numpy
+from ontime.module.processing.common import (
+    split_in_windows,
+    split_inputs_from_targets,
+    timeseries_list_to_numpy,
+)
 from ontime.core.time_series import TimeSeries
 
 
-def create_dataset(ts: TimeSeries,
-                   window_length: int,
-                   stride_length: int,
-                   input_length: int,
-                   target_length: int,
-                   gap_length: int = 0):
+def create_dataset(
+    ts: TimeSeries,
+    window_length: int,
+    stride_length: int,
+    input_length: int,
+    target_length: int,
+    gap_length: int = 0,
+):
     """
     Create a Tensorflow Dataset given a TimeSeries
 
@@ -24,7 +30,11 @@ def create_dataset(ts: TimeSeries,
 
     ts_list = split_in_windows(ts, window_length, stride_length)
     input_ts_list, target_ts_list = split_inputs_from_targets(
-        ts_list, input_length=input_length, target_length=target_length, gap_length=gap_length)
+        ts_list,
+        input_length=input_length,
+        target_length=target_length,
+        gap_length=gap_length,
+    )
     features = timeseries_list_to_numpy(input_ts_list)
     labels = timeseries_list_to_numpy(target_ts_list)
     ds_feature = Dataset.from_tensor_slices(features)
@@ -54,7 +64,7 @@ def dataset_to_numpy(dataset: Dataset):
 def arr_to_ts(arr: np.array) -> TimeSeries:
     """
     Converts on array obtained as output of a model to a TimeSeries
-    
+
     :param arr: Numpy array
     :return: TimeSeries
     """
@@ -65,7 +75,7 @@ def arr_to_ts(arr: np.array) -> TimeSeries:
 def get_input(dataset: Dataset) -> np.array:
     """
     Get the input from a Tensorflow Dataset
-    
+
     :param dataset: Tensorflow Dataset
     """
     return np.array([x for x, y in dataset])

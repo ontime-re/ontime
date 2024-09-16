@@ -14,7 +14,7 @@ from ontime.module.processing.pytorch.sliced_dataset import SlicedDataset
 from ontime.module.benchmarking.benchmark import Benchmark
 
 
-device = 'cpu'
+device = "cpu"
 
 
 class Encoder(nn.Module):
@@ -64,7 +64,6 @@ class Decoder(nn.Module):
 
 
 class Autoencoder(nn.Module):
-
     def __init__(self, entry_size: int, latent_dims: int):
         super(Autoencoder, self).__init__()
         self.encoder = Encoder(entry_size, latent_dims)
@@ -76,16 +75,18 @@ class Autoencoder(nn.Module):
         return self.decoder(z)
 
     def loss(self, x: Tensor, x_hat: Tensor) -> float:
-        loss = F.smooth_l1_loss(x, x_hat, reduction='mean')
+        loss = F.smooth_l1_loss(x, x_hat, reduction="mean")
         return loss
 
-    def get_reconstructed(self, dataset: TimeSeries, period: int, labels: TimeSeries = None, verbose: bool = False) -> \
-    list[list]:
+    def get_reconstructed(
+        self,
+        dataset: TimeSeries,
+        period: int,
+        labels: TimeSeries = None,
+        verbose: bool = False,
+    ) -> list[list]:
         ds = SlicedDataset(dataset, period, labels)
-        data = torch.utils.data.DataLoader(
-            ds,
-            batch_size=1,
-            shuffle=False)
+        data = torch.utils.data.DataLoader(ds, batch_size=1, shuffle=False)
         results_x = []
         results_xhat = []
         results_y = []
@@ -95,8 +96,8 @@ class Autoencoder(nn.Module):
             x = x.to(device)  # CPU
             x_hat = self(x)
             if verbose:
-                print(f'x:{x.size()} -> x_hat {x_hat.size()}')
-            x_hat = x_hat.reshape(x.size()).to('cpu').detach()
+                print(f"x:{x.size()} -> x_hat {x_hat.size()}")
+            x_hat = x_hat.reshape(x.size()).to("cpu").detach()
             loss = self.loss(x, x_hat)
             x_hat = x_hat.numpy()
             x = x.cpu().numpy()
@@ -106,15 +107,17 @@ class Autoencoder(nn.Module):
             results_loss.append(loss)
             if ds.labels is not None:
                 results_y.append(y)
-        reconstructed_dataset = Autoencoder._into_timeseries(dataset, results_xhat, results_loss, results_y, period)
+        reconstructed_dataset = Autoencoder._into_timeseries(
+            dataset, results_xhat, results_loss, results_y, period
+        )
         return reconstructed_dataset
 
     def train(self, data: SlicedDataset, device: str, epochs: int = 20):
         opt = torch.optim.Adam(self.parameters())
         for epoch in range(epochs):
-            i=1
+            i = 1
             for x, y in data:
-                i+=1
+                i += 1
                 x = x.to(device)  # CPU
                 opt.zero_grad()
                 x_hat = self(x)
@@ -127,18 +130,26 @@ class Autoencoder(nn.Module):
     def get_period(dataset: TimeSeries):
         periods = []
         for col in dataset.columns:
-            periods.append(pyd.findfrequency(dataset.pd_dataframe()[col].to_numpy(), detrend=True))
+            periods.append(
+                pyd.findfrequency(dataset.pd_dataframe()[col].to_numpy(), detrend=True)
+            )
         period = max(periods)
         while period < 15:
             period += period
         return period
 
     @staticmethod
-    def new_encoder_for_dataset(dataset: TimeSeries, period: int = None) -> 'Autoencoder':
+    def new_encoder_for_dataset(
+        dataset: TimeSeries, period: int = None
+    ) -> "Autoencoder":
         if period is None:
             periods = []
             for col in dataset.columns:
-                periods.append(pyd.findfrequency(dataset.pd_dataframe()[col].to_numpy(), detrend=True))
+                periods.append(
+                    pyd.findfrequency(
+                        dataset.pd_dataframe()[col].to_numpy(), detrend=True
+                    )
+                )
             period = max(periods)
             while period < 15:
                 period += period
@@ -157,8 +168,12 @@ class Autoencoder(nn.Module):
             sample = xhat[i][0]
             for line in sample:
                 x_hat_flat.append(line)
-        reconstructed_dataset = pd.DataFrame(x_hat_flat, columns=input_dataset.columns.tolist())
-        reconstructed_dataset.index = input_dataset.time_index[:len(reconstructed_dataset.index)]
+        reconstructed_dataset = pd.DataFrame(
+            x_hat_flat, columns=input_dataset.columns.tolist()
+        )
+        reconstructed_dataset.index = input_dataset.time_index[
+            : len(reconstructed_dataset.index)
+        ]
 
         # loss and y
         reconstructed_loss = []
@@ -166,12 +181,12 @@ class Autoencoder(nn.Module):
         for l in loss:
             for i in range(0, period):
                 reconstructed_loss.append(l)
-        reconstructed_dataset['loss'] = reconstructed_loss
+        reconstructed_dataset["loss"] = reconstructed_loss
 
         if y is not None and len(y) > 0:
             for ry in y:
                 for i in range(0, period):
                     reconstructed_y.append(ry)
-            reconstructed_dataset['y'] = reconstructed_y
+            reconstructed_dataset["y"] = reconstructed_y
 
         return TimeSeries.from_pandas(reconstructed_dataset)

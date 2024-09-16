@@ -21,7 +21,9 @@ class RestrictedTimeSeries(TimeSeries):
         self.restrictions = []
         if restrictions is not None:
             for r in restrictions:
-                assert isinstance(r, Restriction), "All restrictions must be of type Restriction"
+                assert isinstance(
+                    r, Restriction
+                ), "All restrictions must be of type Restriction"
                 self.add_restriction(r)
 
     def check(self) -> bool:
