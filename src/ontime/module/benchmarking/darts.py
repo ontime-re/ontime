@@ -9,6 +9,10 @@ from ontime.module.benchmarking.benchmark import (
     BenchmarkMetric,
     BenchmarkMode,
 )
+from ontime.module.processing.common import (
+    split_in_windows,
+    split_inputs_from_targets,
+)
 from darts.models.forecasting.forecasting_model import LocalForecastingModel
 
 
@@ -24,15 +28,15 @@ def create_dataset(
     """
     # TODO: This method should be improved as we can have memory issues with large time series (e.g. we should process the time series per batch, using a generator).
     dataset = {"input": [], "label": []}
-    for i in range(
-        0, len(ts) - context_length - prediction_length - gap, stride_length
-    ):
-        dataset["input"].append(ts[: i + context_length])
-        dataset["label"].append(
-            ts[i + context_length + gap : i + context_length + gap + prediction_length]
-        )
+    ts_list = split_in_windows(ts, context_length+prediction_length+gap, stride_length)
+    dataset["input"], dataset["label"] = split_inputs_from_targets(
+        ts_list,
+        input_length=context_length,
+        target_length=prediction_length,
+        gap_length=gap,
+    )
+    
     return dataset
-
 
 class SimpleDartsBenchmarkModel(AbstractBenchmarkModel):
     """
@@ -62,7 +66,7 @@ class SimpleDartsBenchmarkModel(AbstractBenchmarkModel):
         self.model.fit(train_ts, val_ts, *args, **kwargs)
 
     def predict(
-        self, ts: on.TimeSeries, batch_size: int, horizon: int, *args, **kwargs
+        self, ts: on.TimeSeries, horizon: int, *args, **kwargs
     ) -> on.TimeSeries:
         """
         Forecast the given time series.
@@ -71,7 +75,9 @@ class SimpleDartsBenchmarkModel(AbstractBenchmarkModel):
             # we use the predict method of the model directly, to make predictions on the train set
             return self.model.predict(horizon, *args, **kwargs)
         # TODO: create dataset in rolling window or expanding window style and predict for each window
-        pass
+        else:
+            self.model.fit(ts)
+            return self.model.predict(horizon, *args, **kwargs)
 
     def evaluate(
         self,

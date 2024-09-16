@@ -14,6 +14,7 @@ from ontime.module.benchmarking import (
 import pandas as pd
 import time
 import traceback
+import numpy as np
 
 
 class Benchmark:
@@ -27,10 +28,11 @@ class Benchmark:
         self.models = []
         self.metrics = []
 
-        # for holding results
+        # for holding results and predictions
         self.metrics_results = []
         self.model_stats = {}
         self.results = {}
+        self.predictions = {}
 
         # initialize datasets, models and metrics
         if metrics is not None:
@@ -70,14 +72,22 @@ class Benchmark:
     def get_metrics(self):
         return self.metrics
 
-    def run(self, verbose: bool = False, debug: bool = False):
+    def run(self, verbose: bool = False, debug: bool = False, nb_predictions: int = 1):
         # TODO: throw error if models or datasets is empty
         if verbose:
             print("Starting evaluation...")
         i = 0
+        
+        if nb_predictions > 0:
+            inputs, targets = self._get_random_inputs(nb_predictions)
+            self.predictions = {"inputs": inputs, "targets": targets, "predictions": {}}
+        
         for source_model in self.models:
             self.results[source_model.name] = {}
             self.model_stats[source_model.name] = {}
+            if nb_predictions > 0:
+                self.predictions["predictions"][source_model.name] = {}
+            
             if verbose:
                 print(f"Evaluation for model {source_model.name}")
 
@@ -123,6 +133,15 @@ class Benchmark:
                     inference_time = time.time() - start_time
                     if verbose:
                         print(f"done, took {inference_time}")
+                        
+                    # get predictions
+                    if nb_predictions > 0:
+                        self.predictions["predictions"][source_model.name][dataset.name] = []
+                        if verbose:
+                            print(f"getting predictions... ", end="")
+                        for i in range(nb_predictions):
+                            prediction = source_model.predict(inputs[dataset.name][i], horizon=dataset.horizon)
+                            self.predictions["predictions"][source_model.name][dataset.name].append(prediction)
 
                 except:  # can't train or test on this dataset
                     run_success = False
@@ -186,7 +205,7 @@ class Benchmark:
             for dataset in self.datasets:
                 s += f"Dataset {dataset.name}:\n"
                 if dataset.name not in self.results[model.name].keys():
-                    s += f"dataset.name couldn't complete training\n"
+                    s += f"couldn't complete training on {dataset.name}\n"
                 else:
                     for key in self.results[model.name][dataset.name].keys():
                         if key == "prediction":
@@ -197,6 +216,8 @@ class Benchmark:
         return report
 
     def get_report_df(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        if self.results is None:
+            return "please invoke run_benchmark() to generate report data"
         flat_results = {}
         for model_name, datasets in self.results.items():
             for dataset_name, dataset_results in datasets.items():
@@ -222,10 +243,44 @@ class Benchmark:
         model_stats_df = pd.DataFrame(self.model_stats)
         model_stats_df.index.name = "Statistic"
 
-        return model_stats_df, results_df
+        return model_stats_df, results_df     
 
     def get_results(self):
         return self.results
 
     def get_model_stats(self):
         return self.model_stats
+    
+    def get_predictions(self):
+        if bool(self.predictions):
+            return self.predictions
+        else:
+            return "No predictions available, please run the benchmark with nb_predictions > 0."
+    
+    def _get_random_inputs(self, nb_predictions: int = 1) -> Tuple[dict[str, list[TimeSeries]], dict[str, list[TimeSeries]]]:
+        # for each dataset, get the number of inputs specified, randomly selected.
+        inputs = {}
+        targets = {}
+        
+        for dataset in self.datasets:
+            inputs[dataset.name] = []
+            targets[dataset.name] = []
+            _, test_set = dataset.get_train_test_split()
+            
+            # store dataset attributes
+            input_length = dataset.input_length
+            horizon = dataset.horizon
+            stride = dataset.stride
+            gap = dataset.gap
+            
+            # select random indices
+            window_length = input_length + horizon + gap
+            max_idx = len(test_set) - window_length
+            indices = np.random.choice(range(0, max_idx, stride), nb_predictions, replace=False)
+            
+            # store input and target time series
+            for idx in indices:
+                inputs[dataset.name].append(test_set[idx:idx+input_length])
+                targets[dataset.name].append(test_set[idx+input_length+gap:idx+input_length+gap+horizon])
+                        
+        return inputs, targets
