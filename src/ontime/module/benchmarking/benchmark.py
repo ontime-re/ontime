@@ -22,9 +22,7 @@ class Benchmark:
         datasets: List[BenchmarkDataset] = None,
         models: List[AbstractBenchmarkModel] = None,
         metrics: List[BenchmarkMetric] = None,
-        train_proportion=0.7,
     ):
-        self.train_proportion = train_proportion
         self.datasets = []
         self.models = []
         self.metrics = []
@@ -94,9 +92,7 @@ class Benchmark:
 
                 # initialize variables
                 nb_features = dataset.ts.n_components
-                train_set, test_set = dataset.get_train_test_split(
-                    self.train_proportion
-                )
+                train_set, test_set = dataset.get_train_test_split()
                 train_size = len(train_set.time_index)
                 test_size = len(test_set.time_index)
                 train_time = 0

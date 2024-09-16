@@ -12,6 +12,7 @@ class BenchmarkDataset:
         stride: int,
         horizon: int,
         name: str,
+        train_proportion: float = 0.7,
         target_columns: Optional[List[str]] = None,
     ):
         self.ts = ts
@@ -20,6 +21,7 @@ class BenchmarkDataset:
         self.stride = stride
         self.horizon = horizon
         self.name = name
+        self.train_proportion = train_proportion
         # if target columns is None, we use all columns
         if target_columns is None:
             target_columns = list(ts.columns)
@@ -31,5 +33,5 @@ class BenchmarkDataset:
     def get_data(self):
         return self.ts
 
-    def get_train_test_split(self, train_proportion=0.7):
-        return self.ts.split_before(train_proportion)
+    def get_train_test_split(self):
+        return self.ts.split_before(self.train_proportion)
