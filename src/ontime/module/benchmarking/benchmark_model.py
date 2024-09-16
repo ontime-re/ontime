@@ -6,9 +6,11 @@ from enum import Enum
 from ontime.core.time_series.time_series import TimeSeries
 from ontime.module.benchmarking import BenchmarkMetric
 
+
 class BenchmarkMode(Enum):
-        ZERO_SHOT = 1 # no training, only inference
-        FULL_SHOT = 3 # full training
+    ZERO_SHOT = 1  # no training, only inference
+    FULL_SHOT = 3  # full training
+
 
 class AbstractBenchmarkModel(ABC):
     @abstractmethod
@@ -26,7 +28,14 @@ class AbstractBenchmarkModel(ABC):
         pass
 
     @abstractmethod
-    def evaluate(self, ts: TimeSeries, horizon: int, metrics: List[BenchmarkMetric], *args, **kwargs) -> dict:
+    def evaluate(
+        self,
+        ts: TimeSeries,
+        horizon: int,
+        metrics: List[BenchmarkMetric],
+        *args,
+        **kwargs,
+    ) -> dict:
         """
         Evaluate the model on test data, using the given metrics.
         """
@@ -38,7 +47,7 @@ class AbstractBenchmarkModel(ABC):
         Load a model checkpoint from the given path, and return the model.
         """
         pass
-    
+
     @abstractmethod
     def get_benchmark_mode(self) -> BenchmarkMode:
         """
