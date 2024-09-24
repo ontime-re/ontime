@@ -139,8 +139,8 @@ class Benchmark:
                         self.predictions["predictions"][source_model.name][dataset.name] = []
                         if verbose:
                             print(f"getting predictions... ", end="")
-                        for i in range(nb_predictions):
-                            prediction = source_model.predict(inputs[dataset.name][i], horizon=dataset.horizon)
+                        for input in inputs[dataset.name]:
+                            prediction = source_model.predict(input, horizon=dataset.horizon)
                             self.predictions["predictions"][source_model.name][dataset.name].append(prediction)
 
                 except:  # can't train or test on this dataset
@@ -276,7 +276,12 @@ class Benchmark:
             # select random indices
             window_length = input_length + horizon + gap
             max_idx = len(test_set) - window_length
-            indices = np.random.choice(range(0, max_idx, stride), nb_predictions, replace=False)
+            available_indices = list(range(0, max_idx, stride))
+            
+            if len(available_indices) < nb_predictions:
+                nb_predictions = len(available_indices)
+            
+            indices = np.random.choice(available_indices, nb_predictions, replace=False)
             
             # store input and target time series
             for idx in indices:
