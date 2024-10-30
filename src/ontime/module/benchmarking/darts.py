@@ -50,12 +50,14 @@ class SimpleDartsBenchmarkModel(AbstractBenchmarkModel):
         name: str,
         model: LocalForecastingModel,
         mode: BenchmarkMode,
+        multivariate: bool = False,
         *args,
         **kwargs,
     ):
         self.name = name
         self.model = model
         self.mode = mode
+        self.multivariate = multivariate
 
     def fit(
         self, train_ts: on.TimeSeries, val_ts: on.TimeSeries, *args, **kwargs
@@ -63,6 +65,8 @@ class SimpleDartsBenchmarkModel(AbstractBenchmarkModel):
         """
         Fit a model on training data.
         """
+        if train_ts.n_components > 1:
+            raise ValueError("This model can only be fitted on univariate time series. Use directly predict() method to make a prediction on multivariate time series, by instantiating a model with argument multivariate=True.")
         self.model.fit(train_ts, val_ts, *args, **kwargs)
 
     def predict(
@@ -74,10 +78,7 @@ class SimpleDartsBenchmarkModel(AbstractBenchmarkModel):
         if ts is None:
             # we use the predict method of the model directly, to make predictions on the train set
             return self.model.predict(horizon, *args, **kwargs)
-        # TODO: create dataset in rolling window or expanding window style and predict for each window
-        else:
-            self.model.fit(ts)
-            return self.model.predict(horizon, *args, **kwargs)
+        return self.fit_predict(ts, horizon, *args, **kwargs)
 
     def evaluate(
         self,
@@ -93,11 +94,42 @@ class SimpleDartsBenchmarkModel(AbstractBenchmarkModel):
         dataset = create_dataset(ts, prediction_length=horizon, *args, **kwargs)
         metrics_values = {metric.name: [] for metric in metrics}
         for input, label in zip(dataset["input"], dataset["label"]):
-            self.model.fit(input)
-            forecast = self.model.predict(horizon)
+            forecast = self.fit_predict(input, horizon)
             for metric in metrics:
                 metrics_values[metric.name].append(metric.compute(forecast, label))
         return {metric: np.mean(values) for metric, values in metrics_values.items()}
+    
+    def fit_predict(
+        self,
+        ts: on.TimeSeries,
+        horizon: int,
+        *args,
+        **kwargs
+    ) -> on.TimeSeries:
+        """
+        Fit the model on the given time series and produce from it a forecast of a given horizon
+        """
+        if ts.n_components > 1:
+            if self.multivariate:
+                predictions = []
+                # loop over each component
+                for i in range(ts.n_components):
+                    component = ts.univariate_component(i)
+                    self.model.fit(component)
+                    forecast = self.model.predict(horizon, *args, **kwargs)
+                    predictions.append(forecast)
+                # combine predictions
+                combined_forecast = on.TimeSeries.from_times_and_values(
+                    times=predictions[0].time_index,
+                    values=np.column_stack([f.values() for f in predictions]),
+                )
+                return combined_forecast.with_columns_renamed(combined_forecast.components, ts.components)
+            else:
+                raise ValueError("This model can only make prediction on univariate time series. To perform a prediction on multivariate time series, you should instantiate a model with argument multivariate=True.")
+        else:
+            self.model.fit(ts)
+            return self.model.predict(horizon, *args, **kwargs)
+        
 
     def load_checkpoint(self, path: str) -> SimpleDartsBenchmarkModel:
         """
