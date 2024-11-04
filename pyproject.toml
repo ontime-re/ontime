@@ -8,10 +8,10 @@ packages = [{include = "ontime", from = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
-darts = "^0.25.0"
+darts = "^0.30.0"
 catboost = "^1.2"
 altair = "^5.1.0"
-skforecast = "^0.11.0"
+skforecast = "^0.12.0"
 torch = ">=2.0.0, !=2.0.1, !=2.1.0"
 vegafusion-python-embed = "^1.4.1"
 vegafusion = {extras = ["embed"], version = "^1.4.1"}
