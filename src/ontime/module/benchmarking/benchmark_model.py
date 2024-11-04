@@ -12,7 +12,7 @@ class BenchmarkMode(Enum):
     FULL_SHOT = 3  # full training
 
 
-class AbstractBenchmarkModel(ABC):
+class AbstractBenchmarkModel(ABC):  
     @abstractmethod
     def fit(self, train_ts: TimeSeries, val_ts: TimeSeries, *args, **kwargs) -> None:
         """
@@ -40,6 +40,13 @@ class AbstractBenchmarkModel(ABC):
         Evaluate the model on test data, using the given metrics.
         """
         pass
+    
+    def reset_model(self):
+        """
+        Reset model weights, so that the model can be retrained without being recreated.
+        """
+        pass
+        
 
     @abstractmethod
     def load_checkpoint(self, path: str) -> AbstractBenchmarkModel:

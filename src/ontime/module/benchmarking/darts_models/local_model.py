@@ -69,7 +69,7 @@ class LocalDartsBenchmarkModel(AbstractBenchmarkModel):
         dataset = create_dataset(ts, prediction_length=horizon, *args, **kwargs)
         metrics_values = {metric.name: [] for metric in metrics}
         for input, label in zip(dataset["input"], dataset["label"]):
-            forecast = self.fit_predict(input, horizon)
+            forecast = self._fit_predict(input, horizon)
             for metric in metrics:
                 metrics_values[metric.name].append(metric.compute(forecast, label))
         return {metric: np.mean(values) for metric, values in metrics_values.items()}

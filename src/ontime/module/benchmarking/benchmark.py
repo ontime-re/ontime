@@ -102,8 +102,10 @@ class Benchmark:
 
                 # initialize variables
                 nb_features = dataset.ts.n_components
-                train_set, test_set = dataset.get_train_test_split()
+                _, test_set = dataset.get_train_test_split()
+                train_set, val_set = dataset.get_train_val_split()
                 train_size = len(train_set.time_index)
+                val_size = len(val_set.time_index)
                 test_size = len(test_set.time_index)
                 train_time = 0
                 inference_time = 0
@@ -114,7 +116,7 @@ class Benchmark:
                         if verbose:
                             print(f"training... ", end="")
                         start_time = time.time()
-                        source_model.fit(train_set)
+                        source_model.fit(train_ts=train_set, val_ts=val_set)
                         train_time = time.time() - start_time
 
                         if verbose:
@@ -142,6 +144,8 @@ class Benchmark:
                         for input in inputs[dataset.name]:
                             prediction = source_model.predict(input, horizon=dataset.horizon)
                             self.predictions["predictions"][source_model.name][dataset.name].append(prediction)
+                            
+                    source_model.reset_model()
 
                 except:  # can't train or test on this dataset
                     run_success = False
@@ -160,6 +164,7 @@ class Benchmark:
                         "nb features": nb_features,
                         "target column": dataset.target_columns,
                         "training set size": train_size,
+                        "validation set size": val_size,
                         "training time": train_time,
                         "test set size": test_size,
                         "testing time": inference_time,
