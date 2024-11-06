@@ -1,47 +1,22 @@
 from __future__ import annotations
-from abc import ABCMeta
-from typing import List, Union, Tuple, Generator
-
+from typing import List
 import numpy as np
+
 import ontime as on
 from ontime.module.benchmarking.benchmark import (
     AbstractBenchmarkModel,
     BenchmarkMetric,
     BenchmarkMode,
 )
-from ontime.module.processing.common import (
-    split_in_windows,
-    split_inputs_from_targets,
-)
+from .common import create_dataset
+
 from darts.models.forecasting.forecasting_model import LocalForecastingModel
 
-
-def create_dataset(
-    ts: on.TimeSeries,
-    stride_length: int,
-    context_length: int,
-    prediction_length: int,
-    gap: int = 0,
-) -> dict[str, List[on.TimeSeries]]:
-    """
-    Create a dataset of ontime TimeSeries in an expanding window style from a given time series. The dataset is a dictionary with two keys: "input" and "label".
-    """
-    # TODO: This method should be improved as we can have memory issues with large time series (e.g. we should process the time series per batch, using a generator).
-    dataset = {"input": [], "label": []}
-    ts_list = split_in_windows(ts, context_length+prediction_length+gap, stride_length)
-    dataset["input"], dataset["label"] = split_inputs_from_targets(
-        ts_list,
-        input_length=context_length,
-        target_length=prediction_length,
-        gap_length=gap,
-    )
-    
-    return dataset
-
-class SimpleDartsBenchmarkModel(AbstractBenchmarkModel):
+class LocalDartsBenchmarkModel(AbstractBenchmarkModel):
     """
     A wrapper around LocalForecastingModel from Darts, to be forecasted like any other model.
-    The major specificity of LocalForecastingModel models is that they are fitted on a time series and then used to forecast this same time series.
+    The major specificity of LocalForecastingModel models is that 1. they are fitted on a time series and then used to forecast this same time series, 2. they can be trained
+    on a single target (i.e. univariate) series only. 
     For more information about them, see https://unit8co.github.io/darts/_modules/darts/models/forecasting/forecasting_model.html
     """
 
@@ -67,7 +42,7 @@ class SimpleDartsBenchmarkModel(AbstractBenchmarkModel):
         """
         if train_ts.n_components > 1:
             raise ValueError("This model can only be fitted on univariate time series. Use directly predict() method to make a prediction on multivariate time series, by instantiating a model with argument multivariate=True.")
-        self.model.fit(train_ts, val_ts, *args, **kwargs)
+        self.model.fit(train_ts, *args, **kwargs)
 
     def predict(
         self, ts: on.TimeSeries, horizon: int, *args, **kwargs
@@ -78,7 +53,7 @@ class SimpleDartsBenchmarkModel(AbstractBenchmarkModel):
         if ts is None:
             # we use the predict method of the model directly, to make predictions on the train set
             return self.model.predict(horizon, *args, **kwargs)
-        return self.fit_predict(ts, horizon, *args, **kwargs)
+        return self._fit_predict(ts, horizon, *args, **kwargs)
 
     def evaluate(
         self,
@@ -94,12 +69,12 @@ class SimpleDartsBenchmarkModel(AbstractBenchmarkModel):
         dataset = create_dataset(ts, prediction_length=horizon, *args, **kwargs)
         metrics_values = {metric.name: [] for metric in metrics}
         for input, label in zip(dataset["input"], dataset["label"]):
-            forecast = self.fit_predict(input, horizon)
+            forecast = self._fit_predict(input, horizon)
             for metric in metrics:
                 metrics_values[metric.name].append(metric.compute(forecast, label))
         return {metric: np.mean(values) for metric, values in metrics_values.items()}
     
-    def fit_predict(
+    def _fit_predict(
         self,
         ts: on.TimeSeries,
         horizon: int,
@@ -131,7 +106,7 @@ class SimpleDartsBenchmarkModel(AbstractBenchmarkModel):
             return self.model.predict(horizon, *args, **kwargs)
         
 
-    def load_checkpoint(self, path: str) -> SimpleDartsBenchmarkModel:
+    def load_checkpoint(self, path: str) -> LocalDartsBenchmarkModel:
         """
         Load a model checkpoint from the given path.
         """
