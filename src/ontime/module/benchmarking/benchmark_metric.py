@@ -7,8 +7,8 @@ class BenchmarkMetric:
         self.name = name
         self.reduction = reduction
 
-    def compute(self, target: TimeSeries, pred: TimeSeries):
+    def compute(self, target: TimeSeries, pred: TimeSeries, **kwargs):
         """
         Compute the metric on the target and predicted time series.
         """
-        return self.metric(target, pred, component_reduction=self.reduction)
+        return self.metric(target, pred, component_reduction=self.reduction, **kwargs)
