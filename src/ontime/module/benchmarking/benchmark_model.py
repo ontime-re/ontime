@@ -44,7 +44,7 @@ class AbstractBenchmarkModel(ABC):
         """
         pass
     
-    def reset_model(self):
+    def reset_model(self, **new_model_params):
         """
         Reset model weights, so that the model can be retrained without being recreated.
         """

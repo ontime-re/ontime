@@ -25,14 +25,12 @@ class GlobalDartsBenchmarkModel(AbstractBenchmarkModel):
         name: str,
         model: GlobalForecastingModel,
         mode: BenchmarkMode,
-        training_epochs: int = 10,
         *args,
         **kwargs,
     ):
         self.name = name
         self.model = model
         self.mode = mode
-        self.training_epochs = training_epochs
 
     def fit(
         self, train_ts: on.TimeSeries, val_ts: on.TimeSeries, *args, **kwargs
@@ -41,7 +39,7 @@ class GlobalDartsBenchmarkModel(AbstractBenchmarkModel):
         Fit a model on training data.
         """
         if isinstance(self.model, TorchForecastingModel):
-            self.model.fit(series=train_ts, val_series=val_ts, epochs=self.training_epochs, *args, **kwargs)
+            self.model.fit(series=train_ts, val_series=val_ts, *args, **kwargs)
         else:
             self.model.fit(series=train_ts, *args, **kwargs)
 
@@ -78,11 +76,13 @@ class GlobalDartsBenchmarkModel(AbstractBenchmarkModel):
         """
         return self.load(path)
     
-    def reset_model(self):
+    def reset_model(self, **new_model_params):
         """
         Reset model weights, so that the model can be retrained without being recreated.
         """
-        self.model = self.model.untrained_model()
+        model_params = self.model._model_params.copy()
+        model_params.update(new_model_params)
+        self.model = self.model.__class__(**model_params)
 
     def get_benchmark_mode(self) -> BenchmarkMode:
         return self.mode

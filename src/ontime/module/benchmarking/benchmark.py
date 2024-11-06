@@ -111,6 +111,8 @@ class Benchmark:
                 inference_time = 0
                 run_success = True
                 try:
+                    # TODO: make this cleaner
+                    source_model.reset_model(input_chunk_length=dataset.input_length, output_chunk_length=dataset.horizon)
                     # train
                     if source_model.get_benchmark_mode() != BenchmarkMode.ZERO_SHOT:
                         if verbose:
@@ -123,7 +125,7 @@ class Benchmark:
                             print(f"done, took {train_time}", end="")
                     # test
                     if verbose:
-                        print(f"testing... ", end="")
+                        print(f"evaluating... ", end="")
                     start_time = time.time()
                     metrics = source_model.evaluate(
                         test_set,
@@ -132,20 +134,23 @@ class Benchmark:
                         context_length=dataset.input_length,
                         stride_length=dataset.stride,
                     )
-                    inference_time = time.time() - start_time
+                    evaluation_time = time.time() - start_time
                     if verbose:
-                        print(f"done, took {inference_time}")
+                        print(f"done, took {evaluation_time}")
                         
+                    inference_time = 0
                     # get predictions
                     if nb_predictions > 0:
                         self.predictions["predictions"][source_model.name][dataset.name] = []
                         if verbose:
                             print(f"getting predictions... ", end="")
+                        predictions_time = []
                         for input in inputs[dataset.name]:
+                            start_time = time.time()
                             prediction = source_model.predict(input, horizon=dataset.horizon)
+                            predictions_time.append(time.time() - start_time)
                             self.predictions["predictions"][source_model.name][dataset.name].append(prediction)
-                            
-                    source_model.reset_model()
+                        inference_time = np.mean(predictions_time)
 
                 except:  # can't train or test on this dataset
                     run_success = False
@@ -165,9 +170,10 @@ class Benchmark:
                         "target column": dataset.target_columns,
                         "training set size": train_size,
                         "validation set size": val_size,
-                        "training time": train_time,
                         "test set size": test_size,
-                        "testing time": inference_time,
+                        "training time": train_time,
+                        "evaluation time": evaluation_time,
+                        "inference time": inference_time,
                     }
                     # compute user-submitted metrics
                     if verbose:
@@ -235,7 +241,7 @@ class Benchmark:
                             flat_results[(dataset_name, metric_name)][
                                 model_name
                             ] = metric_value
-                    elif result_name in ["training time", "testing time"]:
+                    elif result_name in ["training time", "evaluation time", "inference time"]:
                         flat_results[(dataset_name, result_name)] = flat_results.get(
                             (dataset_name, result_name), {}
                         )
