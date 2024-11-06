@@ -1,8 +1,9 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import List, Dict
+from typing import List, Union
 from enum import Enum
 
+from numpy import ndarray
 from darts.metrics import mase
 
 from ontime.core.time_series.time_series import TimeSeries
@@ -64,7 +65,7 @@ class AbstractBenchmarkModel(ABC):
         """
         pass
     
-    def _compute_metric(self, forecast: TimeSeries, label: TimeSeries, metric: BenchmarkMetric, **kwargs) -> Dict:
+    def _compute_metric(self, forecast: TimeSeries, label: TimeSeries, metric: BenchmarkMetric, **kwargs) -> Union[float, List[float], ndarray, List[ndarray]]:
         """
         Helper method to compute metric on given forecast and label TimeSeries. This method also handles any specific
         conditions required by specific metrics.
