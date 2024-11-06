@@ -1,7 +1,9 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Dict
 from enum import Enum
+
+from darts.metrics import mase
 
 from ontime.core.time_series.time_series import TimeSeries
 from ontime.module.benchmarking import BenchmarkMetric
@@ -61,3 +63,14 @@ class AbstractBenchmarkModel(ABC):
         Return the benchmark mode of the model.
         """
         pass
+    
+    def _compute_metric(self, forecast: TimeSeries, label: TimeSeries, metric: BenchmarkMetric, **kwargs) -> Dict:
+        """
+        Helper method to compute metric on given forecast and label TimeSeries. This method also handles any specific
+        conditions required by specific metrics.
+        """
+        if metric.metric == mase:
+            return metric.compute(label, forecast, insample=kwargs["input"])
+        else:
+            return metric.compute(label, forecast)
+        

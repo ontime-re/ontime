@@ -69,7 +69,7 @@ class GlobalDartsBenchmarkModel(AbstractBenchmarkModel):
         for input, label in zip(dataset["input"], dataset["label"]):
             forecast = self.predict(input, horizon)
             for metric in metrics:
-                metrics_values[metric.name].append(metric.compute(forecast, label))
+                metrics_values[metric.name].append(self._compute_metric(forecast, label, metric, input=input))
         return {metric: np.mean(values) for metric, values in metrics_values.items()}
 
     def load_checkpoint(self, path: str) -> GlobalDartsBenchmarkModel:
