@@ -2,6 +2,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import List, Union
 from enum import Enum
+import numpy as np
+import logging
 
 from numpy import ndarray
 from darts.metrics import mase
@@ -70,8 +72,12 @@ class AbstractBenchmarkModel(ABC):
         Helper method to compute metric on given forecast and label TimeSeries. This method also handles any specific
         conditions required by specific metrics.
         """
-        if metric.metric == mase:
-            return metric.compute(label, forecast, insample=kwargs["input"])
-        else:
-            return metric.compute(label, forecast)
+        try:
+            if metric.metric == mase:
+                return metric.compute(label, forecast, insample=kwargs["input"])
+            else:
+                return metric.compute(label, forecast)
+        except Exception as e:
+            logging.warning(f"{metric.name} could not be computed for this sample, result will be NaN. \n Error : {e}")
+            return np.full(forecast.n_samples, np.nan)
         
