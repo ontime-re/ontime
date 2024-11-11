@@ -74,9 +74,12 @@ class AbstractBenchmarkModel(ABC):
         """
         metrics_values = {}
         for metric in metrics:
-            if metric.metric == mase:
-                metrics_values[metric.name] = metric.compute(labels, forecasts, insample=kwargs["input"])
-            else:
-                metrics_values[metric.name] = metric.compute(labels, forecasts)
+            try:
+                if metric.metric == mase:
+                    metrics_values[metric.name] = metric.compute(labels, forecasts, insample=kwargs["input"])
+                else:
+                    metrics_values[metric.name] = metric.compute(labels, forecasts)
+            except Exception as e:
+                logging.warning(f"Cannot compute {metric.name} metric, it will be skipped.")
         return metrics_values
         
