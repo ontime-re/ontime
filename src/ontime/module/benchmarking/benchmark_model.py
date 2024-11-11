@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import List, Union
+from typing import List, Union, Dict
 from enum import Enum
 import numpy as np
 import logging
@@ -67,17 +67,16 @@ class AbstractBenchmarkModel(ABC):
         """
         pass
     
-    def _compute_metric(self, forecast: TimeSeries, label: TimeSeries, metric: BenchmarkMetric, **kwargs) -> Union[float, List[float], ndarray, List[ndarray]]:
+    def _compute_metrics(self, forecasts: List[TimeSeries], labels: List[TimeSeries], metrics: List[BenchmarkMetric], **kwargs) -> Dict[str, ndarray]:
         """
-        Helper method to compute metric on given forecast and label TimeSeries. This method also handles any specific
+        Helper method to compute metrics on given forecast and label TimeSeries. This method also handles any specific
         conditions required by specific metrics.
         """
-        try:
+        metrics_values = {}
+        for metric in metrics:
             if metric.metric == mase:
-                return metric.compute(label, forecast, insample=kwargs["input"])
+                metrics_values[metric.name] = metric.compute(labels, forecasts, insample=kwargs["input"])
             else:
-                return metric.compute(label, forecast)
-        except Exception as e:
-            logging.warning(f"{metric.name} could not be computed for this sample, result will be NaN. \n Error : {e}")
-            return np.full(forecast.n_samples, np.nan)
+                metrics_values[metric.name] = metric.compute(labels, forecasts)
+        return metrics_values
         
