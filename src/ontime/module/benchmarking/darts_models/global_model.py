@@ -63,10 +63,12 @@ class GlobalDartsBenchmarkModel(AbstractBenchmarkModel):
         Evaluate the model on test data, using the given metrics.
         """
         dataset = create_dataset(ts, prediction_length=horizon, *args, **kwargs)
-        dataset["forecast"] = []
-        for input in dataset["input"]:
-            dataset["forecast"].append(self.predict(input, horizon))
-        return self._compute_metrics(dataset["forecast"], dataset["label"], metrics, input=dataset["input"])
+        metrics_values = {metric.name: [] for metric in metrics}
+        for input, label in zip(dataset["input"], dataset["label"]):
+            forecast = self.predict(input, horizon)
+            computed_metrics = self._compute_metric(forecast, label, metrics, input=input)
+            {metrics_values[metric].append(value) for metric, value in computed_metrics.items()}
+        return {metric: np.nanmean(values) for metric, values in metrics_values.items()}
 
     def load_checkpoint(self, path: str) -> GlobalDartsBenchmarkModel:
         """

@@ -82,4 +82,24 @@ class AbstractBenchmarkModel(ABC):
             except Exception as e:
                 logging.warning(f"Cannot compute {metric.name} metric, it will be skipped.")
         return metrics_values
+    
+    def _compute_metric(self, forecast: TimeSeries, label: TimeSeries, metrics: List[BenchmarkMetric], **kwargs) -> Dict[str, ndarray]:
+        """
+        Helper method to compute metrics on given forecast and label TimeSeries. This method also handles any specific
+        conditions required by specific metrics.
+        """
+        metrics_values = {}
+        for metric in metrics:
+            try:
+                if metric.metric == mase:
+                    metrics_values[metric.name] = metric.compute(label, forecast, insample=kwargs["input"])
+                else:
+                    metrics_values[metric.name] = metric.compute(label, forecast)
+            except Exception as e:
+                if metric.component_reduction is None:
+                    metrics_values[metric.name] = np.full(forecast.n_components, np.nan)
+                else:
+                    metrics_values[metric.name] = np.nan
+                         
+        return metrics_values
         
