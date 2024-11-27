@@ -1,7 +1,9 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import List, Union
+from typing import List, Union, Dict
 from enum import Enum
+import numpy as np
+import logging
 
 from numpy import ndarray
 from darts.metrics import mase
@@ -44,7 +46,7 @@ class AbstractBenchmarkModel(ABC):
         """
         pass
     
-    def reset_model(self):
+    def reset_model(self, **new_model_params):
         """
         Reset model weights, so that the model can be retrained without being recreated.
         """
@@ -65,13 +67,39 @@ class AbstractBenchmarkModel(ABC):
         """
         pass
     
-    def _compute_metric(self, forecast: TimeSeries, label: TimeSeries, metric: BenchmarkMetric, **kwargs) -> Union[float, List[float], ndarray, List[ndarray]]:
+    def _compute_metrics(self, forecasts: List[TimeSeries], labels: List[TimeSeries], metrics: List[BenchmarkMetric], **kwargs) -> Dict[str, ndarray]:
         """
-        Helper method to compute metric on given forecast and label TimeSeries. This method also handles any specific
+        Helper method to compute metrics on given forecast and label TimeSeries. This method also handles any specific
         conditions required by specific metrics.
         """
-        if metric.metric == mase:
-            return metric.compute(label, forecast, insample=kwargs["input"])
-        else:
-            return metric.compute(label, forecast)
+        metrics_values = {}
+        for metric in metrics:
+            try:
+                if metric.metric == mase:
+                    metrics_values[metric.name] = metric.compute(labels, forecasts, insample=kwargs["input"])
+                else:
+                    metrics_values[metric.name] = metric.compute(labels, forecasts)
+            except Exception as e:
+                logging.warning(f"Cannot compute {metric.name} metric, it will be skipped.")
+        return metrics_values
+    
+    def _compute_metric(self, forecast: TimeSeries, label: TimeSeries, metrics: List[BenchmarkMetric], **kwargs) -> Dict[str, ndarray]:
+        """
+        Helper method to compute metrics on given forecast and label TimeSeries. This method also handles any specific
+        conditions required by specific metrics.
+        """
+        metrics_values = {}
+        for metric in metrics:
+            try:
+                if metric.metric == mase:
+                    metrics_values[metric.name] = metric.compute(label, forecast, insample=kwargs["input"])
+                else:
+                    metrics_values[metric.name] = metric.compute(label, forecast)
+            except Exception as e:
+                if metric.component_reduction is None:
+                    metrics_values[metric.name] = np.full(forecast.n_components, np.nan)
+                else:
+                    metrics_values[metric.name] = np.nan
+                         
+        return metrics_values
         

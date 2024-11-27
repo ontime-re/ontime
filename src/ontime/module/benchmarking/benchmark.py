@@ -11,6 +11,7 @@ from ontime.module.benchmarking import (
     BenchmarkMode,
 )
 
+from alive_progress import alive_bar
 import pandas as pd
 import time
 import traceback
@@ -38,10 +39,8 @@ class Benchmark:
         if metrics is not None:
             self.metrics = metrics
         if datasets is not None:
-            i = 1
             for d in datasets:
                 self.add_dataset(d)
-                i += 1
         if models is not None:
             for m in models:
                 self.add_model(m)
@@ -72,123 +71,131 @@ class Benchmark:
     def get_metrics(self):
         return self.metrics
 
-    def run(self, verbose: bool = False, debug: bool = False, nb_predictions: int = 1):
-        # TODO: throw error if models or datasets is empty
-        if verbose:
-            print("Starting evaluation...")
-        i = 0
+    def run(self, verbose: bool = False, debug: bool = False, use_progress_bar = False, nb_predictions: int = 1): 
+        total_steps = len(self.models) * len(self.datasets)
         
-        if nb_predictions > 0:
-            inputs, targets = self._get_random_inputs(nb_predictions)
-            self.predictions = {"inputs": inputs, "targets": targets, "predictions": {}}
-        
-        for source_model in self.models:
-            self.results[source_model.name] = {}
-            self.model_stats[source_model.name] = {}
+        # Initialize the alive-progress bar if enabled
+        with alive_bar(total_steps, title="Benchmarking", force_tty=True, length=20, max_cols=200) as bar:
             if nb_predictions > 0:
-                self.predictions["predictions"][source_model.name] = {}
+                inputs, targets = self._get_random_inputs(nb_predictions)
+                self.predictions = {"inputs": inputs, "targets": targets, "predictions": {}}
             
-            if verbose:
-                print(f"Evaluation for model {source_model.name}")
+            for source_model in self.models:
+                self.results[source_model.name] = {}
+                self.model_stats[source_model.name] = {}
+                if nb_predictions > 0:
+                    self.predictions["predictions"][source_model.name] = {}
+                
+                if verbose:
+                    print(f"for model {source_model.name}")
 
-            # internal metrics (computed during run time)
-            mv0 = len([x for x in self.datasets if x.is_multivariate()])
-            nb_mv_run_succeeded = mv0
-            nb_uv_run_succeeded = len(self.datasets) - mv0
+                # internal metrics (computed during run time)
+                mv0 = len([x for x in self.datasets if x.is_multivariate()])
+                nb_mv_run_succeeded = mv0
+                nb_uv_run_succeeded = len(self.datasets) - mv0
 
-            # evaluation time!
-            for dataset in self.datasets:
-                print(f"on dataset {dataset.name}")
-
-                # initialize variables
-                nb_features = dataset.ts.n_components
-                _, test_set = dataset.get_train_test_split()
-                train_set, val_set = dataset.get_train_val_split()
-                train_size = len(train_set.time_index)
-                val_size = len(val_set.time_index)
-                test_size = len(test_set.time_index)
-                train_time = 0
-                inference_time = 0
-                run_success = True
-                try:
-                    # train
-                    if source_model.get_benchmark_mode() != BenchmarkMode.ZERO_SHOT:
-                        if verbose:
-                            print(f"training... ", end="")
-                        start_time = time.time()
-                        source_model.fit(train_ts=train_set, val_ts=val_set)
-                        train_time = time.time() - start_time
-
-                        if verbose:
-                            print(f"done, took {train_time}", end="")
-                    # test
+                # evaluation time!
+                for dataset in self.datasets:
+                    bar.text(f"{source_model.name} on {dataset.name}...")
+                    bar()
                     if verbose:
-                        print(f"testing... ", end="")
-                    start_time = time.time()
-                    metrics = source_model.evaluate(
-                        test_set,
-                        dataset.horizon,
-                        self.metrics,
-                        context_length=dataset.input_length,
-                        stride_length=dataset.stride,
-                    )
-                    inference_time = time.time() - start_time
-                    if verbose:
-                        print(f"done, took {inference_time}")
-                        
-                    # get predictions
-                    if nb_predictions > 0:
-                        self.predictions["predictions"][source_model.name][dataset.name] = []
+                        print(f"on dataset {dataset.name}")
+
+                    # initialize variables
+                    nb_features = dataset.ts.n_components
+                    _, test_set = dataset.get_train_test_split()
+                    train_set, val_set = dataset.get_train_val_split()
+                    train_size = len(train_set.time_index)
+                    val_size = len(val_set.time_index)
+                    test_size = len(test_set.time_index)
+                    train_time = 0
+                    inference_time = 0
+                    run_success = True
+                    try:
+                        # TODO: make this cleaner
+                        source_model.reset_model(input_chunk_length=dataset.input_length, output_chunk_length=dataset.horizon)
+                        # train
+                        if source_model.get_benchmark_mode() != BenchmarkMode.ZERO_SHOT:
+                            if verbose:
+                                print(f"training... ", end="")
+                            start_time = time.time()
+                            source_model.fit(train_ts=train_set, val_ts=val_set)
+                            train_time = time.time() - start_time
+
+                            if verbose:
+                                print(f"done, took {train_time}", end="")
+                        # test
                         if verbose:
-                            print(f"getting predictions... ", end="")
-                        for input in inputs[dataset.name]:
-                            prediction = source_model.predict(input, horizon=dataset.horizon)
-                            self.predictions["predictions"][source_model.name][dataset.name].append(prediction)
+                            print(f"evaluating... ", end="")
                             
-                    source_model.reset_model()
+                        start_time = time.time()
+                        metrics = source_model.evaluate(
+                            test_set,
+                            dataset.horizon,
+                            self.metrics,
+                            context_length=dataset.input_length,
+                            stride_length=dataset.stride,
+                        )
+                        evaluation_time = time.time() - start_time
+                        if verbose:
+                            print(f"done, took {evaluation_time}")
+                            
+                        inference_time = 0
+                        # get predictions
+                        if nb_predictions > 0:
+                            self.predictions["predictions"][source_model.name][dataset.name] = []
+                            if verbose:
+                                print(f"getting predictions... ", end="")
+                            predictions_time = []
+                            for input in inputs[dataset.name]:
+                                start_time = time.time()
+                                prediction = source_model.predict(input, horizon=dataset.horizon)
+                                predictions_time.append(time.time() - start_time)
+                                self.predictions["predictions"][source_model.name][dataset.name].append(prediction)
+                            inference_time = np.mean(predictions_time)
 
-                except:  # can't train or test on this dataset
-                    run_success = False
-                    if nb_features == 1:
-                        nb_uv_run_succeeded -= 1
-                    else:
-                        nb_mv_run_succeeded -= 1
-                    if verbose:
-                        print(f"Couldn't complete evaluation.")
-                        if debug:
-                            traceback.print_exc()
+                    except:  # can't train or test on this dataset
+                        run_success = False
+                        if nb_features == 1:
+                            nb_uv_run_succeeded -= 1
+                        else:
+                            nb_mv_run_succeeded -= 1
+                        if verbose:
+                            print(f"Couldn't complete evaluation.")
+                            if debug:
+                                traceback.print_exc()
 
-                if run_success:
-                    # compute metrics
-                    self.results[source_model.name][dataset.name] = {
-                        "nb features": nb_features,
-                        "target column": dataset.target_columns,
-                        "training set size": train_size,
-                        "validation set size": val_size,
-                        "training time": train_time,
-                        "test set size": test_size,
-                        "testing time": inference_time,
-                    }
-                    # compute user-submitted metrics
-                    if verbose:
-                        print(f"Computed metrics: {metrics}")
+                    if run_success:
+                        # compute metrics
+                        self.results[source_model.name][dataset.name] = {
+                            "nb features": nb_features,
+                            "target column": dataset.target_columns,
+                            "training set size": train_size,
+                            "validation set size": val_size,
+                            "test set size": test_size,
+                            "training time": train_time,
+                            "evaluation time": evaluation_time,
+                            "inference time": inference_time,
+                        }
+                        # compute user-submitted metrics
+                        if verbose:
+                            print(f"Computed metrics: {metrics}")
 
-                    self.results[source_model.name][dataset.name]["metrics"] = metrics
+                        self.results[source_model.name][dataset.name]["metrics"] = metrics
 
-            # back to model-level stats
-            supports_uni = None
-            if len(self.datasets) - mv0 > 0:  # if we have univariate ds in our batch
-                supports_uni = nb_uv_run_succeeded > 0
-            supports_mult = None
-            if mv0 > 0:
-                supports_mult = nb_mv_run_succeeded > 0
-            self.model_stats[source_model.name][
-                "supports univariate"
-            ] = Benchmark._bool_to_symbol(supports_uni)
-            self.model_stats[source_model.name][
-                "supports multivariate"
-            ] = Benchmark._bool_to_symbol(supports_mult)
-            i += 1
+                # back to model-level stats
+                supports_uni = None
+                if len(self.datasets) - mv0 > 0:  # if we have univariate ds in our batch
+                    supports_uni = nb_uv_run_succeeded > 0
+                supports_mult = None
+                if mv0 > 0:
+                    supports_mult = nb_mv_run_succeeded > 0
+                self.model_stats[source_model.name][
+                    "supports univariate"
+                ] = Benchmark._bool_to_symbol(supports_uni)
+                self.model_stats[source_model.name][
+                    "supports multivariate"
+                ] = Benchmark._bool_to_symbol(supports_mult)
 
     @staticmethod
     def _bool_to_symbol(b: bool) -> str:
@@ -235,7 +242,7 @@ class Benchmark:
                             flat_results[(dataset_name, metric_name)][
                                 model_name
                             ] = metric_value
-                    elif result_name in ["training time", "testing time"]:
+                    elif result_name in ["training time", "evaluation time", "inference time"]:
                         flat_results[(dataset_name, result_name)] = flat_results.get(
                             (dataset_name, result_name), {}
                         )

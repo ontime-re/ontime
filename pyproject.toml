@@ -23,6 +23,7 @@ tensorflow = "^2.16.1"
 lightning = "^2.2.4"
 numpy = "^1.26.4"
 calmap = "^0.0.11"
+alive-progress = "^3.2.0"
 
 [tool.poetry.group.dev]
 optional = true
