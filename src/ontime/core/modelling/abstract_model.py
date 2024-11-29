@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, NoReturn
+from typing import Any, NoReturn, Optional
 from ..time_series import TimeSeries
 
 
@@ -19,6 +19,6 @@ class AbstractModel(ABC):
         pass
 
     @abstractmethod
-    def predict(self, horizon: Any, *args, **kwargs) -> Any:
+    def predict(self, horizon: Any, ts: Optional[TimeSeries] = None, *args, **kwargs) -> Any:
         """Usage of the model to predict values"""
         pass

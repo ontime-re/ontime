@@ -1,3 +1,4 @@
+from typing import Optional
 from darts.models.forecasting.forecasting_model import ModelMeta
 from sklearn.base import BaseEstimator
 from ..time_series import TimeSeries
@@ -46,11 +47,12 @@ class Model(AbstractModel):
         self.model.fit(ts, **params)
         return self
 
-    def predict(self, n: int, **params) -> TimeSeries:
+    def predict(self, n: int, ts: Optional[TimeSeries] = None, **params) -> TimeSeries:
         """
         Predict length steps into the future
 
         :param n: int number of steps to predict
+        :param ts: the time series from which make the prediction. Optional if the model can predict on the ts it has been trained on.
         :param params: dict to pass to the predict method
         :return: TimeSeries
         """
