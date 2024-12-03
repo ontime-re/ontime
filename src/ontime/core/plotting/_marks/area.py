@@ -6,6 +6,14 @@ from ..plot import Plot
 
 
 def area(ts: TimeSeries, title: str = "Area", encode_kwargs: dict = None) -> Chart:
+    """
+    Plot a TimeSeries as an area chart
+
+    :param ts: TimeSeries
+    :param title: str
+    :param encode_kwargs: dict
+    :return: Altair Chart
+    """
     # Define type given the number of components
     if ts.is_univariate:
         type = "single"
