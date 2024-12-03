@@ -5,21 +5,21 @@ from darts.models.forecasting.forecasting_model import ModelMeta, GlobalForecast
 import numpy as np
 
 
-class ForecastingModel(AbstractModel):
+class DartsForecastingModel(AbstractModel):
     """
     Generic wrapper around Darts forecasting models
     """
 
-    def __init__(self, model: ModelMeta, **params):
+    def __init__(self, model_class: ModelMeta, **params):
         """Constructor of a ForecastingModel object
 
-        :param model: Dart's forecasting model
+        :param model: Darts forecasting model class
         :param params: dict of keyword arguments for this model's constructor
         """
         super().__init__()
-        self.model = model(**params)
+        self.model = model_class(**params)
 
-    def fit(self, ts: TimeSeries, **params) -> "ForecastingModel":
+    def fit(self, ts: TimeSeries, **params) -> "DartsForecastingModel":
         """
         Fit the model to the given time series
 
@@ -27,7 +27,7 @@ class ForecastingModel(AbstractModel):
         :param params: dict of keyword arguments for this model's fit method
         :return: self
         """
-        self.model.fit(ts, **params)
+        self.model.fit(ts, **params) # TODO: should we not here remove **params so that we can pass any args to fit method from outside.
         return self
 
     def predict(self, n: int, ts: Optional[TimeSeries] = None, **params) -> TimeSeries:
