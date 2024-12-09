@@ -1,23 +1,26 @@
 from abc import ABCMeta
-from ...abstract_model import AbstractModel
+from typing import Union, Type, Optional
+from sklearn.base import BaseEstimator
+from ...model_interface import ModelInterface
 from ontime.core.time_series import TimeSeries
 from skforecast.ForecasterAutoregMultiVariate import (
     ForecasterAutoregMultiVariate as SkForecasterAutoregMultiVariate,
 )
 
 
-class ForecasterAutoregMultiVariate(AbstractModel):
+class ForecasterAutoregMultiVariate(ModelInterface):
     """
     Generic wrapper around SkForecast ForecasterAutoreg models
     """
 
-    def __init__(self, model, **params):
+    def __init__(self, model: Union[Type[BaseEstimator], BaseEstimator], **params):
         """
         Initialize model based on ForecasterAutoregMultiVariate. **params are defined in ForecasterAutoregMultiVariate
         from sklearn
         """
         super().__init__()
-        if isinstance(model, ABCMeta):
+        # check if model is a class or an instance
+        if isinstance(model, type):
             model = model()
         self.model = SkForecasterAutoregMultiVariate(regressor=model, **params)
 
@@ -34,7 +37,7 @@ class ForecasterAutoregMultiVariate(AbstractModel):
         self.model.fit(series=df, **params)
         return self
 
-    def predict(self, n: int, **params) -> TimeSeries:
+    def predict(self, n: int, ts: Optional[TimeSeries] = None, **params) -> TimeSeries:
         """
         Predict n steps into the future, must match with the limit defined on model initialization
 

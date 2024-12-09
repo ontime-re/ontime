@@ -1,23 +1,27 @@
-from typing import Optional
-from ...abstract_model import AbstractModel
+from typing import Optional, Union, Type
+from ...model_interface import ModelInterface
 from ....time_series import TimeSeries
 from darts.models.forecasting.forecasting_model import ModelMeta, GlobalForecastingModel
 import numpy as np
 
 
-class DartsForecastingModel(AbstractModel):
+class DartsForecastingModel(ModelInterface):
     """
     Generic wrapper around Darts forecasting models
     """
 
-    def __init__(self, model_class: ModelMeta, **params):
+    def __init__(self, model: Union[Type[ModelMeta], ModelMeta], **params):
         """Constructor of a ForecastingModel object
 
         :param model: Darts forecasting model class
         :param params: dict of keyword arguments for this model's constructor
         """
         super().__init__()
-        self.model = model_class(**params)
+        self.model = model
+        print(isinstance(model, ModelMeta))
+        # check if model is a class or an instance
+        if isinstance(model, type):
+            self.model = model(**params)
 
     def fit(self, ts: TimeSeries, **params) -> "DartsForecastingModel":
         """
@@ -27,7 +31,7 @@ class DartsForecastingModel(AbstractModel):
         :param params: dict of keyword arguments for this model's fit method
         :return: self
         """
-        self.model.fit(ts, **params) # TODO: should we not here remove **params so that we can pass any args to fit method from outside.
+        self.model.fit(ts, **params)
         return self
 
     def predict(self, n: int, ts: Optional[TimeSeries] = None, **params) -> TimeSeries:
@@ -40,12 +44,12 @@ class DartsForecastingModel(AbstractModel):
         :return: TimeSeries
         """
         if ts:
-            if not isinstance(self.model, GlobalForecastingModel):
-                pred = self._fit_predict(ts, n, **params)
-            pred = self.model.predict(series=ts, n=n, **params)
+            if isinstance(self.model, GlobalForecastingModel):
+                pred = self.model.predict(series=ts, n=n, **params)
+            pred = self._fit_predict(ts, n, **params)
         else:            
             pred = self.model.predict(n, **params)
-        return TimeSeries(pred.data_array()) # why ?
+        return TimeSeries.from_darts(pred)
     
     def _fit_predict(self, n: int, ts: TimeSeries, **params) -> TimeSeries:
         """
