@@ -8,9 +8,9 @@ class BenchmarkDataset:
         self,
         ts: TimeSeries,
         input_length: int,
+        target_length: int,
         gap: int,
         stride: int,
-        horizon: int,
         name: str,
         train_proportion: float = 0.8,
         target_columns: Optional[List[str]] = None,
@@ -19,7 +19,7 @@ class BenchmarkDataset:
         self.input_length = input_length
         self.gap = gap
         self.stride = stride
-        self.horizon = horizon
+        self.target_length = target_length
         self.name = name
         self.train_proportion = train_proportion
         # if target columns is None, we use all columns
