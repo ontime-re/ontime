@@ -1,4 +1,4 @@
-from typing import Any, NoReturn, Optional, Dict, Union, Type
+from typing import Any, Optional, Dict, Union, Type, List
 import warnings
 
 from ...model_interface import ModelInterface
@@ -40,20 +40,9 @@ class TorchForecastingModel(L.LightningModule, ModelInterface):
         self.train_ts = None
         
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Forward pass through the wrapped PyTorch model
-
-        :param x: input tensor
-        :return: output tensor
-        """
         return self.model(x)
     
     def training_step(self, batch: tuple, batch_idx: int) -> torch.Tensor:
-        """Training step for PyTorch Lightning
-
-        :param batch: tuple containing inputs and targets
-        :param batch_idx: index of the batch
-        :return: training loss for the batch
-        """
         inputs, targets = batch
         outputs = self(inputs)
         loss = self.loss_fn(outputs, targets)
@@ -61,12 +50,6 @@ class TorchForecastingModel(L.LightningModule, ModelInterface):
         return loss
     
     def validation_step(self, batch: tuple, batch_idx: int) -> torch.Tensor:
-        """Validation step for PyTorch Lightning
-
-        :param batch: tuple containing inputs and targets
-        :param batch_idx: index of the batch
-        :return: training loss for the batch
-        """
         inputs, targets = batch
         outputs = self(inputs)
         loss = self.loss_fn(outputs, targets)
@@ -74,20 +57,11 @@ class TorchForecastingModel(L.LightningModule, ModelInterface):
         return loss
     
     def configure_optimizers(self) -> torch.optim.Optimizer:
-        """Configure the optimizer for training
-
-        :return: optimizer
-        """
         return torch.optim.Adam(self.model.parameters(), lr=self.lr)
 
-    def fit(self, ts: TimeSeries, **kwargs) -> "TorchForecastingModel":
-        """Fit the model using the given time series data
-
-        :param ts: time series data for training
-        :param kwargs: additional arguments for the PyTorch Lightning trainer
-        """
+    def fit(self, ts: TimeSeries, **params) -> "TorchForecastingModel":
         self.train_ts = ts
-        trainer = L.Trainer(max_epochs = self.n_epochs, **kwargs)
+        trainer = L.Trainer(max_epochs = self.n_epochs, **params)
         self.data_module = TimeSeriesDataModule(
             series=ts, 
             input_length=self.input_chunk_length, 
@@ -96,18 +70,15 @@ class TorchForecastingModel(L.LightningModule, ModelInterface):
         trainer.fit(self, datamodule=self.data_module)
         return self
 
-    def predict(self, n: int, ts: Optional[TimeSeries] = None, **params) -> TimeSeries:
-        """
-        Predict n steps into the future
-
-        :param n: int number of steps to predict
-        :param ts: the time series from which make the prediction. Optional if the model can predict on the ts it has been trained on.
-        :param params: dict of keyword arguments for this model's predict method
-        :return: TimeSeries
-        """        
+    def predict(
+        self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
+    ) -> Union[List[TimeSeries], TimeSeries]:     
         if not ts:
             ts = self.train_ts
             
+        is_batch = isinstance(ts, list)
+        ts_list = ts if is_batch else [ts]    
+        
         if n > self.output_chunk_length:
             warnings.warn(
                 f"The requested prediction horizon (n={n}) exceeds the model's output_chunk_length "
@@ -115,17 +86,15 @@ class TorchForecastingModel(L.LightningModule, ModelInterface):
                 f"which may result in reduced accuracy due to error propagation.",       
             )
         
-        # create forecast index
-        forecast_index = pd.date_range(start=ts.time_index[-1], periods=n+1, freq=ts.time_index.freq)[1:]
+        # create forecast indices
+        forecast_indices = [pd.date_range(start=series.time_index[-1], periods=n+1, freq=series.time_index.freq)[1:] for series in ts_list] 
+        
+        
+        # prepare inputs
+        input = torch.stack([series.to_tensor() for series in ts_list])
         
         self.eval()
         with torch.no_grad():
-            input = ts.to_tensor()
-
-            # add the batch dim if needed
-            if len(input.size()) == 2:
-                input = input.unsqueeze(0)
-                
             # as the model may not be designed to predict n time steps at once, we may slice the output and/or autoregressively get predictions
             predictions = []
             current_input = input.clone()
@@ -141,6 +110,9 @@ class TorchForecastingModel(L.LightningModule, ModelInterface):
             # concatenate predictions and trim
             predictions = torch.cat(predictions, dim=1)
             predictions = predictions[:, :n, :]
-            predictions = predictions.squeeze(0).cpu().numpy()
             
-        return TimeSeries.from_times_and_values(forecast_index, predictions)
+        result = [
+            TimeSeries.from_times_and_values(forecast_index, prediction.squeeze(0).cpu().numpy()) for forecast_index, prediction in zip(forecast_indices, predictions)
+        ]
+            
+        return result if is_batch else result[0]

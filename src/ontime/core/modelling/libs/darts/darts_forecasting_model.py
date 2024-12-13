@@ -1,4 +1,4 @@
-from typing import Optional, Union, Type
+from typing import Optional, Union, Type, List
 from ...model_interface import ModelInterface
 from ....time_series import TimeSeries
 from darts.models.forecasting.forecasting_model import ModelMeta, GlobalForecastingModel
@@ -24,31 +24,20 @@ class DartsForecastingModel(ModelInterface):
             self.model = model(**params)
 
     def fit(self, ts: TimeSeries, **params) -> "DartsForecastingModel":
-        """
-        Fit the model to the given time series
-
-        :param ts: TimeSeries
-        :param params: dict of keyword arguments for this model's fit method
-        :return: self
-        """
         self.model.fit(ts, **params)
         return self
 
-    def predict(self, n: int, ts: Optional[TimeSeries] = None, **params) -> TimeSeries:
-        """
-        Predict n steps into the future
-
-        :param n: int number of steps to predict
-        :param ts: the time series from which make the prediction. Optional if the model can predict on the ts it has been trained on.
-        :param params: dict of keyword arguments for this model's predict method
-        :return: TimeSeries
-        """
+    def predict(self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
+    ) -> Union[List[TimeSeries], TimeSeries]:
         if ts:
             if isinstance(self.model, GlobalForecastingModel):
                 pred = self.model.predict(series=ts, n=n, **params)
-            pred = self._fit_predict(ts, n, **params)
+            else:
+                pred = self._fit_predict(ts, n, **params)
         else:            
             pred = self.model.predict(n, **params)
+        if isinstance(pred, list):
+            return [TimeSeries.from_darts(p) for p in pred]
         return TimeSeries.from_darts(pred)
     
     def _fit_predict(self, n: int, ts: TimeSeries, **params) -> TimeSeries:

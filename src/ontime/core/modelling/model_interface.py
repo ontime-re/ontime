@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, NoReturn, Optional
+from typing import Any, NoReturn, Optional, Union, List
 from ..time_series import TimeSeries
 
 
@@ -11,11 +11,24 @@ class ModelInterface(ABC):
     """
 
     @abstractmethod
-    def fit(self, ts: TimeSeries, *args, **kwargs) -> NoReturn:
-        """Fit a model"""
+    def fit(self, ts: TimeSeries, **params) -> "ModelInterface":
+        """
+        Fit a model.
+
+        :param ts: time series on which to fit the model
+        :return: self
+        """
         pass
 
     @abstractmethod
-    def predict(self, horizon: Any, ts: Optional[TimeSeries] = None, *args, **kwargs) -> Any:
-        """Usage of the model to predict values"""
+    def predict(self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
+    ) -> Union[List[TimeSeries], TimeSeries]:
+        """
+        Predict n steps into the future
+
+        :param n: int number of steps to predict
+        :param ts: the time series from which make the prediction. Optional if the model 
+        can predict on the ts it has been trained on.
+        :return: TimeSeries
+        """
         pass

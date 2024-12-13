@@ -1,4 +1,4 @@
-from typing import Optional, Union, Type, Any
+from typing import Optional, Union, Type, Any, List
 from darts.models.forecasting.forecasting_model import ModelMeta
 from sklearn.base import BaseEstimator
 from ..time_series import TimeSeries
@@ -13,12 +13,13 @@ from .libs.skforecast.forecaster_autoreg_multi_variate import (
 from .libs.pytorch.pytorch_forecasting_model import TorchForecastingModel
 from torch import nn
 
+
 def is_subclass_or_instance_of_subclass(variable: Any, base_class: Any):
     """
     Check if the given variable is either a subclass of the given base class, or an instance of the base class (or its subclass)
     """
     if isinstance(variable, base_class):
-        return True 
+        return True
     try:
         if issubclass(variable, base_class):
             return True
@@ -42,45 +43,37 @@ class Model(ModelInterface):
     """
 
     def __init__(self, model: Union[ModelInterface, Type[ModelInterface]], **params):
-        super().__init__()
         """
-        Constructor
+        Initializes a Model.
+
         :param model: either a model class or a model instance
-        :param params: argument given to the wrapper model constructor
         """
+
+        super().__init__()
         self.model = model
         self.params = params
         self.is_model_undefined = True
 
     def fit(self, ts: TimeSeries, **params) -> "Model":
-        """
-        Fit the model to the given time series
-
-        :param ts: TimeSeries
-        :param params: Parameters to pass to the model
-        :return: self
-        """
         if self.is_model_undefined:
             self._set_model(ts)
 
         self.model.fit(ts, **params)
         return self
 
-    def predict(self, n: int, ts: Optional[TimeSeries] = None, **params) -> TimeSeries:
-        """
-        Predict length steps into the future
-
-        :param n: int number of steps to predict
-        :param ts: the time series from which make the prediction. Optional if the model can predict on the ts it has been trained on.
-        :param params: dict to pass to the predict method
-        :return: TimeSeries
-        """
+    def predict(self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
+    ) -> Union[List[TimeSeries], TimeSeries]:
         return self.model.predict(n, ts, **params)
 
-    def _set_model(self, ts):
+    def _set_model(self, ts: TimeSeries):
         """
         Create and set the appropriate model wrapper according to the actual model.
+
+        :param ts: the time series on which the selected model will be fitted.
+        :raises ValueError: if the provided model is not supported by the model wrapper. This could happen if the model
+        does not inherit from a known base class such as `ModelMeta`, `BaseEstimator`, or `nn.Module`.
         """
+        
         size_of_ts = ts.n_components
 
         if is_subclass_or_instance_of_subclass(self.model, ModelMeta):
