@@ -1,7 +1,6 @@
 from typing import List, Dict, Any
 
 from ontime.core.modelling.model import Model
-from ontime import TimeSeries
 from ..benchmarking import BenchmarkDataset, BenchmarkMetric
 from ontime.module.processing.common import (
     split_in_windows,
@@ -14,11 +13,11 @@ class BenchmarkEvaluator:
     """
     def __init__(self, dataset: BenchmarkDataset, metrics: List[BenchmarkMetric]):
         """
-        Constructor.
+        Initializes a BenchmarkEvaluator
         
         :param dataset: dataset on which evaluate models
         :param metrics: evaluation metrics to compute
-        :return:
+        :return: an initialized BenchmarkEvaluator
         """
         self.dataset = dataset
         self.metrics = metrics
@@ -30,8 +29,9 @@ class BenchmarkEvaluator:
         
         :param model: the model to evaluate
         :param batch_size: size of a batch of data. If not specified, will be equal to the number of samples generated.
-        :return:
+        :return: calculated metrics
         """
+        # create windows
         window_length = self.dataset.input_length + self.dataset.target_length + self.dataset.gap
         ts_list = split_in_windows(self.test_ts, window_length, self.dataset.stride)
         input_ts_list, target_ts_list = split_inputs_from_targets(
@@ -40,7 +40,7 @@ class BenchmarkEvaluator:
             target_length=self.dataset.target_length,
             gap_length=self.dataset.gap)
         
-        # batch prediction
+        # batch prediction, take all input in a one batch if no batch size given
         if batch_size is None:
             batch_size = len(input_ts_list)
             
