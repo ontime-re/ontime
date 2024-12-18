@@ -46,15 +46,17 @@ class BenchmarkEvaluator:
             
         pred_ts_list = []
         
-        for i in range(0, len(input_ts_list), batch_size):
+        for i in range(0, len(input_ts_list), batch_size): 
             batch_inputs = input_ts_list[i:i+batch_size]
-            pred_ts_list.extend(model.predict(batch_inputs)) # model should be able to handle list of inputs
+            pred_ts_list.extend(model.predict(ts=batch_inputs, n=self.dataset.target_length)) # model should be able to handle list of inputs
             
         results = {}
+        
         for metric in self.metrics:
             metric_results = metric.compute(target_ts_list, pred_ts_list, insample=input_ts_list)
             results[metric.name] = metric.aggregate_series_metrics(metric_results)
-            return results
+        
+        return results
                 
         
         

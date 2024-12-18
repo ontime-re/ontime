@@ -3,7 +3,7 @@ from typing import Type, Dict, Any, Callable, Optional
 from enum import Enum
 
 from ontime.core.modelling.model_interface import ModelInterface
-from ontime.module.benchmarking import BenchmarkDataset
+from .benchmark_dataset import BenchmarkDataset
 
 class BenchmarkMode(Enum):
     ZERO_SHOT = 1  # no training, only inference
@@ -52,4 +52,4 @@ class BenchmarkModelConfig:
         }
         model_params = {**self._static_model_params, **resolved_model_dynamic_params}
         
-        return self._model_class(**model_params)
+        return self.model_class(**model_params)

@@ -1,5 +1,5 @@
 from typing import Optional, Union, Type, Any, List
-from darts.models.forecasting.forecasting_model import ModelMeta
+from darts.models.forecasting.forecasting_model import ForecastingModel
 from sklearn.base import BaseEstimator
 from ..time_series import TimeSeries
 from .model_interface import ModelInterface
@@ -63,6 +63,11 @@ class Model(ModelInterface):
 
     def predict(self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
     ) -> Union[List[TimeSeries], TimeSeries]:
+        if self.is_model_undefined:
+            if isinstance(ts, list):
+                self._set_model(ts[0])
+            else:
+                self._set_model(ts)
         return self.model.predict(n, ts, **params)
 
     def _set_model(self, ts: TimeSeries):
@@ -76,7 +81,7 @@ class Model(ModelInterface):
         
         size_of_ts = ts.n_components
 
-        if is_subclass_or_instance_of_subclass(self.model, ModelMeta):
+        if is_subclass_or_instance_of_subclass(self.model, ForecastingModel):
             # Darts Models
             self.model = DartsForecastingModel(self.model, **self.params)
         # This take all the sklearn regressors and pipelines

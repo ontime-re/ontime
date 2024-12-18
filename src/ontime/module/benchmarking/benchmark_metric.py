@@ -124,9 +124,9 @@ class BenchmarkMetric:
         :return: the metric(s)
         """
 
-        if not self._insample_required:
+        if not self.insample_required:
             insample = None
-        if self._insample_required and insample is None:
+        if self.insample_required and insample is None:
             raise ValueError(
                 f"The 'insample' parameter is required with {self._metric_function.__name__}."
             )

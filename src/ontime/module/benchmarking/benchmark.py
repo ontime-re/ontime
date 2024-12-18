@@ -4,13 +4,10 @@ import logging
 
 from ontime import TimeSeries
 from ontime.core.modelling.model_interface import ModelInterface
-from ontime.module.benchmarking import (
-    BenchmarkDataset,
-    BenchmarkModelConfig,
-    BenchmarkMetric,
-    BenchmarkMode,
-    BenchmarkEvaluator
-)
+from .benchmark_dataset import BenchmarkDataset
+from .benchmark_evaluator import BenchmarkEvaluator
+from .benchmark_metric import BenchmarkMetric
+from .benchmark_model_config import BenchmarkMode, BenchmarkModelConfig
 
 from alive_progress import alive_bar
 import pandas as pd
@@ -35,16 +32,20 @@ def setup_logger(name: str = None, logging_level: int = logging.WARNING) -> logg
                          Defaults to logging.WARNING.
     :return: A configured logger instance.
     """
-    logger = logging.getLogger(name or "CustomLogger")
+    # Chat GPT generated
+    logger = logging.getLogger(name or "BenchmarkLogger")
     logger.setLevel(logging_level)
 
     # Avoid adding handlers multiple times
-    if not logger.handlers:
+    if not any(isinstance(handler, logging.StreamHandler) for handler in logger.handlers):
         handler = logging.StreamHandler()
-        formatter = logging.Formatter("%(asctime)s - [%(levelname)s] - %(name)s - %(message)s")
+        formatter = logging.Formatter("%(asctime)s - [%(levelname)s] - %(name)s - %(message)s", datefmt='%H:%M:%S')
         handler.setFormatter(formatter)
         handler.setLevel(logging_level)
         logger.addHandler(handler)
+
+    # Prevent propagation to the root logger
+    logger.propagate = False
 
     return logger
 
@@ -137,7 +138,6 @@ class Benchmark:
             
             for dataset in self.datasets:
                 self.results[dataset.name] = {}
-                self.model_stats[dataset.name] = {}
                 self.predictions["predictions"][dataset.name] = {}
                 
                 logger.info(f"On {dataset.name} dataset...")
@@ -164,13 +164,13 @@ class Benchmark:
                 
                 for model_config in self.model_configs:
                     bar.text(f"{model_config.model_name} on {dataset.name}")
+                    bar()
                     self.results[dataset.name][model_config.model_name] = {}
-                    self.model_stats[dataset.name][model_config.model_name] = {}
                     
                     logger.info(f"{model_config.model_name} model...")
 
                     try:
-                        model = model_config.init_model()
+                        model = model_config.init_model(dataset=dataset)
                         
                         if model_config.benchmark_mode != BenchmarkMode.ZERO_SHOT:
                             logging.info("Training ...")
@@ -188,29 +188,29 @@ class Benchmark:
                         metrics = evaluator.evaluate(model=model)
                         evaluation_time = time.time() - start_time
                         
-                        print(f"Evaluation done, took {evaluation_time}")
+                        logger.info(f"Evaluation done, took {evaluation_time}")
                             
                         inference_time = np.nan
                         # get predictions
                         if nb_predictions > 0:
                             self.predictions["predictions"][dataset.name][model_config.model_name] = []
-                            print(f"getting predictions... ", end="")
+                            logger.info(f"getting predictions... ")
                             predictions_time = []
                             for input in inputs[dataset.name]:
                                 start_time = time.time()
-                                prediction = model_config.predict(ts=input, n=dataset.horizon)
+                                prediction = model.predict(ts=input, n=dataset.target_length)
                                 predictions_time.append(time.time() - start_time)
                                 self.predictions["predictions"][dataset.name][model_config.model_name].append(prediction)
                             inference_time = np.mean(predictions_time)
 
                     except:
-                        self.results[model_config.model_name][dataset.name] = {"suceeded": False}
-                        logger.info(f"Could not complete evaluation for {model_config.model_name}" 
-                                    "model on {dataset.name} dataset")
-                        logger.debug(traceback.print_exc())
+                        self.results[dataset.name][model_config.model_name] = {"suceeded": False}
+                        logger.warning(f"Could not complete evaluation for {model_config.model_name}" 
+                                    f" model on {dataset.name} dataset")
+                        logger.debug(traceback.format_exc())
                             
-                    if not "suceeded" in self.results[model_config.model_name][dataset.name]:                          
-                        self.results[model_config.model_name][dataset.name] = {
+                    if not "suceeded" in self.results[dataset.name][model_config.model_name]:                          
+                        self.results[dataset.name][model_config.model_name] = {
                             "suceeded": True,
                             "training time": training_time,
                             "evaluation time": evaluation_time,
@@ -222,9 +222,6 @@ class Benchmark:
                         
     def get_results(self):
         return self.results
-
-    def get_model_stats(self):
-        return self.model_stats
     
     def get_predictions(self):
         return self.predictions
@@ -242,14 +239,14 @@ class Benchmark:
         for dataset in self.datasets:
             s = f"{dataset.name} dataset:\n"
             for key, value in self.dataset_info[dataset.name].items():
-                s += f"{key}: {value}"
+                s += f"{key}: {value}\n"
 
             for model_config in self.model_configs:
                 model_name = model_config.model_name
-                s += f"{model_name} model:\n"
+                s += f"\n{model_name} model:\n"
                 for key, value in self.results[dataset.name][model_name].items():
                     if key == "suceeded":
-                        s += f"{key}: {self._bool_to_symbol(value)}"
+                        s += f"{key}: {self._bool_to_symbol(value)}\n"
                     else:
                         s += f"{key}: {value}\n"
             txt.append(s)
@@ -286,10 +283,10 @@ class Benchmark:
 
         results_df = pd.DataFrame.from_dict(flat_results, orient="index")
         results_df.index.names = ["Dataset", "Metric"]
-        model_stats_df = pd.DataFrame(self.model_stats)
-        model_stats_df.index.name = "Statistic"
+        ds_info_df = pd.DataFrame(self.dataset_info)
+        ds_info_df.index.name = "Characteristic"
 
-        return model_stats_df, results_df    
+        return ds_info_df, results_df    
     
     @staticmethod
     def _bool_to_symbol(b: bool) -> str:
@@ -320,7 +317,7 @@ class Benchmark:
             
             # store dataset attributes
             input_length = dataset.input_length
-            horizon = dataset.horizon
+            horizon = dataset.target_length
             stride = dataset.stride
             gap = dataset.gap
             

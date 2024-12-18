@@ -18,7 +18,6 @@ class DartsForecastingModel(ModelInterface):
         """
         super().__init__()
         self.model = model
-        print(isinstance(model, ModelMeta))
         # check if model is a class or an instance
         if isinstance(model, type):
             self.model = model(**params)
@@ -33,7 +32,10 @@ class DartsForecastingModel(ModelInterface):
             if isinstance(self.model, GlobalForecastingModel):
                 pred = self.model.predict(series=ts, n=n, **params)
             else:
-                pred = self._fit_predict(ts, n, **params)
+                if isinstance(ts, list):
+                    pred = [self._fit_predict(n, t, **params) for t in ts]
+                else:    
+                    pred = self._fit_predict(n, ts, **params)
         else:            
             pred = self.model.predict(n, **params)
         if isinstance(pred, list):
