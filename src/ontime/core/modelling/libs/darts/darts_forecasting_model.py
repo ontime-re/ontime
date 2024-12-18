@@ -26,7 +26,8 @@ class DartsForecastingModel(ModelInterface):
         self.model.fit(ts, **params)
         return self
 
-    def predict(self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
+    def predict(
+        self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
     ) -> Union[List[TimeSeries], TimeSeries]:
         if ts:
             if isinstance(self.model, GlobalForecastingModel):
@@ -34,18 +35,18 @@ class DartsForecastingModel(ModelInterface):
             else:
                 if isinstance(ts, list):
                     pred = [self._fit_predict(n, t, **params) for t in ts]
-                else:    
+                else:
                     pred = self._fit_predict(n, ts, **params)
-        else:            
+        else:
             pred = self.model.predict(n, **params)
         if isinstance(pred, list):
             return [TimeSeries.from_darts(p) for p in pred]
         return TimeSeries.from_darts(pred)
-    
+
     def _fit_predict(self, n: int, ts: TimeSeries, **params) -> TimeSeries:
         """
         For LocalForecastingModel, fit the model on the given time series and produce from it a forecast of a given horizon.
-        
+
         :param n: int number of steps to predict
         :param ts: the time series from which make the prediction. Optional if the model can predict on the ts it has been trained on.
         :param params: dict of keyword arguments for this model's predict method
@@ -63,4 +64,6 @@ class DartsForecastingModel(ModelInterface):
             times=predictions[0].time_index,
             values=np.column_stack([f.values() for f in predictions]),
         )
-        return combined_forecast.with_columns_renamed(combined_forecast.components, ts.components)
+        return combined_forecast.with_columns_renamed(
+            combined_forecast.components, ts.components
+        )

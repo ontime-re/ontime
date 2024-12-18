@@ -143,15 +143,17 @@ class BenchmarkMetric:
                 series_reduction=None,
                 **kwargs,
             )
-        
-    def aggregate_series_metrics(self, metrics: List[Union[np.ndarray, float]]) -> Union[np.ndarray, float]:
+
+    def aggregate_series_metrics(
+        self, metrics: List[Union[np.ndarray, float]]
+    ) -> Union[np.ndarray, float]:
         """
         Aggregate metric over given series, according to the reduction function of the metric.
 
         :param metrics: metrics to aggregate
-        return: 
+        return:
         """
-        
+
         if self._series_reduction is None:
             return metrics
         return self._series_reduction(metrics, axis=0)

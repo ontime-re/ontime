@@ -23,7 +23,10 @@ LOG_LEVELS = {
     "critical": logging.CRITICAL,
 }
 
-def setup_logger(name: str = None, logging_level: int = logging.WARNING) -> logging.Logger:
+
+def setup_logger(
+    name: str = None, logging_level: int = logging.WARNING
+) -> logging.Logger:
     """
     Configures and returns a logger with the desired verbosity.
 
@@ -37,9 +40,13 @@ def setup_logger(name: str = None, logging_level: int = logging.WARNING) -> logg
     logger.setLevel(logging_level)
 
     # Avoid adding handlers multiple times
-    if not any(isinstance(handler, logging.StreamHandler) for handler in logger.handlers):
+    if not any(
+        isinstance(handler, logging.StreamHandler) for handler in logger.handlers
+    ):
         handler = logging.StreamHandler()
-        formatter = logging.Formatter("%(asctime)s - [%(levelname)s] - %(name)s - %(message)s", datefmt='%H:%M:%S')
+        formatter = logging.Formatter(
+            "%(asctime)s - [%(levelname)s] - %(name)s - %(message)s", datefmt="%H:%M:%S"
+        )
         handler.setFormatter(formatter)
         handler.setLevel(logging_level)
         logger.addHandler(handler)
@@ -49,10 +56,12 @@ def setup_logger(name: str = None, logging_level: int = logging.WARNING) -> logg
 
     return logger
 
+
 class Benchmark:
     """
     Benchmark class to initialize a benchmark with models, datasets and metrics, run it, and retrieve results.
     """
+
     def __init__(
         self,
         model_configs: List[ModelInterface] = None,
@@ -121,7 +130,7 @@ class Benchmark:
         """
         self.metrics.append(metric)
 
-    def run(self, logging_level: str = "warning", nb_predictions: int = 1): 
+    def run(self, logging_level: str = "warning", nb_predictions: int = 1):
         """
         Run the benchmark
 
@@ -129,28 +138,30 @@ class Benchmark:
         :param nb_predictions: the number of predictions to do per model and dataset, for plotting purpose
         """
         logger = setup_logger(logging_level=LOG_LEVELS[logging_level])
-        
+
         total_steps = len(self.model_configs) * len(self.datasets)
-        
-        with alive_bar(total_steps, title="Benchmarking", force_tty=True, length=20, max_cols=200) as bar:
+
+        with alive_bar(
+            total_steps, title="Benchmarking", force_tty=True, length=20, max_cols=200
+        ) as bar:
             inputs, targets = self._get_random_inputs(nb_predictions)
             self.predictions = {"inputs": inputs, "targets": targets, "predictions": {}}
-            
+
             for dataset in self.datasets:
                 self.results[dataset.name] = {}
                 self.predictions["predictions"][dataset.name] = {}
-                
+
                 logger.info(f"On {dataset.name} dataset...")
-                
+
                 nb_features = dataset.ts.n_components
                 _, test_set = dataset.get_train_test_split()
                 train_set, val_set = dataset.get_train_val_split()
                 train_size = len(train_set.time_index)
                 val_size = len(val_set.time_index)
                 test_size = len(test_set.time_index)
-                
+
                 evaluator = BenchmarkEvaluator(dataset, self.metrics)
-                
+
                 self.dataset_info[dataset.name] = {
                     "nb features": nb_features,
                     "target column": dataset.target_columns,
@@ -158,20 +169,20 @@ class Benchmark:
                     "validation set size": val_size,
                     "test set size": test_size,
                 }
-                
+
                 training_time = 0
                 inference_time = 0
-                
+
                 for model_config in self.model_configs:
                     bar.text(f"{model_config.model_name} on {dataset.name}")
                     bar()
                     self.results[dataset.name][model_config.model_name] = {}
-                    
+
                     logger.info(f"{model_config.model_name} model...")
 
                     try:
                         model = model_config.init_model(dataset=dataset)
-                        
+
                         if model_config.benchmark_mode != BenchmarkMode.ZERO_SHOT:
                             logging.info("Training ...")
                             start_time = time.time()
@@ -180,49 +191,64 @@ class Benchmark:
                                 fit_kwargs[model_config.validation_set_param] = val_set
                             model.fit(**fit_kwargs)
                             training_time = time.time() - start_time
-                            logger.info(f"Training done, it took {training_time} seconds")
+                            logger.info(
+                                f"Training done, it took {training_time} seconds"
+                            )
 
                         logger.info("Evaluating...")
-                            
+
                         start_time = time.time()
                         metrics = evaluator.evaluate(model=model)
                         evaluation_time = time.time() - start_time
-                        
+
                         logger.info(f"Evaluation done, took {evaluation_time}")
-                            
+
                         inference_time = np.nan
                         # get predictions
                         if nb_predictions > 0:
-                            self.predictions["predictions"][dataset.name][model_config.model_name] = []
+                            self.predictions["predictions"][dataset.name][
+                                model_config.model_name
+                            ] = []
                             logger.info(f"getting predictions... ")
                             predictions_time = []
                             for input in inputs[dataset.name]:
                                 start_time = time.time()
-                                prediction = model.predict(ts=input, n=dataset.target_length)
+                                prediction = model.predict(
+                                    ts=input, n=dataset.target_length
+                                )
                                 predictions_time.append(time.time() - start_time)
-                                self.predictions["predictions"][dataset.name][model_config.model_name].append(prediction)
+                                self.predictions["predictions"][dataset.name][
+                                    model_config.model_name
+                                ].append(prediction)
                             inference_time = np.mean(predictions_time)
 
                     except:
-                        self.results[dataset.name][model_config.model_name] = {"suceeded": False}
-                        logger.warning(f"Could not complete evaluation for {model_config.model_name}" 
-                                    f" model on {dataset.name} dataset")
+                        self.results[dataset.name][model_config.model_name] = {
+                            "suceeded": False
+                        }
+                        logger.warning(
+                            f"Could not complete evaluation for {model_config.model_name}"
+                            f" model on {dataset.name} dataset"
+                        )
                         logger.debug(traceback.format_exc())
-                            
-                    if not "suceeded" in self.results[dataset.name][model_config.model_name]:                          
+
+                    if (
+                        not "suceeded"
+                        in self.results[dataset.name][model_config.model_name]
+                    ):
                         self.results[dataset.name][model_config.model_name] = {
                             "suceeded": True,
                             "training time": training_time,
                             "evaluation time": evaluation_time,
                             "inference time": inference_time,
-                            "metrics": metrics
+                            "metrics": metrics,
                         }
-                            
+
                         logger.info(f"Computed metrics: \n {metrics}")
-                        
+
     def get_results(self):
         return self.results
-    
+
     def get_predictions(self):
         return self.predictions
 
@@ -273,7 +299,11 @@ class Benchmark:
                             flat_results[(dataset_name, metric_name)][
                                 model_name
                             ] = metric_value
-                    elif result_key in ["training time", "evaluation time", "inference time"]:
+                    elif result_key in [
+                        "training time",
+                        "evaluation time",
+                        "inference time",
+                    ]:
                         flat_results[(dataset_name, result_key)] = flat_results.get(
                             (dataset_name, result_key), {}
                         )
@@ -286,8 +316,8 @@ class Benchmark:
         ds_info_df = pd.DataFrame(self.dataset_info)
         ds_info_df.index.name = "Characteristic"
 
-        return ds_info_df, results_df    
-    
+        return ds_info_df, results_df
+
     @staticmethod
     def _bool_to_symbol(b: bool) -> str:
         if b is None:
@@ -295,45 +325,51 @@ class Benchmark:
         if b:
             return "✓"
         return "X"
-    
-    def _get_random_inputs(self, nb_samples: int = 1) -> Tuple[dict[str, list[TimeSeries]], dict[str, list[TimeSeries]]]:
+
+    def _get_random_inputs(
+        self, nb_samples: int = 1
+    ) -> Tuple[dict[str, list[TimeSeries]], dict[str, list[TimeSeries]]]:
         """
         Retrieve ``nb_samples`` tuples of input and target from all dataset in the benchmark
 
         :param nb_samples: number of input/target tuples to retrieve
         :return: a dictionnary identified by dataset name, containing the tuples of input and target
         """
-        
+
         # for each dataset, get the number of inputs specified, randomly selected.
         inputs = {}
         targets = {}
-        
+
         for dataset in self.datasets:
             inputs[dataset.name] = []
             targets[dataset.name] = []
             if nb_samples < 1:
                 continue
             _, test_set = dataset.get_train_test_split()
-            
+
             # store dataset attributes
             input_length = dataset.input_length
             horizon = dataset.target_length
             stride = dataset.stride
             gap = dataset.gap
-            
+
             # select random indices
             window_length = input_length + horizon + gap
             max_idx = len(test_set) - window_length
             available_indices = list(range(0, max_idx, stride))
-            
+
             if len(available_indices) < nb_samples:
                 nb_samples = len(available_indices)
-            
+
             indices = np.random.choice(available_indices, nb_samples, replace=False)
-            
+
             # store input and target time series
             for idx in indices:
-                inputs[dataset.name].append(test_set[idx:idx+input_length])
-                targets[dataset.name].append(test_set[idx+input_length+gap:idx+input_length+gap+horizon])
-                        
+                inputs[dataset.name].append(test_set[idx : idx + input_length])
+                targets[dataset.name].append(
+                    test_set[
+                        idx + input_length + gap : idx + input_length + gap + horizon
+                    ]
+                )
+
         return inputs, targets

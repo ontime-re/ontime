@@ -27,12 +27,15 @@ class ForecasterAutoreg(ModelInterface):
         self.model.fit(y=ts.pd_series(), **params)
         return self
 
-    def predict(self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
+    def predict(
+        self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
     ) -> Union[List[TimeSeries], TimeSeries]:
         if ts is None:
             pred = self.model.predict(n, **params)
         else:
             if not isinstance(ts, TimeSeries):
-                raise ValueError(f"For now, predict method can only be used on single TimeSeries")
+                raise ValueError(
+                    f"For now, predict method can only be used on single TimeSeries"
+                )
             pred = self.model.predict(n, last_window=ts.pd_series(), **params)
         return TimeSeries.from_series(pred)

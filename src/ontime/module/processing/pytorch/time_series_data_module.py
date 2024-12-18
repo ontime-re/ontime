@@ -65,7 +65,9 @@ class TimeSeriesDataModule(L.LightningDataModule):
         tmp_ts_train, self.ts_test = train_test_split(
             self.series, test_split=self.test_split
         )
-        self.ts_train, self.ts_val = train_test_split(tmp_ts_train, test_split=self.val_split)
+        self.ts_train, self.ts_val = train_test_split(
+            tmp_ts_train, test_split=self.val_split
+        )
 
     def compute_transform(self):
         """

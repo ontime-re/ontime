@@ -21,13 +21,14 @@ class ModelInterface(ABC):
         pass
 
     @abstractmethod
-    def predict(self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
+    def predict(
+        self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
     ) -> Union[List[TimeSeries], TimeSeries]:
         """
         Predict n steps into the future
 
         :param n: int number of steps to predict
-        :param ts: the time series from which make the prediction. Optional if the model 
+        :param ts: the time series from which make the prediction. Optional if the model
         can predict on the ts it has been trained on.
         :return: TimeSeries
         """

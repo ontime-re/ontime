@@ -61,7 +61,8 @@ class Model(ModelInterface):
         self.model.fit(ts, **params)
         return self
 
-    def predict(self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
+    def predict(
+        self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
     ) -> Union[List[TimeSeries], TimeSeries]:
         if self.is_model_undefined:
             if isinstance(ts, list):
@@ -78,7 +79,7 @@ class Model(ModelInterface):
         :raises ValueError: if the provided model is not supported by the model wrapper. This could happen if the model
         does not inherit from a known base class such as `ModelMeta`, `BaseEstimator`, or `nn.Module`.
         """
-        
+
         size_of_ts = ts.n_components
 
         if is_subclass_or_instance_of_subclass(self.model, ForecastingModel):

@@ -35,7 +35,7 @@ class BenchmarkDataset:
 
     def get_train_test_split(self):
         return self.ts.split_before(self.train_proportion)
-    
+
     def get_train_val_split(self):
         train_ts, _ = self.get_train_test_split()
         return train_ts.split_before(self.train_proportion)
