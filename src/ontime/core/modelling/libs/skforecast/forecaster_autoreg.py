@@ -1,14 +1,14 @@
 from abc import ABCMeta
 from typing import Union, Type, Optional, List
 from sklearn.base import BaseEstimator
-from ...model_interface import ModelInterface
+from ...abstract_model import AbstractModel
 from ....time_series import TimeSeries
 from skforecast.ForecasterAutoreg import (
     ForecasterAutoreg as SkForecastForecasterAutoreg,
 )
 
 
-class ForecasterAutoreg(ModelInterface):
+class ForecasterAutoreg(AbstractModel):
     """
     Generic wrapper around SkForecast ForecasterAutoreg models
     """

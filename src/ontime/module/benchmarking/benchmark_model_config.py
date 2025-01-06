@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Type, Dict, Any, Callable, Optional
 from enum import Enum
 
-from ontime.core.modelling.model_interface import ModelInterface
+from ontime.core.modelling.abstract_model import AbstractModel
 from .benchmark_dataset import BenchmarkDataset
 
 
@@ -19,7 +19,7 @@ class BenchmarkModelConfig:
     def __init__(
         self,
         model_name: str,
-        model_class: Type[ModelInterface],
+        model_class: Type[AbstractModel],
         benchmark_mode: BenchmarkMode,
         static_model_params: Optional[Dict[str, Any]] = None,
         dynamic_model_params: Optional[
@@ -45,7 +45,7 @@ class BenchmarkModelConfig:
         self._static_model_params = static_model_params or {}
         self._dynamic_model_params = dynamic_model_params or {}
 
-    def init_model(self, dataset: BenchmarkDataset) -> ModelInterface:
+    def init_model(self, dataset: BenchmarkDataset) -> AbstractModel:
         """
         Initializes the model from its class and parameters. Dynamically computes any parameters that depend on the dataset.
 

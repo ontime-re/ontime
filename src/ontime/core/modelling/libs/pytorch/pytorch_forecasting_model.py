@@ -1,7 +1,7 @@
 from typing import Any, Optional, Dict, Union, Type, List
 import warnings
 
-from ...model_interface import ModelInterface
+from ...abstract_model import AbstractModel
 from ....time_series import TimeSeries
 from ontime.module.processing.pytorch.time_series_data_module import (
     TimeSeriesDataModule,
@@ -13,7 +13,7 @@ from torch import nn
 import pandas as pd
 
 
-class TorchForecastingModel(L.LightningModule, ModelInterface):
+class TorchForecastingModel(L.LightningModule, AbstractModel):
     """
     Generic wrapper around PyTorch forecasting model, using PyTorch lightning for training.
     """

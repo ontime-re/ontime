@@ -3,7 +3,7 @@ from typing import List, Tuple
 import logging
 
 from ontime import TimeSeries
-from ontime.core.modelling.model_interface import ModelInterface
+from ontime.core.modelling.abstract_model import AbstractModel
 from .benchmark_dataset import BenchmarkDataset
 from .benchmark_evaluator import BenchmarkEvaluator
 from .benchmark_metric import BenchmarkMetric
@@ -64,7 +64,7 @@ class Benchmark:
 
     def __init__(
         self,
-        model_configs: List[ModelInterface] = None,
+        model_configs: List[AbstractModel] = None,
         datasets: List[BenchmarkDataset] = None,
         metrics: List[BenchmarkMetric] = None,
     ):
@@ -102,9 +102,9 @@ class Benchmark:
         :param model_config: the model configuration to add
         :raises TypeError: if the model class contained in given the model configuration is not a subclass of the ModelInterface interface
         """
-        if not issubclass(model_config.model_class, ModelInterface):
+        if not issubclass(model_config.model_class, AbstractModel):
             raise TypeError(
-                f"models must implement {ModelInterface}, found{type(model_config)}."
+                f"models must implement {AbstractModel}, found{type(model_config)}."
             )
         self.model_configs.append(model_config)
 

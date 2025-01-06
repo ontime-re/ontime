@@ -1,11 +1,11 @@
 from typing import Optional, Union, Type, List
-from ...model_interface import ModelInterface
+from ...abstract_model import AbstractModel
 from ....time_series import TimeSeries
 from darts.models.forecasting.forecasting_model import ModelMeta, GlobalForecastingModel
 import numpy as np
 
 
-class DartsForecastingModel(ModelInterface):
+class DartsForecastingModel(AbstractModel):
     """
     Generic wrapper around Darts forecasting models
     """

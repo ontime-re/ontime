@@ -2,7 +2,7 @@ from typing import Optional, Union, Type, Any, List
 from darts.models.forecasting.forecasting_model import ForecastingModel
 from sklearn.base import BaseEstimator
 from ..time_series import TimeSeries
-from .model_interface import ModelInterface
+from .abstract_model import AbstractModel
 from .libs.darts.darts_forecasting_model import DartsForecastingModel
 from .libs.skforecast.forecaster_autoreg import (
     ForecasterAutoreg as SkForecastForecasterAutoreg,
@@ -28,7 +28,7 @@ def is_subclass_or_instance_of_subclass(variable: Any, base_class: Any):
     return False
 
 
-class Model(ModelInterface):
+class Model(AbstractModel):
     """
     Generic wrapper around time series libraries
 
@@ -42,7 +42,7 @@ class Model(ModelInterface):
     It is chosen once and then kept for the whole lifecycle of the model.
     """
 
-    def __init__(self, model: Union[ModelInterface, Type[ModelInterface]], **params):
+    def __init__(self, model: Union[AbstractModel, Type[AbstractModel]], **params):
         """
         Initializes a Model.
 

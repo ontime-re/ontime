@@ -4,14 +4,14 @@ from typing import Any, NoReturn, Optional, Union, List
 from ..time_series import TimeSeries
 
 
-class ModelInterface(ABC):
+class AbstractModel(ABC):
     """
     Abstract class to define methods to implement
     for a Model class inspired by Scikit Learn API.
     """
 
     @abstractmethod
-    def fit(self, ts: TimeSeries, **params) -> "ModelInterface":
+    def fit(self, ts: TimeSeries, **params) -> "AbstractModel":
         """
         Fit a model.
 
