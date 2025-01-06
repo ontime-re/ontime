@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, NoReturn
+from typing import Any, NoReturn, Optional, Union, List
 from ..time_series import TimeSeries
 
 
@@ -10,15 +10,26 @@ class AbstractModel(ABC):
     for a Model class inspired by Scikit Learn API.
     """
 
-    def __init__(self, *args, **kwargs):
+    @abstractmethod
+    def fit(self, ts: TimeSeries, **params) -> "AbstractModel":
+        """
+        Fit a model.
+
+        :param ts: time series on which to fit the model
+        :return: self
+        """
         pass
 
     @abstractmethod
-    def fit(self, ts: TimeSeries, *args, **kwargs) -> NoReturn:
-        """Fit a model"""
-        pass
+    def predict(
+        self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
+    ) -> Union[List[TimeSeries], TimeSeries]:
+        """
+        Predict n steps into the future
 
-    @abstractmethod
-    def predict(self, horizon: Any, *args, **kwargs) -> Any:
-        """Usage of the model to predict values"""
+        :param n: int number of steps to predict
+        :param ts: the time series from which make the prediction. Optional if the model
+        can predict on the ts it has been trained on.
+        :return: TimeSeries
+        """
         pass

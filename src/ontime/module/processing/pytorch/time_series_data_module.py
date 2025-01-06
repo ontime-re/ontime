@@ -13,14 +13,14 @@ class TimeSeriesDataModule(L.LightningDataModule):
     def __init__(
         self,
         series,
-        window_length: int,
-        stride_length: int,
         input_length: int,
         target_length: int,
-        gap_length: int,
+        gap_length: int = 0,
+        stride_length: int = 1,
         batch_size: int = 32,
         num_workers: int = 0,
-        train_split: Union[float, int or pd.TimeStamp] = None,
+        test_split: Union[float, int, pd.Timestamp] = 0.0,
+        val_split: Union[float, int, pd.Timestamp] = 0.0,
         transform: Pipeline = None,
     ):
         super().__init__()
@@ -28,7 +28,6 @@ class TimeSeriesDataModule(L.LightningDataModule):
         self.series = series
 
         # Variables at instantiation
-        self.window_length = window_length
         self.stride_length = stride_length
         self.input_length = input_length
         self.target_length = target_length
@@ -38,7 +37,8 @@ class TimeSeriesDataModule(L.LightningDataModule):
         self.num_workers = num_workers
 
         self.transform = transform
-        self.train_split = train_split
+        self.test_split = test_split
+        self.val_split = val_split
 
         # Variables when using the class
 
@@ -63,9 +63,11 @@ class TimeSeriesDataModule(L.LightningDataModule):
         Splits the series from the datamodule given the parameters defined in the instance
         """
         tmp_ts_train, self.ts_test = train_test_split(
-            self.series, train_split=self.train_split
+            self.series, test_split=self.test_split
         )
-        self.ts_train, self.ts_val = train_test_split(tmp_ts_train, train_split=0.8)
+        self.ts_train, self.ts_val = train_test_split(
+            tmp_ts_train, test_split=self.val_split
+        )
 
     def compute_transform(self):
         """
@@ -84,31 +86,28 @@ class TimeSeriesDataModule(L.LightningDataModule):
         if stage == "fit":
             self.train = create_dataset(
                 self.ts_train,
-                self.window_length,
                 self.stride_length,
                 self.input_length,
                 self.target_length,
                 self.gap_length,
             )
-        elif stage == "validate":
+        if stage == "fit" or stage == "validate":
             self.val = create_dataset(
                 self.ts_val,
-                self.window_length,
                 self.stride_length,
                 self.input_length,
                 self.target_length,
                 self.gap_length,
             )
-        elif stage == "test":
+        if stage == "test":
             self.test = create_dataset(
                 self.ts_test,
-                self.window_length,
                 self.stride_length,
                 self.input_length,
                 self.target_length,
                 self.gap_length,
             )
-        elif stage == "predict":
+        if stage == "predict":
             raise NotImplementedError
 
     def train_dataloader(self):
