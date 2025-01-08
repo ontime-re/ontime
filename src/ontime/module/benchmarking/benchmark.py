@@ -293,9 +293,9 @@ class Benchmark:
                 for result_key, result_value in model_results.items():
                     if result_key == "metrics":
                         for metric_name, metric_value in result_value.items():
-                            flat_results[
-                                (dataset_name, metric_name)
-                            ] = flat_results.get((dataset_name, metric_name), {})
+                            flat_results[(dataset_name, metric_name)] = (
+                                flat_results.get((dataset_name, metric_name), {})
+                            )
                             flat_results[(dataset_name, metric_name)][
                                 model_name
                             ] = metric_value

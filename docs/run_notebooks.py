@@ -2,6 +2,7 @@ import papermill as pm
 from pathlib import Path
 import subprocess
 
+
 def is_git_ignored(file_path):
     result = subprocess.run(
         ["git", "check-ignore", "-q", str(file_path)],
@@ -9,6 +10,7 @@ def is_git_ignored(file_path):
         stderr=subprocess.PIPE,
     )
     return result.returncode == 0
+
 
 print("########################################")
 print("#          Notebook Executor           #")
