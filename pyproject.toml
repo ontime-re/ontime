@@ -24,6 +24,7 @@ lightning = "^2.2.4"
 numpy = "^1.26.4"
 calmap = "^0.0.11"
 alive-progress = "^3.2.0"
+periodicity-detection = "^0.1.3"
 
 [tool.poetry.group.dev]
 optional = true
