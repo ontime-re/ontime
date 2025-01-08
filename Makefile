@@ -50,7 +50,7 @@ jupyter:
 
 run-notebooks:
 	@echo "Running notebooks"
-	@cd docs && poetry run python run_notebooks.py
+	poetry run python docs/run_notebooks.py
 
 test:
 	@echo "Running tests"
