@@ -10,12 +10,12 @@ from .time_series_dataset import TimeSeriesDataset
 
 def create_dataset(
     ts: TimeSeries,
-    window_length: int,
     stride_length: int,
     input_length: int,
     target_length: int,
     gap_length: int = 0,
 ):
+    window_length = input_length + target_length + gap_length
     ts_list = split_in_windows(ts, window_length, stride_length)
     input_ts_list, target_ts_list = split_inputs_from_targets(
         ts_list,

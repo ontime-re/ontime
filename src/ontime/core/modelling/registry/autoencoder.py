@@ -6,13 +6,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import pandas as pd
 from torch import Tensor
-import periodicity_detection as pyd
-from torch.utils.data import DataLoader
 
 from ontime.core.time_series import TimeSeries
 from ontime.module.processing.pytorch.sliced_dataset import SlicedDataset
-from ontime.module.benchmarking.benchmark import Benchmark
-
 
 device = "cpu"
 
