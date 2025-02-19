@@ -25,12 +25,12 @@ class BenchmarkEvaluator:
         self.metrics = metrics
         _, self.test_ts = dataset.get_train_test_split()
 
-    def evaluate(self, model: Model, batch_size: int = None) -> Dict[str, Any]:
+
+    def evaluate(self, model: Model) -> Dict[str, Any]:
         """
         Evaluation method, computing metrics for each batch of data, and aggregating it.
 
         :param model: the model to evaluate
-        :param batch_size: size of a batch of data. If not specified, will be equal to the number of samples generated.
         :return: calculated metrics
         """
         # create windows
@@ -38,6 +38,7 @@ class BenchmarkEvaluator:
             self.dataset.input_length + self.dataset.target_length + self.dataset.gap
         )
         ts_list = split_in_windows(self.test_ts, window_length, self.dataset.stride)
+        
         input_ts_list, target_ts_list = split_inputs_from_targets(
             ts_list,
             input_length=self.dataset.input_length,
@@ -45,9 +46,7 @@ class BenchmarkEvaluator:
             gap_length=self.dataset.gap,
         )
 
-        # batch prediction, take all input in a one batch if no batch size given
-        if batch_size is None:
-            batch_size = len(input_ts_list)
+        batch_size = self.dataset.test_batch_size
 
         pred_ts_list = []
 
@@ -57,11 +56,18 @@ class BenchmarkEvaluator:
                 model.predict(ts=batch_inputs, n=self.dataset.target_length)
             )  # model should be able to handle list of inputs
 
+        # filter target_ts_list to only include the target columns
+        target_ts_list = [ts.drop_columns(self.dataset.get_input_columns()) for ts in target_ts_list]
+        input_target_ts_list = [ts.drop_columns(self.dataset.get_input_columns()) for ts in input_ts_list] # needed for insample
+        # keep target components of prediction
+        pred_target_ts_list = [ts.with_columns_renamed(ts.columns, self.test_ts.columns).drop_columns(self.dataset.get_input_columns())
+                               for ts in pred_ts_list]
+        
         results = {}
 
         for metric in self.metrics:
             metric_results = metric.compute(
-                target_ts_list, pred_ts_list, insample=input_ts_list
+                target_ts_list, pred_target_ts_list, insample=input_target_ts_list
             )
             results[metric.name] = metric.aggregate_series_metrics(metric_results)
 

@@ -11,8 +11,8 @@ class BenchmarkDataset:
     """
     def __init__(
         self,
-        name: str,
         ts: Union[TimeSeries, Dataset.ImportedDataset],
+        name: str,
         input_length: int,
         target_length: int,
         gap: int,
@@ -107,3 +107,13 @@ class BenchmarkDataset:
         """
         train_ts, _ = self.get_train_test_split()
         return train_ts.split_before(self.train_proportion)
+    
+    def get_input_columns(self):
+        """
+        Returns the list of columns used as input only
+        
+        :return: the list of input columns
+        """
+        return list(set(self.ts.columns) - set(self.target_columns))
+        
+        
