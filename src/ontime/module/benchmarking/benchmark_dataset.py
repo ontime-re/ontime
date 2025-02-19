@@ -41,7 +41,7 @@ class BenchmarkDataset:
         :param test_batch_size: batch size for testing
         :processing_fn: processing pipeline to apply to entire ts once loaded, only taken into consideration if a ImportedDataset is given, default to None
         """
-        self.ts = ts
+        self._ts = ts
         self.input_length = input_length
         self.gap = gap
         self.stride = stride
@@ -57,16 +57,20 @@ class BenchmarkDataset:
         self.target_columns = target_columns
         self.processing_fn = processing_fn or (lambda ts: ts)
         
-    def get_ts(self) -> TimeSeries:
+    @property
+    def ts(self) -> TimeSeries:
         """
-        Returns the dataset time series. If not yet loaded, load and process it.
+        Getter that returns the dataset time series. If not yet loaded, load and process it.
         
         :return: the time series
         """
-        # TODO : maybe we don't want necessarily to store the instantiated ts in this class ?
-        if not isinstance(self.ts, TimeSeries):
-            self.ts = self.processing_fn(self.ts.load())
-        return self.ts
+        # TODO: not storing ts in object prevent from memory issues, but is not optimal as
+        # dataset will be loaded each time we want to retrieve metadata from it.
+        # maybe we should give reponsability to the code using the dataset to destroy the object
+        # when no more needed ?
+        if not isinstance(self._ts, TimeSeries):
+            return self.processing_fn(self._ts.load())
+        return self._ts
 
     def is_multivariate(self):
         """
@@ -74,7 +78,7 @@ class BenchmarkDataset:
 
         :return: True if the time series is multivariate, False otherwise
         """
-        return self.get_ts().n_components > 1
+        return self.ts.n_components > 1
 
     def get_data(self):
         """
@@ -89,7 +93,7 @@ class BenchmarkDataset:
             DeprecationWarning,
             stacklevel=2
         )
-        return self.get_ts()
+        return self.ts
 
     def get_train_test_split(self) -> Tuple[TimeSeries, TimeSeries]:
         """
@@ -97,7 +101,7 @@ class BenchmarkDataset:
 
         :return: a tuple of train and test time series
         """
-        return self.get_ts().split_before(self.train_proportion)
+        return self.ts.split_before(self.train_proportion)
 
     def get_train_val_split(self):
         """
