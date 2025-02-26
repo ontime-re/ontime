@@ -9,6 +9,7 @@ class BenchmarkDataset:
     """
     BenchmarkDataset class that holds a time series and processing parameter to use it when training and evaluating a model (benchmarking).
     """
+
     def __init__(
         self,
         ts: Union[TimeSeries, Dataset.ImportedDataset],
@@ -35,7 +36,7 @@ class BenchmarkDataset:
         :param stride: stride in the time series between two consecutive window
         :param target_columns: time series columns to be used as target, i.e. features to be predicted, defaults to None
         :param train_proportion: proportion of the time series to be used for training
-        :param validation_proportion: proportion of the training time series to be used for validation, defaults to None. 
+        :param validation_proportion: proportion of the training time series to be used for validation, defaults to None.
         If None, set to (1 - train_proportion).
         :param train_batch_size: batch size for training
         :param test_batch_size: batch size for testing
@@ -56,12 +57,12 @@ class BenchmarkDataset:
             target_columns = list(ts.columns)
         self.target_columns = target_columns
         self.processing_fn = processing_fn or (lambda ts: ts)
-        
+
     @property
     def ts(self) -> TimeSeries:
         """
         Getter that returns the dataset time series. If not yet loaded, load and process it.
-        
+
         :return: the time series
         """
         # TODO: not storing ts in object prevent from memory issues, but is not optimal as
@@ -83,7 +84,7 @@ class BenchmarkDataset:
     def get_data(self):
         """
         Deprecated: Use `get_ts`instead
-        Returns the dataset time series 
+        Returns the dataset time series
 
         :return: the time series
         """
@@ -91,7 +92,7 @@ class BenchmarkDataset:
             "`BenchmarkDataset.get_data()` is deprecated and will be removed in future releases."
             "Use BenchmarkDataset.get_ts() instead",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         return self.ts
 
@@ -111,13 +112,11 @@ class BenchmarkDataset:
         """
         train_ts, _ = self.get_train_test_split()
         return train_ts.split_before(self.train_proportion)
-    
+
     def get_input_columns(self):
         """
         Returns the list of columns used as input only
-        
+
         :return: the list of input columns
         """
         return list(set(self.ts.columns) - set(self.target_columns))
-        
-        

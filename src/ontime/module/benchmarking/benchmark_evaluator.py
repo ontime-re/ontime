@@ -25,7 +25,6 @@ class BenchmarkEvaluator:
         self.metrics = metrics
         _, self.test_ts = dataset.get_train_test_split()
 
-
     def evaluate(self, model: Model) -> Dict[str, Any]:
         """
         Evaluation method, computing metrics for each batch of data, and aggregating it.
@@ -38,7 +37,7 @@ class BenchmarkEvaluator:
             self.dataset.input_length + self.dataset.target_length + self.dataset.gap
         )
         ts_list = split_in_windows(self.test_ts, window_length, self.dataset.stride)
-        
+
         input_ts_list, target_ts_list = split_inputs_from_targets(
             ts_list,
             input_length=self.dataset.input_length,
@@ -57,12 +56,20 @@ class BenchmarkEvaluator:
             )  # model should be able to handle list of inputs
 
         # filter target_ts_list to only include the target columns
-        target_ts_list = [ts.drop_columns(self.dataset.get_input_columns()) for ts in target_ts_list]
-        input_target_ts_list = [ts.drop_columns(self.dataset.get_input_columns()) for ts in input_ts_list] # needed for insample
+        target_ts_list = [
+            ts.drop_columns(self.dataset.get_input_columns()) for ts in target_ts_list
+        ]
+        input_target_ts_list = [
+            ts.drop_columns(self.dataset.get_input_columns()) for ts in input_ts_list
+        ]  # needed for insample
         # keep target components of prediction
-        pred_target_ts_list = [ts.with_columns_renamed(ts.columns, self.test_ts.columns).drop_columns(self.dataset.get_input_columns())
-                               for ts in pred_ts_list]
-        
+        pred_target_ts_list = [
+            ts.with_columns_renamed(ts.columns, self.test_ts.columns).drop_columns(
+                self.dataset.get_input_columns()
+            )
+            for ts in pred_ts_list
+        ]
+
         results = {}
 
         for metric in self.metrics:
