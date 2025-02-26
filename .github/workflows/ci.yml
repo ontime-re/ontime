@@ -6,7 +6,7 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ 'main', 'develop']
+    branches: [ 'main', 'develop', '87-fix-lint-github-actions']
   
 jobs:
 
