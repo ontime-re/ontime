@@ -21,9 +21,9 @@ class BenchmarkDataset:
         processing_fn: Optional[Callable[[TimeSeries], TimeSeries]] = None,
         target_columns: Optional[List[str]] = None,
         test_proportion: float = 0.2,
-        train_proportion: float = None,
-        validation_proportion: Optional[float] = [],
-        few_shot_proportions: Optional[List[float]] = None,
+        train_proportion: Optional[float] = None,
+        validation_proportion: Optional[float] = 0.2,
+        few_shot_proportions: List[float] = [1.0],
         train_batch_size: int = 16,
         test_batch_size: int = 16,
     ):
@@ -39,8 +39,9 @@ class BenchmarkDataset:
         :param target_columns: time series columns to be used as target, i.e. features to be predicted, defaults to None
         :param test_proportion: proportion of the time series to be used for testing
         :param train_proportion: proportion of the time series to be used for training
-        :param few_shot_proportions: proportions of the training time series to be used for few-shot learning trainings and evaluations
-        :param validation_proportion: proportion of the training time series to be used for validation, defaults to None.
+        :param validation_proportion: proportion of the training time series to be used for validation, default to None. If None, set to test_proportion
+        :param few_shot_proportions: proportions of the training time series to be used for few-shot learning trainings and evaluations, 
+        defaults to [1.0]
         If None, set to (1 - train_proportion).
         :param train_batch_size: batch size for training
         :param test_batch_size: batch size for testing
@@ -64,6 +65,8 @@ class BenchmarkDataset:
             )
             test_proportion = 1.0 - train_proportion
         self.test_proportion = test_proportion
+        if validation_proportion is None:
+            validation_proportion = test_proportion
         self.validation_proportion = validation_proportion
         self.few_shot_proportions = few_shot_proportions
         self.train_batch_size = train_batch_size
@@ -73,15 +76,6 @@ class BenchmarkDataset:
             target_columns = list(ts.columns)
         self.target_columns = target_columns
         self.processing_fn = processing_fn or (lambda ts: ts)
-
-    @property
-    def few_shot_proportions(self) -> List[float]:
-        """
-        Getter that returns the dataset train set proportion to use in few-shot learning setting.
-
-        :return: the few-shot train set proportions
-        """
-        return self.few_shot_proportions
 
     @property
     def ts(self) -> TimeSeries:
@@ -129,14 +123,18 @@ class BenchmarkDataset:
         """
         return self.ts.split_before(1 - self.test_proportion)
 
-    def get_train_val_split(self):
+    def get_train_val_split(self, train_set: Optional[TimeSeries] = None) -> Tuple[TimeSeries, TimeSeries]:
         """
         Creates the train and validation splits according to `validation_proportion` parameter
 
+        :param train_set: the train set to split, if None, the original train set is used
         :return: a tuple of train and validation time series
         """
-        train_ts, _ = self.get_train_test_split()
-        return train_ts.split_before(1 - self.validation_proportion)
+        if train_set is not None:
+            train_set = train_set
+        else:
+            train_set, _ = self.get_train_test_split()
+        return train_set.split_before(1 - self.validation_proportion)
 
     def get_input_columns(self):
         """
