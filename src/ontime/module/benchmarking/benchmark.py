@@ -23,7 +23,6 @@ LOG_LEVELS = {
     "critical": logging.CRITICAL,
 }
 
-
 def setup_logger(
     name: str = None, logging_level: int = logging.WARNING
 ) -> logging.Logger:
@@ -55,7 +54,6 @@ def setup_logger(
     logger.propagate = False
 
     return logger
-
 
 class Benchmark:
     """
@@ -154,10 +152,8 @@ class Benchmark:
                 logger.info(f"On {dataset.name} dataset...")
 
                 nb_features = dataset.ts.n_components
-                _, test_set = dataset.get_train_test_split()
-                train_set, val_set = dataset.get_train_val_split()
-                train_size = len(train_set.time_index)
-                val_size = len(val_set.time_index)
+                full_train_set, test_set = dataset.get_train_test_split()
+                full_train_size = len(full_train_set.time_index)
                 test_size = len(test_set.time_index)
 
                 evaluator = BenchmarkEvaluator(dataset, self.metrics)
@@ -165,86 +161,89 @@ class Benchmark:
                 self.dataset_info[dataset.name] = {
                     "nb features": nb_features,
                     "target column": dataset.target_columns,
-                    "training set size": train_size,
-                    "validation set size": val_size,
+                    "training set size": full_train_size,
                     "test set size": test_size,
+                    "validation set proportion": dataset.validation_proportion,
+                    "few shot proportions": dataset.few_shot_proportions
                 }
+                
+                for few_shot_proportion in dataset.few_shot_proportions:
+                    logger.info(f"On {few_shot_proportion*100:.1f}% of training data...")
+                    self.results[dataset.name][few_shot_proportion] = {}
+                    self.predictions["predictions"][dataset.name][few_shot_proportion] = {}
+                    
+                    few_shot_train_set = full_train_set[:int(full_train_size * few_shot_proportion)]
+                    train_set, val_set = dataset.get_train_val_split(few_shot_train_set)
+                        
+                    for model_config in self.model_configs:
+                        bar.text(f"{model_config.model_name} on {dataset.name}")
+                        bar()
+                        
+                        self.results[dataset.name][few_shot_proportion][model_config.model_name] = {}
+                        times = {}
+                        predictions = []
 
-                training_time = 0
-                inference_time = 0
+                        logger.info(f"{model_config.model_name} model...")
 
-                for model_config in self.model_configs:
-                    bar.text(f"{model_config.model_name} on {dataset.name}")
-                    bar()
-                    self.results[dataset.name][model_config.model_name] = {}
+                        try:
+                            model = model_config.init_model(dataset=dataset)
 
-                    logger.info(f"{model_config.model_name} model...")
-
-                    try:
-                        model = model_config.init_model(dataset=dataset)
-
-                        if model_config.benchmark_mode != BenchmarkMode.ZERO_SHOT:
-                            logging.info("Training ...")
-                            start_time = time.time()
-                            fit_kwargs = {"ts": train_set}
-                            if model_config.validation_set_param is not None:
-                                fit_kwargs[model_config.validation_set_param] = val_set
-                            model.fit(**fit_kwargs)
-                            training_time = time.time() - start_time
-                            logger.info(
-                                f"Training done, it took {training_time} seconds"
-                            )
-
-                        logger.info("Evaluating...")
-
-                        start_time = time.time()
-                        metrics = evaluator.evaluate(model=model)
-                        evaluation_time = time.time() - start_time
-
-                        logger.info(f"Evaluation done, took {evaluation_time}")
-
-                        inference_time = np.nan
-                        # get predictions
-                        if nb_predictions > 0:
-                            self.predictions["predictions"][dataset.name][
-                                model_config.model_name
-                            ] = []
-                            logger.info(f"getting predictions... ")
-                            predictions_time = []
-                            for input in inputs[dataset.name]:
+                            if model_config.benchmark_mode != BenchmarkMode.ZERO_SHOT:
+                                logging.info("Training ...")
                                 start_time = time.time()
-                                prediction = model.predict(
-                                    ts=input, n=dataset.target_length
-                                )
-                                predictions_time.append(time.time() - start_time)
-                                self.predictions["predictions"][dataset.name][
-                                    model_config.model_name
-                                ].append(prediction)
-                            inference_time = np.mean(predictions_time)
+                                fit_kwargs = {"ts": train_set}
+                                if model_config.validation_set_param is not None:
+                                    fit_kwargs[model_config.validation_set_param] = val_set
+                                model.fit(**fit_kwargs)
+                                times["training"] = time.time() - start_time
+                                logger.info(f"Training done, it took {times['training']}")
+                            else:
+                                times["training"] = 0
 
-                    except:
-                        self.results[dataset.name][model_config.model_name] = {
-                            "suceeded": False
-                        }
-                        logger.warning(
-                            f"Could not complete evaluation for {model_config.model_name}"
-                            f" model on {dataset.name} dataset"
-                        )
-                        logger.debug(traceback.format_exc())
+                            logger.info("Evaluating...")
 
-                    if (
-                        not "suceeded"
-                        in self.results[dataset.name][model_config.model_name]
-                    ):
-                        self.results[dataset.name][model_config.model_name] = {
-                            "suceeded": True,
-                            "training time": training_time,
-                            "evaluation time": evaluation_time,
-                            "inference time": inference_time,
-                            "metrics": metrics,
-                        }
+                            start_time = time.time()
+                            metrics = evaluator.evaluate(model=model)
+                            times["evaluation"] = time.time() - start_time
 
-                        logger.info(f"Computed metrics: \n {metrics}")
+                            logger.info(f"Evaluation done, took {times['evaluation']}")
+
+                            # get predictions
+                            if nb_predictions > 0:
+                                predictions = []
+                                logger.info(f"getting predictions... ")
+                                predictions_time = []
+                                for input in inputs[dataset.name]:
+                                    start_time = time.time()
+                                    prediction = model.predict(
+                                        ts=input, n=dataset.target_length
+                                    )
+                                    predictions_time.append(time.time() - start_time)
+                                    predictions.append(prediction)
+                                times["inference"] = np.mean(predictions_time)
+                            self.predictions["predictions"][dataset.name][few_shot_proportion][model_config.model_name] = predictions
+
+                        except:
+                            self.results[dataset.name][few_shot_proportion][model_config.model_name] = {
+                                "suceeded": False
+                            }
+                            logger.warning(
+                                f"Could not complete evaluation for {model_config.model_name}"
+                                f" model on {dataset.name} dataset"
+                            )
+                            logger.debug(traceback.format_exc())
+
+                        if (
+                            not "suceeded"
+                            in self.results[dataset.name][few_shot_proportion][model_config.model_name]
+                        ):
+                            self.results[dataset.name][few_shot_proportion][model_config.model_name] = {
+                                "suceeded": True,
+                                "times": times,
+                                "metrics": metrics,
+                            }
+
+                            logger.info(f"Computed metrics: \n {metrics}")
 
     def get_results(self):
         return self.results
@@ -266,53 +265,58 @@ class Benchmark:
             s = f"{dataset.name} dataset:\n"
             for key, value in self.dataset_info[dataset.name].items():
                 s += f"{key}: {value}\n"
-
-            for model_config in self.model_configs:
-                model_name = model_config.model_name
-                s += f"\n{model_name} model:\n"
-                for key, value in self.results[dataset.name][model_name].items():
-                    if key == "suceeded":
-                        s += f"{key}: {self._bool_to_symbol(value)}\n"
-                    else:
-                        s += f"{key}: {value}\n"
+                
+            for few_shot_proportion in dataset.few_shot_proportions:
+                s += f"\n{few_shot_proportion*100:.1f}% of training data:\n"
+                for model_config in self.model_configs:
+                    model_name = model_config.model_name
+                    s += f"\n{model_name} model:\n"
+                    for key, value in self.results[dataset.name][few_shot_proportion][model_name].items():
+                        if key == "suceeded":
+                            s += f"{key}: {self._bool_to_symbol(value)}\n"
+                        else:
+                            s += f"{key}: {value}\n"
             txt.append(s)
         report = "\n\n".join(txt)
         return report
 
-    def get_report_dfs(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def get_report_dfs(self, with_metrics: bool = True, with_times: bool = True) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Generate report as two dataframes, one for the dataset information, and one for the benchmark results
-
+        
+        :param with_metrics: whether to include metrics in the benchmark results dataframe
+        :param with_times: whether to include times in the benchmark results dataframe
         :return: the two dataframes
         """
+        
         if self.results is None:
             return "please invoke run_benchmark() to generate report data"
         flat_results = {}
-        for dataset_name, models_results in self.results.items():
-            for model_name, model_results in models_results.items():
-                for result_key, result_value in model_results.items():
-                    if result_key == "metrics":
-                        for metric_name, metric_value in result_value.items():
-                            flat_results[(dataset_name, metric_name)] = (
-                                flat_results.get((dataset_name, metric_name), {})
-                            )
-                            flat_results[(dataset_name, metric_name)][
-                                model_name
-                            ] = metric_value
-                    elif result_key in [
-                        "training time",
-                        "evaluation time",
-                        "inference time",
-                    ]:
-                        flat_results[(dataset_name, result_key)] = flat_results.get(
-                            (dataset_name, result_key), {}
-                        )
-                        flat_results[(dataset_name, result_key)][
-                            model_name
-                        ] = result_value
+        for dataset_name, few_shots_results in self.results.items():
+            for few_shot_proportion, few_shot_results in few_shots_results.items():
+                proportion_str_percent = f"{few_shot_proportion*100:.1f}%"
+                for model_name, model_results in few_shot_results.items():
+                    for result_key, result_value in model_results.items():
+                        if result_key == "metrics" and with_metrics:
+                            for metric_name, metric_value in result_value.items():
+                                flat_results[(proportion_str_percent, dataset_name, metric_name)] = (
+                                    flat_results.get((proportion_str_percent, dataset_name, metric_name), {})
+                                )
+                                flat_results[(proportion_str_percent, dataset_name, metric_name)][
+                                    model_name
+                                ] = metric_value
+                        elif result_key == "times" and with_times:
+                            for time_name, time_value in result_value.items():
+                                flat_results[(proportion_str_percent, dataset_name, time_name)] = (
+                                    flat_results.get((proportion_str_percent, dataset_name, time_name), {})
+                                )
+                                flat_results[(proportion_str_percent, dataset_name, time_name)][
+                                    model_name
+                                ] = time_value
 
         results_df = pd.DataFrame.from_dict(flat_results, orient="index")
-        results_df.index.names = ["Dataset", "Metric"]
+        main_index_name = "Metric / Time" if with_metrics and with_times else "Metric" if with_metrics else "Time"
+        results_df.index.names = ["Few-shot proportion", "Dataset", "Metric"]
         ds_info_df = pd.DataFrame(self.dataset_info)
         ds_info_df.index.name = "Characteristic"
 
@@ -320,6 +324,16 @@ class Benchmark:
 
     @staticmethod
     def _bool_to_symbol(b: bool) -> str:
+        """Return a string representation of a boolean value, as a symbol
+
+        Symbols are "✓" for True and "X" for False. If the input is None, returns "unknown"
+
+        Args:
+            b: bool value to be converted
+
+        Returns:
+            str: string representation of the boolean value as a symbol
+        """
         if b is None:
             return "unknown"
         if b:
