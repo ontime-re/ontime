@@ -4,6 +4,7 @@ from .registry.mapper import Mapper
 from .registry.windower import Windower
 from .registry.correlation import Correlation
 from .registry.density import Density
+
 processors = Processors()
 processors.load("filler", Filler)
 processors.load("mapper", Mapper)
