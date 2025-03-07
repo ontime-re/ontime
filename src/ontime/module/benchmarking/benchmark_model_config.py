@@ -47,7 +47,7 @@ class BenchmarkModelConfig:
         self.validation_set_param = validation_set_param
         self._static_model_params = static_model_params or {}
         self._dynamic_model_params = dynamic_model_params or {}
-        
+
         # depreciation about benchmark_mode
         if benchmark_mode is not None:
             warnings.warn(
@@ -58,7 +58,7 @@ class BenchmarkModelConfig:
             )
             if zero_shot_only is None:
                 zero_shot_only = benchmark_mode == BenchmarkMode.ZERO_SHOT
-                
+
         self.zero_shot_only = zero_shot_only if zero_shot_only is not None else False
 
     def init_model(self, dataset: BenchmarkDataset) -> AbstractModel:

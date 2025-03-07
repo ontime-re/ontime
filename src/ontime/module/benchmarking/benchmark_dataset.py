@@ -40,7 +40,7 @@ class BenchmarkDataset:
         :param test_proportion: proportion of the time series to be used for testing
         :param train_proportion: proportion of the time series to be used for training
         :param validation_proportion: proportion of the training time series to be used for validation, default to None. If None, set to test_proportion
-        :param few_shot_proportions: proportions of the training time series to be used for few-shot learning trainings and evaluations, 
+        :param few_shot_proportions: proportions of the training time series to be used for few-shot learning trainings and evaluations,
         defaults to [1.0]
         If None, set to (1 - train_proportion).
         :param train_batch_size: batch size for training
@@ -53,7 +53,7 @@ class BenchmarkDataset:
         self.stride = stride
         self.target_length = target_length
         self.name = name
-        
+
         # depreciation about train_proportion
         if train_proportion is not None:
             warnings.warn(
@@ -61,7 +61,7 @@ class BenchmarkDataset:
                 "As you set 'train_proportion' argument, 'test_proportion' is ignored and computed as 1.0 - 'train_proportion'."
                 "For futur uses, please consider 'test_proportion' instead.",
                 DeprecationWarning,
-                stacklevel=2
+                stacklevel=2,
             )
             test_proportion = 1.0 - train_proportion
         self.test_proportion = test_proportion
@@ -123,7 +123,9 @@ class BenchmarkDataset:
         """
         return self.ts.split_before(1 - self.test_proportion)
 
-    def get_train_val_split(self, train_set: Optional[TimeSeries] = None) -> Tuple[TimeSeries, TimeSeries]:
+    def get_train_val_split(
+        self, train_set: Optional[TimeSeries] = None
+    ) -> Tuple[TimeSeries, TimeSeries]:
         """
         Creates the train and validation splits according to `validation_proportion` parameter
 
