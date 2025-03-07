@@ -14,6 +14,7 @@ import pandas as pd
 import time
 import traceback
 import numpy as np
+from tabulate import tabulate
 
 LOG_LEVELS = {
     "debug": logging.DEBUG,
@@ -65,6 +66,7 @@ class Benchmark:
         model_configs: List[AbstractModel] = None,
         datasets: List[BenchmarkDataset] = None,
         metrics: List[BenchmarkMetric] = None,
+        few_shot_proportions: List[float] = [1.0],
     ):
         """
         Initializes a Benchmark
@@ -72,10 +74,12 @@ class Benchmark:
         :param model_configs: config of models to benchmark
         :param datasets: datasets on which to benchmark the models
         :param metrics: metrics used to benchmark the models
+        :param few_shot_proportions: list of proportions of the train set to use for few-shot learning
         """
         self.datasets: List[BenchmarkDataset] = []
         self.model_configs: List[BenchmarkModelConfig] = []
         self.metrics: List[BenchmarkMetric] = []
+        self.few_shot_proportions = few_shot_proportions
 
         # for holding results and predictions
         self.results = {}
@@ -139,15 +143,13 @@ class Benchmark:
 
         total_steps = len(self.model_configs) * len(self.datasets)
 
-        with alive_bar(
-            total_steps, title="Benchmarking", force_tty=True, length=20, max_cols=200
-        ) as bar:
+        with alive_bar(total_steps, title="Benchmarking", force_tty=True, length=20, max_cols=200) as bar:
             inputs, targets = self._get_random_inputs(nb_predictions)
             self.predictions = {"inputs": inputs, "targets": targets, "predictions": {}}
 
             for dataset in self.datasets:
-                self.results[dataset.name] = {}
-                self.predictions["predictions"][dataset.name] = {}
+                self.results[dataset.name] = dataset_results = {}
+                self.predictions["predictions"][dataset.name] = dataset_predictions = {}
 
                 logger.info(f"On {dataset.name} dataset...")
 
@@ -164,31 +166,34 @@ class Benchmark:
                     "training set size": full_train_size,
                     "test set size": test_size,
                     "validation set proportion": dataset.validation_proportion,
-                    "few shot proportions": dataset.few_shot_proportions
                 }
-                
-                for few_shot_proportion in dataset.few_shot_proportions:
-                    logger.info(f"On {few_shot_proportion*100:.1f}% of training data...")
-                    self.results[dataset.name][few_shot_proportion] = {}
-                    self.predictions["predictions"][dataset.name][few_shot_proportion] = {}
+                        
+                for model_config in self.model_configs:
+                    bar.text(f"{model_config.model_name} on {dataset.name}")
+                    bar()
                     
-                    few_shot_train_set = full_train_set[:int(full_train_size * few_shot_proportion)]
-                    train_set, val_set = dataset.get_train_val_split(few_shot_train_set)
+                    dataset_results[model_config.model_name] = model_results = {}
+                    dataset_predictions[model_config.model_name] = model_predictions = {}
+                    
+                    if model_config.zero_shot_only:
+                        few_shot_proportions = [0.0]
+                    else:
+                        few_shot_proportions = self.few_shot_proportions
+                    
+                    model = model_config.init_model(dataset=dataset)
+                    
+                    for few_shot_proportion in few_shot_proportions:
+                        bar.text(f"{model_config.model_name} on {dataset.name}, using {few_shot_proportion*100:.1f}% of training data")
+                        model_results[few_shot_proportion] = results = {}
+                        model_predictions[few_shot_proportion] = predictions = []
                         
-                    for model_config in self.model_configs:
-                        bar.text(f"{model_config.model_name} on {dataset.name}")
-                        bar()
-                        
-                        self.results[dataset.name][few_shot_proportion][model_config.model_name] = {}
+                        few_shot_train_set = full_train_set[:int(full_train_size * few_shot_proportion)]
+                        train_set, val_set = dataset.get_train_val_split(few_shot_train_set)
+                    
                         times = {}
-                        predictions = []
-
-                        logger.info(f"{model_config.model_name} model...")
-
+                        
                         try:
-                            model = model_config.init_model(dataset=dataset)
-
-                            if model_config.benchmark_mode != BenchmarkMode.ZERO_SHOT:
+                            if few_shot_proportion > 0.0:
                                 logging.info("Training ...")
                                 start_time = time.time()
                                 fit_kwargs = {"ts": train_set}
@@ -198,6 +203,7 @@ class Benchmark:
                                 times["training"] = time.time() - start_time
                                 logger.info(f"Training done, it took {times['training']}")
                             else:
+                                logging.info("Training skipped, zero-shot evaluation")
                                 times["training"] = 0
 
                             logger.info("Evaluating...")
@@ -221,27 +227,20 @@ class Benchmark:
                                     predictions_time.append(time.time() - start_time)
                                     predictions.append(prediction)
                                 times["inference"] = np.mean(predictions_time)
-                            self.predictions["predictions"][dataset.name][few_shot_proportion][model_config.model_name] = predictions
-
                         except:
-                            self.results[dataset.name][few_shot_proportion][model_config.model_name] = {
-                                "suceeded": False
-                            }
+                            results["suceeded"] = False
                             logger.warning(
                                 f"Could not complete evaluation for {model_config.model_name}"
                                 f" model on {dataset.name} dataset"
                             )
                             logger.debug(traceback.format_exc())
 
-                        if (
-                            not "suceeded"
-                            in self.results[dataset.name][few_shot_proportion][model_config.model_name]
-                        ):
-                            self.results[dataset.name][few_shot_proportion][model_config.model_name] = {
+                        if (not "suceeded"in results):
+                            results.update({
                                 "suceeded": True,
                                 "times": times,
                                 "metrics": metrics,
-                            }
+                                })
 
                             logger.info(f"Computed metrics: \n {metrics}")
 
@@ -250,6 +249,9 @@ class Benchmark:
 
     def get_predictions(self):
         return self.predictions
+    
+    def get_dataset_info(self):
+        return self.dataset_info
 
     def get_report(self) -> str:
         """
@@ -259,26 +261,48 @@ class Benchmark:
         """
         if self.results is None:
             return "please invoke run_benchmark() to generate report data"
-        txt = []
 
-        for dataset in self.datasets:
-            s = f"{dataset.name} dataset:\n"
-            for key, value in self.dataset_info[dataset.name].items():
-                s += f"{key}: {value}\n"
-                
-            for few_shot_proportion in dataset.few_shot_proportions:
-                s += f"\n{few_shot_proportion*100:.1f}% of training data:\n"
-                for model_config in self.model_configs:
-                    model_name = model_config.model_name
-                    s += f"\n{model_name} model:\n"
-                    for key, value in self.results[dataset.name][few_shot_proportion][model_name].items():
-                        if key == "suceeded":
-                            s += f"{key}: {self._bool_to_symbol(value)}\n"
-                        else:
-                            s += f"{key}: {value}\n"
-            txt.append(s)
-        report = "\n\n".join(txt)
-        return report
+        report = []
+
+        for dataset, models in self.results.items():
+            report.append(f"\nDataset: {dataset}\n")
+
+            # Print dataset info dynamically
+            if dataset in self.dataset_info:
+                info = self.dataset_info[dataset]
+                dataset_table = [[key, value] for key, value in info.items()]  # Extract keys/values dynamically
+                report.append(tabulate(dataset_table, tablefmt="plain"))
+
+            report.append("\nResults:\n")
+
+            all_times_keys = set()  # Collect all possible time-related keys
+            all_metrics_keys = set()  # Collect all possible metric keys
+
+            # time and metric columns
+            for model, proportions in models.items():
+                for proportion, data in proportions.items():
+                    all_times_keys.update(data.get("times", {}).keys())
+                    all_metrics_keys.update(data.get("metrics", {}).keys())
+
+            # for consistent sorting
+            all_times_keys = sorted(all_times_keys)
+            all_metrics_keys = sorted(all_metrics_keys)
+
+            headers = ["Model",  "Few-shot %", "", "Success", ""] + all_times_keys + [""] + all_metrics_keys
+            table = []
+
+            for model, proportions in models.items():
+                for proportion, data in proportions.items():
+                    times_values = [f"{data['times'].get(k, 0):.2f}" for k in all_times_keys]
+
+                    metrics_values = [f"{data['metrics'].get(k, 0):.3f}" for k in all_metrics_keys]
+
+                    row = [model, f"{proportion * 100:.0f}%", "", self._bool_to_symbol(data["suceeded"]), ""] + times_values + [""] + metrics_values
+                    table.append(row)
+
+            report.append(tabulate(table, headers=headers, tablefmt="grid")) # generate table
+
+        return "\n".join(report)
 
     def get_report_dfs(self, with_metrics: bool = True, with_times: bool = True) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
@@ -291,33 +315,30 @@ class Benchmark:
         
         if self.results is None:
             return "please invoke run_benchmark() to generate report data"
+        
         flat_results = {}
-        for dataset_name, few_shots_results in self.results.items():
-            for few_shot_proportion, few_shot_results in few_shots_results.items():
-                proportion_str_percent = f"{few_shot_proportion*100:.1f}%"
-                for model_name, model_results in few_shot_results.items():
-                    for result_key, result_value in model_results.items():
-                        if result_key == "metrics" and with_metrics:
-                            for metric_name, metric_value in result_value.items():
-                                flat_results[(proportion_str_percent, dataset_name, metric_name)] = (
-                                    flat_results.get((proportion_str_percent, dataset_name, metric_name), {})
-                                )
-                                flat_results[(proportion_str_percent, dataset_name, metric_name)][
-                                    model_name
-                                ] = metric_value
-                        elif result_key == "times" and with_times:
-                            for time_name, time_value in result_value.items():
-                                flat_results[(proportion_str_percent, dataset_name, time_name)] = (
-                                    flat_results.get((proportion_str_percent, dataset_name, time_name), {})
-                                )
-                                flat_results[(proportion_str_percent, dataset_name, time_name)][
-                                    model_name
-                                ] = time_value
+
+        for dataset_name, models in self.results.items():
+            for model_name, proportions in models.items():
+                for few_shot_proportion, results in proportions.items():
+                    proportion_str = f"{few_shot_proportion * 100:.1f}%"
+
+                    for key, values in results.items():
+                        if key == "times" and with_times:
+                            for time_name, time_value in values.items():
+                                flat_results.setdefault((model_name, proportion_str, time_name), {})[dataset_name] = time_value
+
+                        elif key == "metrics" and with_metrics:
+                            for metric_name, metric_value in values.items():
+                                flat_results.setdefault((model_name, proportion_str, metric_name), {})[dataset_name] = metric_value
 
         results_df = pd.DataFrame.from_dict(flat_results, orient="index")
-        main_index_name = "Metric / Time" if with_metrics and with_times else "Metric" if with_metrics else "Time"
-        results_df.index.names = ["Few-shot proportion", "Dataset", "Metric"]
-        ds_info_df = pd.DataFrame(self.dataset_info)
+        
+        metric_time_index_name = "Metric/Time" if with_metrics and with_times else "Metric" if with_metrics else "Time"
+
+        results_df.index.names = ["Model", "Few-shot proportion", metric_time_index_name]
+
+        ds_info_df = pd.DataFrame.from_dict(self.dataset_info, orient="index").T
         ds_info_df.index.name = "Characteristic"
 
         return ds_info_df, results_df

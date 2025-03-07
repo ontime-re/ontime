@@ -136,7 +136,7 @@ class BenchmarkDataset:
             train_set, _ = self.get_train_test_split()
         return train_set.split_before(1 - self.validation_proportion)
 
-    def get_input_columns(self):
+    def get_input_columns(self) -> List[str]:
         """
         Returns the list of columns used as input only
 
