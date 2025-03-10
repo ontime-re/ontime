@@ -232,7 +232,6 @@ class Benchmark:
 
                             # get predictions
                             if nb_predictions > 0:
-                                predictions = []
                                 logger.info(f"getting predictions... ")
                                 predictions_time = []
                                 for input in inputs[dataset.name]:
