@@ -45,7 +45,7 @@ class Plot:
         return alt.layer(*self.layers)
 
     @staticmethod
-    def melt(ts: TimeSeries, index_name: str = "time", var_name: str = "variable", value_name: str = "value") -> DataFrame:
+    def melt(ts: TimeSeries, var_name: str = "variable", value_name: str = "value") -> DataFrame:
         """
         Melt a TimeSeries into a DataFrame
 
@@ -54,7 +54,7 @@ class Plot:
         """
         df = ts.pd_dataframe()
         df = df.reset_index()
-        df = df.melt(index_name, var_name=var_name, value_name=value_name)
+        df = df.melt(ts.time_index.name, var_name=var_name, value_name=value_name)
         return df
 
     @staticmethod

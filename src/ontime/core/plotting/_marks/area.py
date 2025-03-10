@@ -33,7 +33,7 @@ def area(ts: TimeSeries, title: str = "Area", encode_kwargs: dict = None) -> Cha
 
             # Define kwargs
             default_kwargs = {
-                "x": "time:T",
+                "x": f"{ts.time_index.name}:T",
                 "y": "value:Q",
                 "color": alt.Color("area:N", legend=alt.Legend(title="variable")),
             }
@@ -59,7 +59,7 @@ def area(ts: TimeSeries, title: str = "Area", encode_kwargs: dict = None) -> Cha
 
             # Define kwargs
             default_kwargs = {
-                "x": "time:T",
+                "x": f"{ts.time_index.name}:T",
                 "y": f"{ts.columns[0]}:Q",
                 "y2": f"{ts.columns[1]}:Q",
                 "color": alt.Color("area:N", legend=alt.Legend(title="variable")),
