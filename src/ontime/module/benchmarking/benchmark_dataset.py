@@ -20,8 +20,10 @@ class BenchmarkDataset:
         stride: int,
         processing_fn: Optional[Callable[[TimeSeries], TimeSeries]] = None,
         target_columns: Optional[List[str]] = None,
-        train_proportion: float = 0.8,
-        validation_proportion: Optional[float] = None,
+        test_proportion: float = 0.2,
+        train_proportion: Optional[float] = None,
+        validation_proportion: Optional[float] = 0.2,
+        few_shot_proportions: List[float] = [1.0],
         train_batch_size: int = 16,
         test_batch_size: int = 16,
     ):
@@ -35,8 +37,11 @@ class BenchmarkDataset:
         :param gap: gap in the time series between the end of the input and the begining
         :param stride: stride in the time series between two consecutive window
         :param target_columns: time series columns to be used as target, i.e. features to be predicted, defaults to None
+        :param test_proportion: proportion of the time series to be used for testing
         :param train_proportion: proportion of the time series to be used for training
-        :param validation_proportion: proportion of the training time series to be used for validation, defaults to None.
+        :param validation_proportion: proportion of the training time series to be used for validation, default to None. If None, set to test_proportion
+        :param few_shot_proportions: proportions of the training time series to be used for few-shot learning trainings and evaluations,
+        defaults to [1.0]
         If None, set to (1 - train_proportion).
         :param train_batch_size: batch size for training
         :param test_batch_size: batch size for testing
@@ -48,8 +53,22 @@ class BenchmarkDataset:
         self.stride = stride
         self.target_length = target_length
         self.name = name
-        self.train_proportion = train_proportion
+
+        # depreciation about train_proportion
+        if train_proportion is not None:
+            warnings.warn(
+                "The 'train_proportion' argument is deprecated and will be removed in a future version."
+                "As you set 'train_proportion' argument, 'test_proportion' is ignored and computed as 1.0 - 'train_proportion'."
+                "For futur uses, please consider 'test_proportion' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            test_proportion = 1.0 - train_proportion
+        self.test_proportion = test_proportion
+        if validation_proportion is None:
+            validation_proportion = test_proportion
         self.validation_proportion = validation_proportion
+        self.few_shot_proportions = few_shot_proportions
         self.train_batch_size = train_batch_size
         self.test_batch_size = test_batch_size
         # if target columns is None, we use all columns
@@ -102,18 +121,24 @@ class BenchmarkDataset:
 
         :return: a tuple of train and test time series
         """
-        return self.ts.split_before(self.train_proportion)
+        return self.ts.split_before(1 - self.test_proportion)
 
-    def get_train_val_split(self):
+    def get_train_val_split(
+        self, train_set: Optional[TimeSeries] = None
+    ) -> Tuple[TimeSeries, TimeSeries]:
         """
         Creates the train and validation splits according to `validation_proportion` parameter
 
+        :param train_set: the train set to split, if None, the original train set is used
         :return: a tuple of train and validation time series
         """
-        train_ts, _ = self.get_train_test_split()
-        return train_ts.split_before(self.train_proportion)
+        if train_set is not None:
+            train_set = train_set
+        else:
+            train_set, _ = self.get_train_test_split()
+        return train_set.split_before(1 - self.validation_proportion)
 
-    def get_input_columns(self):
+    def get_input_columns(self) -> List[str]:
         """
         Returns the list of columns used as input only
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Type, Dict, Any, Callable, Optional
 from enum import Enum
+import warnings
 
 from ontime.core.modelling.abstract_model import AbstractModel
 from .benchmark_dataset import BenchmarkDataset
@@ -20,7 +21,8 @@ class BenchmarkModelConfig:
         self,
         model_name: str,
         model_class: Type[AbstractModel],
-        benchmark_mode: BenchmarkMode,
+        zero_shot_only: Optional[bool] = None,
+        benchmark_mode: Optional[BenchmarkMode] = None,
         static_model_params: Optional[Dict[str, Any]] = None,
         dynamic_model_params: Optional[
             Dict[str, Callable[[BenchmarkDataset], Any]]
@@ -32,18 +34,32 @@ class BenchmarkModelConfig:
 
         :param model_name: name of the model
         :param model_class: class of the model to be instanciated
-        :param benchmark_mode: either zero shot or full shot
+        :param benchmark_mode: DEPRECATED - either zero shot or full shot
         :param static_model_params: dictionnary of model parameters that are static, known as soon as the model is declared
-        :param static_model_params: dictionnary of model parameters that are functions depending on the dataset
+        :param dynamic_model_params: dictionnary of model parameters that are functions depending on the dataset
         :param validation_set_param: name of the parameter for the validation set to give to the model fit method
         :return: the initialized BenchmarkModelConfig
         """
         self.model_name = model_name
+        self.zero_shot_only = zero_shot_only
         self.benchmark_mode = benchmark_mode
         self.model_class = model_class
         self.validation_set_param = validation_set_param
         self._static_model_params = static_model_params or {}
         self._dynamic_model_params = dynamic_model_params or {}
+
+        # depreciation about benchmark_mode
+        if benchmark_mode is not None:
+            warnings.warn(
+                "The 'benchmark_mode' parameter is deprecated and will be removed in a future version. "
+                "Use 'zero_shot_only' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if zero_shot_only is None:
+                zero_shot_only = benchmark_mode == BenchmarkMode.ZERO_SHOT
+
+        self.zero_shot_only = zero_shot_only if zero_shot_only is not None else False
 
     def init_model(self, dataset: BenchmarkDataset) -> AbstractModel:
         """
