@@ -53,23 +53,56 @@ class Model(AbstractModel):
         self.model = model
         self.params = params
         self.is_model_undefined = True
+        self.index_name = None
+        self.components_names = None
 
     def fit(self, ts: TimeSeries, **params) -> "Model":
+        """
+        Fit the model
+
+        :param ts: TimeSeries to fit the model on
+        :param params: Additional parameters to pass to the model
+        :return: self
+        """
+        # Set the model if it is undefined
         if self.is_model_undefined:
             self._set_model(ts)
+        
+        # Initialize index name and components names
+        self.index_name = ts.time_index.name
+        self.components_names = ts.components.to_list()
 
+        # Fit the model
         self.model.fit(ts, **params)
         return self
 
     def predict(
         self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
     ) -> Union[List[TimeSeries], TimeSeries]:
+        """
+        Make a prediction
+
+        :param n: Number of steps to predict
+        :param ts: Optional TimeSeries to contain the predicted values
+        :param params: Additional parameters to pass to the model
+        :return: TimeSeries with the predicted values
+        """
+        # Set the model if it is undefined
         if self.is_model_undefined:
             if isinstance(ts, list):
                 self._set_model(ts[0])
             else:
                 self._set_model(ts)
-        return self.model.predict(n, ts, **params)
+
+        # Make the prediction
+        ts_pred = self.model.predict(n, ts, **params)
+
+        # Set the index name and components names
+        ts_pred.time_index.name = self.index_name
+        rename_dict = dict(zip(ts_pred.components.to_list(), self.components_names))
+        ts_pred = ts_pred.rename(rename_dict)
+
+        return ts_pred
 
     def _set_model(self, ts: TimeSeries):
         """
