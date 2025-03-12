@@ -24,7 +24,7 @@ def heatmap(ts: TimeSeries) -> Chart:
         alt.Chart(df)
         .mark_rect()
         .encode(
-            alt.X("yearmonthdate(time):O")
+            alt.X(f"yearmonthdate({ts.time_index.name}):O")
             .title("Time")
             .axis(
                 format="%Y",

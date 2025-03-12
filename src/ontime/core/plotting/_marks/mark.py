@@ -63,7 +63,7 @@ def mark(
     assert data.is_univariate, "TimeSeries must be univariate"
 
     default_kwargs = {
-        "x": "time:T",
+        "x": f"{ts.time_index.name}:T",
         "y": "value:Q",
         "color": "variable:N",
     }
