@@ -1,2 +1,0 @@
-from .local_model import LocalDartsBenchmarkModel
-from .global_model import GlobalDartsBenchmarkModel

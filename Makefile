@@ -23,13 +23,13 @@ install-dependencies:
 
 install-dependencies-test:
 	@echo "Installing..."
-	poetry lock --no-update
+	poetry lock
 	poetry install --with test
 
 install-dependencies-docs:
 	@echo "Installing..."
 	sudo apt install -y pandoc
-	poetry lock --no-update
+	poetry lock
 	poetry install --with docs
 
 activate:
