@@ -1,9 +1,22 @@
 import numpy as np
 from darts import TimeSeries
-from darts.metrics.metrics import multi_ts_support, METRIC_OUTPUT_TYPE, _get_values_or_raise, logger, raise_log, multivariate_support, TIME_AX, _get_wrapped_metric, mae, COMP_AX, ae
+from darts.metrics.metrics import (
+    multi_ts_support,
+    METRIC_OUTPUT_TYPE,
+    _get_values_or_raise,
+    logger,
+    raise_log,
+    multivariate_support,
+    TIME_AX,
+    _get_wrapped_metric,
+    mae,
+    COMP_AX,
+    ae,
+)
 from typing import Union, Optional, Sequence, Callable
 import pandas as pd
-    
+
+
 @multi_ts_support
 @multivariate_support
 def nmae(
@@ -32,7 +45,7 @@ def nmae(
     :param series_reduction: Optionally, a function to aggregate the metrics over the series axis. It must reduce a `np.ndarray` of shape `(s, t, c)` to a `np.ndarray` of shape `(t, c)` The function takes as input a ``np.ndarray`` and a parameter named `axis`, and returns the reduced array. The `axis` receives value `0` corresponding to the series axis. If `None`, will return a metric per series. Defaults to None
     :param n_jobs: The number of jobs to run in parallel. Parallel jobs are created only when a ``Sequence[TimeSeries]`` is passed as input, parallelising operations regarding different ``TimeSeries``. Defaults to `1` (sequential). Setting the parameter to `-1` means using all the available processors.
     :param verbose: Optionally, whether to print operations progress. Defaults to False
-    :return: 
+    :return:
     float
         A single metric score for:
 
@@ -53,11 +66,11 @@ def nmae(
     List[np.ndarray]
         Same as for type `np.ndarray` but for a sequence of series.
     """
-        
+
     y_true, _ = _get_values_or_raise(
         actual_series, pred_series, intersect, remove_nan_union=True
     )
-    
+
     y_true_sum = np.nansum(y_true, axis=TIME_AX)
 
     if not (y_true_sum > 0).all():
@@ -67,15 +80,13 @@ def nmae(
             ),
             logger=logger,
         )
-        
-    return np.nansum(_get_wrapped_metric(ae)(
-            actual_series,
-            pred_series,
-            intersect,
-            time_reduction=np.nansum
-        ), 
-        axis=TIME_AX) / y_true_sum
-    
 
-    
-    
+    return (
+        np.nansum(
+            _get_wrapped_metric(ae)(
+                actual_series, pred_series, intersect, time_reduction=np.nansum
+            ),
+            axis=TIME_AX,
+        )
+        / y_true_sum
+    )
