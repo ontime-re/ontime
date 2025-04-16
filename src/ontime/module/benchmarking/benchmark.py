@@ -202,6 +202,12 @@ class Benchmark:
                             few_shot_train_set
                         )
 
+                        # scaling
+                        if dataset.scaler is not None:
+                            train_set = dataset.scaler.fit_transform(train_set)
+                            val_set = dataset.scaler.transform(val_set)
+                            test_set = dataset.scaler.transform(test_set)
+
                         times = {}
 
                         try:

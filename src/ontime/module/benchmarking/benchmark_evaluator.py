@@ -36,7 +36,16 @@ class BenchmarkEvaluator:
         window_length = (
             self.dataset.input_length + self.dataset.target_length + self.dataset.gap
         )
-        ts_list = split_in_windows(self.test_ts, window_length, self.dataset.stride)
+
+        test_ts = self.test_ts
+        if self.dataset.scaler is not None:
+            test_ts = self.dataset.scaler.transform(self.test_ts)
+
+        ts_list = split_in_windows(
+            test_ts,
+            window_length, 
+            self.dataset.stride
+        )
 
         input_ts_list, target_ts_list = split_inputs_from_targets(
             ts_list,
@@ -54,6 +63,9 @@ class BenchmarkEvaluator:
             pred_ts_list.extend(
                 model.predict(ts=batch_inputs, n=self.dataset.target_length)
             )  # model should be able to handle list of inputs
+
+        if self.dataset.scaler is not None:
+            self.dataset.scaler.inverse_transform(pred_ts_list)
 
         # filter target_ts_list to only include the target columns
         target_ts_list = [

@@ -3,6 +3,7 @@ from typing import List, Optional, Union, Callable, Tuple
 
 from ontime.core.time_series.time_series import TimeSeries
 from ontime.module.datasets.dataset import Dataset
+from darts.dataprocessing.transformers import Scaler
 
 
 class BenchmarkDataset:
@@ -26,6 +27,7 @@ class BenchmarkDataset:
         few_shot_proportions: List[float] = [1.0],
         train_batch_size: int = 16,
         test_batch_size: int = 16,
+        scaler: Optional[Scaler] = None,
     ):
         """
         Initializes a BenchmarkDataset.
@@ -46,6 +48,7 @@ class BenchmarkDataset:
         :param train_batch_size: batch size for training
         :param test_batch_size: batch size for testing
         :processing_fn: processing pipeline to apply to entire ts once loaded, only taken into consideration if a ImportedDataset is given, default to None
+        :param scaler: Scaler to apply to the time series, default to None
         """
         self._ts = ts
         self.input_length = input_length
@@ -76,6 +79,7 @@ class BenchmarkDataset:
             target_columns = list(ts.columns)
         self.target_columns = target_columns
         self.processing_fn = processing_fn or (lambda ts: ts)
+        self.scaler = scaler
 
     @property
     def ts(self) -> TimeSeries:
