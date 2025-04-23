@@ -15,7 +15,12 @@ class BenchmarkEvaluator:
     Evaluator class to benchmark models on a specific dataset, according to different metrics.
     """
 
-    def __init__(self, dataset: BenchmarkDataset, metrics: List[BenchmarkMetric], on_val_ts: bool = False):
+    def __init__(
+        self,
+        dataset: BenchmarkDataset,
+        metrics: List[BenchmarkMetric],
+        on_val_ts: bool = False,
+    ):
         """
         Initializes a BenchmarkEvaluator
 
