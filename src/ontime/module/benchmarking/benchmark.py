@@ -9,6 +9,7 @@ from .benchmark_evaluator import BenchmarkEvaluator
 from .benchmark_metric import BenchmarkMetric
 from .benchmark_model_config import BenchmarkMode, BenchmarkModelConfig
 
+from darts.dataprocessing.transformers import Scaler
 from alive_progress import alive_bar
 import pandas as pd
 import time
@@ -202,6 +203,15 @@ class Benchmark:
                             few_shot_train_set
                         )
 
+                        # scaling (only if scaler is not None and not zero-shot)
+                        if dataset.scaler_type is not None and few_shot_proportion > 0.0:
+                            scaler = Scaler(dataset.scaler_type())
+                            train_set = scaler.fit_transform(train_set)
+                            val_set = scaler.transform(val_set)
+                            test_set = scaler.transform(test_set)
+                        else:
+                            scaler = None
+
                         times = {}
 
                         try:
@@ -225,7 +235,7 @@ class Benchmark:
                             logger.info("Evaluating...")
 
                             start_time = time.time()
-                            metrics = evaluator.evaluate(model=model)
+                            metrics = evaluator.evaluate(model=model, scaler=scaler)
                             times["evaluation"] = time.time() - start_time
 
                             logger.info(f"Evaluation done, took {times['evaluation']}")
