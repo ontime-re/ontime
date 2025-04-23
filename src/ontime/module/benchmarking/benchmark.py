@@ -204,7 +204,10 @@ class Benchmark:
                         )
 
                         # scaling (only if scaler is not None and not zero-shot)
-                        if dataset.scaler_type is not None and few_shot_proportion > 0.0:
+                        if (
+                            dataset.scaler_type is not None
+                            and few_shot_proportion > 0.0
+                        ):
                             scaler = Scaler(dataset.scaler_type())
                             train_set = scaler.fit_transform(train_set)
                             val_set = scaler.transform(val_set)

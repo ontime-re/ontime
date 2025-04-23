@@ -8,6 +8,7 @@ from ontime.module.processing.common import (
 )
 from darts.dataprocessing.transformers import Scaler
 
+
 class BenchmarkEvaluator:
     """
     Evaluator class to benchmark models on a specific dataset, according to different metrics.
@@ -42,11 +43,7 @@ class BenchmarkEvaluator:
         if scaler is not None:
             test_ts = scaler.transform(self.test_ts)
 
-        ts_list = split_in_windows(
-            test_ts,
-            window_length, 
-            self.dataset.stride
-        )
+        ts_list = split_in_windows(test_ts, window_length, self.dataset.stride)
 
         input_ts_list, target_ts_list = split_inputs_from_targets(
             ts_list,
@@ -67,9 +64,7 @@ class BenchmarkEvaluator:
 
         if scaler is not None:
             # inverse transform the predictions, we need to do it time series by time series
-            pred_ts_list = [
-                scaler.inverse_transform(ts) for ts in pred_ts_list
-            ]
+            pred_ts_list = [scaler.inverse_transform(ts) for ts in pred_ts_list]
 
         # filter target_ts_list to only include the target columns
         target_ts_list = [
