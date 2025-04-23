@@ -17,8 +17,8 @@ class BenchmarkDataset:
         name: str,
         input_length: int,
         target_length: int,
-        gap: int,
-        stride: int,
+        gap: int = 0,
+        stride: Optional[int] = None,
         processing_fn: Optional[Callable[[TimeSeries], TimeSeries]] = None,
         target_columns: Optional[List[str]] = None,
         test_proportion: float = 0.2,
@@ -36,8 +36,8 @@ class BenchmarkDataset:
         :param ts: onTime time series or onTime ImportedDataset class that can be loaded
         :param input_length: length of the input, i.e. the context to take into account for making a prediction
         :param target_length: length of the target, i.e. the prediction length
-        :param gap: gap in the time series between the end of the input and the begining
-        :param stride: stride in the time series between two consecutive window
+        :param gap: gap in the time series between the end of the input and the begining. Default to 0
+        :param stride: stride in the time series between two consecutive window. Default to target_length
         :param target_columns: time series columns to be used as target, i.e. features to be predicted, defaults to None
         :param test_proportion: proportion of the time series to be used for testing
         :param train_proportion: proportion of the time series to be used for training
@@ -53,7 +53,7 @@ class BenchmarkDataset:
         self._ts = ts
         self.input_length = input_length
         self.gap = gap
-        self.stride = stride
+        self.stride = stride if stride is not None else target_length
         self.target_length = target_length
         self.name = name
 

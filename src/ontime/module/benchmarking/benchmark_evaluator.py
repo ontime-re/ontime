@@ -1,5 +1,6 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
+from ontime import TimeSeries
 from ontime.core.modelling.model import Model
 from ..benchmarking import BenchmarkDataset, BenchmarkMetric
 from ontime.module.processing.common import (
@@ -14,17 +15,21 @@ class BenchmarkEvaluator:
     Evaluator class to benchmark models on a specific dataset, according to different metrics.
     """
 
-    def __init__(self, dataset: BenchmarkDataset, metrics: List[BenchmarkMetric]):
+    def __init__(self, dataset: BenchmarkDataset, metrics: List[BenchmarkMetric], on_val_ts: bool = False):
         """
         Initializes a BenchmarkEvaluator
 
         :param dataset: dataset on which evaluate models
         :param metrics: evaluation metrics to compute
+        :param on_val_ts: if True, use the validation time series for evaluation, instead of the test time series, default to False
         :return: an initialized BenchmarkEvaluator
         """
         self.dataset = dataset
         self.metrics = metrics
-        _, self.test_ts = dataset.get_train_test_split()
+        if on_val_ts:
+            _, self.test_ts = dataset.get_train_val_split()
+        else:
+            _, self.test_ts = dataset.get_train_test_split()
 
     def evaluate(self, model: Model, scaler: Scaler = None) -> Dict[str, Any]:
         """
@@ -32,6 +37,7 @@ class BenchmarkEvaluator:
 
         :param model: the model to evaluate
         :param scaler: scaler to use for scaling the time series, default to None
+        :param test_ts: time series to use for evaluation, default to None. If None, use the test time series from the dataset
         :return: calculated metrics
         """
         # create windows
