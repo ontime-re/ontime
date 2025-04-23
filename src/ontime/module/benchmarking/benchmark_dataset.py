@@ -3,6 +3,7 @@ from typing import List, Optional, Union, Callable, Tuple
 
 from ontime.core.time_series.time_series import TimeSeries
 from ontime.module.datasets.dataset import Dataset
+from sklearn.base import BaseEstimator
 
 
 class BenchmarkDataset:
@@ -16,8 +17,8 @@ class BenchmarkDataset:
         name: str,
         input_length: int,
         target_length: int,
-        gap: int,
-        stride: int,
+        gap: int = 0,
+        stride: Optional[int] = None,
         processing_fn: Optional[Callable[[TimeSeries], TimeSeries]] = None,
         target_columns: Optional[List[str]] = None,
         test_proportion: float = 0.2,
@@ -26,6 +27,7 @@ class BenchmarkDataset:
         few_shot_proportions: List[float] = [1.0],
         train_batch_size: int = 16,
         test_batch_size: int = 16,
+        scaler_type: Optional[type[BaseEstimator]] = None,
     ):
         """
         Initializes a BenchmarkDataset.
@@ -34,8 +36,8 @@ class BenchmarkDataset:
         :param ts: onTime time series or onTime ImportedDataset class that can be loaded
         :param input_length: length of the input, i.e. the context to take into account for making a prediction
         :param target_length: length of the target, i.e. the prediction length
-        :param gap: gap in the time series between the end of the input and the begining
-        :param stride: stride in the time series between two consecutive window
+        :param gap: gap in the time series between the end of the input and the begining. Default to 0
+        :param stride: stride in the time series between two consecutive window. Default to target_length
         :param target_columns: time series columns to be used as target, i.e. features to be predicted, defaults to None
         :param test_proportion: proportion of the time series to be used for testing
         :param train_proportion: proportion of the time series to be used for training
@@ -46,11 +48,12 @@ class BenchmarkDataset:
         :param train_batch_size: batch size for training
         :param test_batch_size: batch size for testing
         :processing_fn: processing pipeline to apply to entire ts once loaded, only taken into consideration if a ImportedDataset is given, default to None
+        :param scaler_type: sklearn scaler class to use for scaling the time series, default to None
         """
         self._ts = ts
         self.input_length = input_length
         self.gap = gap
-        self.stride = stride
+        self.stride = stride if stride is not None else target_length
         self.target_length = target_length
         self.name = name
 
@@ -76,6 +79,7 @@ class BenchmarkDataset:
             target_columns = list(ts.columns)
         self.target_columns = target_columns
         self.processing_fn = processing_fn or (lambda ts: ts)
+        self.scaler_type = scaler_type
 
     @property
     def ts(self) -> TimeSeries:
