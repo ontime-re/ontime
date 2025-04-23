@@ -621,6 +621,18 @@ webencodings = "*"
 css = ["tinycss2 (>=1.1.0,<1.5)"]
 
 [[package]]
+name = "bottle"
+version = "0.13.3"
+description = "Fast and simple WSGI-framework for small web-applications."
+optional = false
+python-versions = "*"
+groups = ["dev"]
+files = [
+    {file = "bottle-0.13.3-py2.py3-none-any.whl", hash = "sha256:551709073d750d2e88ade05915f0d5dbbbcb8e1d82573fbe85a0635eb842ab07"},
+    {file = "bottle-0.13.3.tar.gz", hash = "sha256:1c23aeb30aa8a13f39c60c0da494530ddd5de3da235bc431b818a50d999de49f"},
+]
+
+[[package]]
 name = "calmap"
 version = "0.0.11"
 description = "Calendar heatmaps from Pandas time series data"
@@ -2275,7 +2287,7 @@ version = "1.4.2"
 description = "Lightweight pipelining with Python functions"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "joblib-1.4.2-py3-none-any.whl", hash = "sha256:06d478d5674cbc267e7496a410ee875abd68e4340feff4490bcb7afb88060ae6"},
     {file = "joblib-1.4.2.tar.gz", hash = "sha256:2382c5816b2636fbd20a09e0f4e9dad4736765fdfb7dca582943b9c1366b3f0e"},
@@ -4262,6 +4274,31 @@ optional = ["boto3", "cmaes (>=0.10.0)", "google-cloud-storage", "matplotlib (!=
 test = ["coverage", "fakeredis[lua]", "kaleido", "moto", "pytest", "scipy (>=1.9.2) ; python_version >= \"3.8\"", "torch"]
 
 [[package]]
+name = "optuna-dashboard"
+version = "0.18.0"
+description = "Real-time dashboard for Optuna"
+optional = false
+python-versions = ">=3.8"
+groups = ["dev"]
+files = [
+    {file = "optuna_dashboard-0.18.0-py3-none-any.whl", hash = "sha256:49f64d5750838fa59bceedcebf3359c1758eb74d1aa0aaab990bd9ce9ffb0638"},
+    {file = "optuna_dashboard-0.18.0.tar.gz", hash = "sha256:be77394279efe2fb45ee63e5fe5622007ef0f06d47117e9b9c36e67716777dfd"},
+]
+
+[package.dependencies]
+bottle = ">=0.13.0"
+optuna = ">=3.1.0"
+packaging = "*"
+scikit-learn = "*"
+
+[package.extras]
+docs = ["boto3", "botorch", "sphinx", "sphinx_rtd_theme", "streamlit"]
+optional = ["boto3", "botorch (>=0.8.1) ; python_version >= \"3.8\"", "streamlit"]
+plotlypy = ["plotly"]
+preferential = ["botorch (>=0.8.1)"]
+test = ["coverage", "moto[s3]", "plotly", "pytest"]
+
+[[package]]
 name = "optuna-integration"
 version = "4.3.0"
 description = "Integration libraries of Optuna."
@@ -5738,7 +5775,7 @@ version = "1.4.2"
 description = "A set of python modules for machine learning and data mining"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "scikit-learn-1.4.2.tar.gz", hash = "sha256:daa1c471d95bad080c6e44b4946c9390a4842adc3082572c20e4f8884e39e959"},
     {file = "scikit_learn-1.4.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:8539a41b3d6d1af82eb629f9c57f37428ff1481c1e34dddb3b9d7af8ede67ac5"},
@@ -5781,7 +5818,7 @@ version = "1.15.2"
 description = "Fundamental algorithms for scientific computing in Python"
 optional = false
 python-versions = ">=3.10"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "scipy-1.15.2-cp310-cp310-macosx_10_13_x86_64.whl", hash = "sha256:a2ec871edaa863e8213ea5df811cd600734f6400b4af272e1c011e69401218e9"},
     {file = "scipy-1.15.2-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:6f223753c6ea76983af380787611ae1291e3ceb23917393079dcc746ba60cfb5"},
@@ -6685,7 +6722,7 @@ version = "3.5.0"
 description = "threadpoolctl"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "threadpoolctl-3.5.0-py3-none-any.whl", hash = "sha256:56c1e26c150397e58c4926da8eeee87533b1e32bef131bd4bf6a2f45f3185467"},
     {file = "threadpoolctl-3.5.0.tar.gz", hash = "sha256:082433502dd922bf738de0d8bcc4fdcbf0979ff44c42bd40f5af8a282f6fa107"},
@@ -7469,4 +7506,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "e2acd5ff09db830b271adb2c5a76e60435bcc4a6e203d3625ac21ab892daf4fe"
+content-hash = "441d210752c310ed3dd226523f61f49f3ee189c5d399d269dad93c6605df53ab"
