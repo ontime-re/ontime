@@ -6,7 +6,7 @@ from ontime.module.processing.common import (
     split_in_windows,
     split_inputs_from_targets,
 )
-
+from darts.dataprocessing.transformers import Scaler
 
 class BenchmarkEvaluator:
     """
@@ -25,11 +25,12 @@ class BenchmarkEvaluator:
         self.metrics = metrics
         _, self.test_ts = dataset.get_train_test_split()
 
-    def evaluate(self, model: Model) -> Dict[str, Any]:
+    def evaluate(self, model: Model, scaler: Scaler = None) -> Dict[str, Any]:
         """
         Evaluation method, computing metrics for each batch of data, and aggregating it.
 
         :param model: the model to evaluate
+        :param scaler: scaler to use for scaling the time series, default to None
         :return: calculated metrics
         """
         # create windows
@@ -38,8 +39,8 @@ class BenchmarkEvaluator:
         )
 
         test_ts = self.test_ts
-        if self.dataset.scaler is not None:
-            test_ts = self.dataset.scaler.transform(self.test_ts)
+        if scaler is not None:
+            test_ts = scaler.transform(self.test_ts)
 
         ts_list = split_in_windows(
             test_ts,
@@ -64,8 +65,11 @@ class BenchmarkEvaluator:
                 model.predict(ts=batch_inputs, n=self.dataset.target_length)
             )  # model should be able to handle list of inputs
 
-        if self.dataset.scaler is not None:
-            self.dataset.scaler.inverse_transform(pred_ts_list)
+        if scaler is not None:
+            # inverse transform the predictions, we need to do it time series by time series
+            pred_ts_list = [
+                scaler.inverse_transform(ts) for ts in pred_ts_list
+            ]
 
         # filter target_ts_list to only include the target columns
         target_ts_list = [
