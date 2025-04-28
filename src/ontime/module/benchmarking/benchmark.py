@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Tuple
+from typing import List, Tuple, Any, Literal, Dict
 import logging
 
 from ontime import TimeSeries
@@ -7,15 +7,17 @@ from ontime.core.modelling.abstract_model import AbstractModel
 from .benchmark_dataset import BenchmarkDataset
 from .benchmark_evaluator import BenchmarkEvaluator
 from .benchmark_metric import BenchmarkMetric
-from .benchmark_model_config import BenchmarkMode, BenchmarkModelConfig
+from .benchmark_model_config import BenchmarkModelConfig
 
 from darts.dataprocessing.transformers import Scaler
 from alive_progress import alive_bar
 import pandas as pd
 import time
 import traceback
+import json, pickle
 import numpy as np
 from tabulate import tabulate
+import os
 
 LOG_LEVELS = {
     "debug": logging.DEBUG,
@@ -58,6 +60,29 @@ def setup_logger(
 
     return logger
 
+def save_data(
+        data: Any,
+        path: str,
+        file_name: str,
+        format: Literal["json", "pickle"] = "json",
+) -> None:
+    """
+    Save a data object to a file in the specified format.
+
+    :param data: The data object to save.
+    :param path: The path where the file will be saved.
+    :param file_name: The name of the file (without extension).
+    :param format: The format to save the file in. Can be either "json" or "pickle", defaults to "json".
+    :raises ValueError: If the specified type is not "json" or "pickle".
+    """
+    if format == "json":
+        with open(f"{path}/{file_name}.json", "w") as f:
+            json.dump(data, f, indent=4)
+    elif format == "pickle":
+        with open(f"{path}/{file_name}.pkl", "wb") as f:
+            pickle.dump(data, f)
+    else:
+        raise ValueError("format must be either 'json' or 'pickle'")
 
 class Benchmark:
     """
@@ -70,6 +95,7 @@ class Benchmark:
         datasets: List[BenchmarkDataset] = None,
         metrics: List[BenchmarkMetric] = None,
         few_shot_proportions: List[float] = [1.0],
+        result_dir: str = "benchmark_results",
     ):
         """
         Initializes a Benchmark
@@ -85,6 +111,8 @@ class Benchmark:
         self.few_shot_proportions = few_shot_proportions
 
         # for holding results and predictions
+        self.result_dir = result_dir
+        os.makedirs(self.result_dir, exist_ok=True)
         self.results = {}
         self.dataset_info = {}
         self.predictions = {}
@@ -135,7 +163,7 @@ class Benchmark:
         """
         self.metrics.append(metric)
 
-    def run(self, logging_level: str = "warning", nb_predictions: int = 1):
+    def run(self, logging_level: str = "warning", nb_predictions: int = 1, run_name: str = None):
         """
         Run the benchmark
 
@@ -143,6 +171,13 @@ class Benchmark:
         :param nb_predictions: the number of predictions to do per model and dataset, for plotting purpose
         """
         logger = setup_logger(logging_level=LOG_LEVELS[logging_level])
+
+        # if run_name is not None, create a random name for the run
+        if run_name is None:
+            run_name = f"benchmark_{int(time.time())}"
+        run_dir = f"{self.result_dir}/{run_name}"
+        os.makedirs(run_dir, exist_ok=True)
+        logger.info(f"Running benchmark {run_name}")
 
         total_steps = len(self.model_configs) * len(self.datasets)
 
@@ -274,6 +309,9 @@ class Benchmark:
 
                             logger.info(f"Computed metrics: \n {metrics}")
 
+                        save_data(self.predictions, f"{run_dir}", "predictions", format="pickle")
+                        save_data(self.results, f"{run_dir}", "results", format="json")
+
     def get_results(self):
         return self.results
 
@@ -289,7 +327,7 @@ class Benchmark:
 
         :return: report in text format
         """
-        if self.results is None:
+        if not self.results:
             return "please invoke run_benchmark() to generate report data"
 
         report = []
@@ -357,27 +395,23 @@ class Benchmark:
             )  # generate table
 
         return "\n".join(report)
-
-    def get_report_dfs(
-        self, with_metrics: bool = True, with_times: bool = True
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    
+    @staticmethod
+    def get_results_df(results: Dict, with_metrics: bool = True, with_times: bool = True) -> pd.DataFrame:
         """
-        Generate report as two dataframes, one for the dataset information, and one for the benchmark results
+        Generate a dataframe from the benchmark results
 
+        :param results: the benchmark results
         :param with_metrics: whether to include metrics in the benchmark results dataframe
         :param with_times: whether to include times in the benchmark results dataframe
-        :return: the two dataframes
+        :return: the dataframe
         """
-
-        if self.results is None:
-            return "please invoke run_benchmark() to generate report data"
-
         flat_results = {}
 
-        for dataset_name, models in self.results.items():
+        for dataset_name, models in results.items():
             for model_name, proportions in models.items():
                 for few_shot_proportion, results in proportions.items():
-                    proportion_str = f"{few_shot_proportion * 100:.1f}%"
+                    proportion_str = f"{float(few_shot_proportion) * 100:.1f}%"
 
                     for key, values in results.items():
                         if key == "times" and with_times:
@@ -393,6 +427,38 @@ class Benchmark:
                                 )[dataset_name] = metric_value
 
         results_df = pd.DataFrame.from_dict(flat_results, orient="index")
+
+        metric_time_index_name = (
+            "Metric/Time"
+            if with_metrics and with_times
+            else "Metric" if with_metrics else "Time"
+        )
+
+        results_df.index.names = [
+            "Model",
+            "Few-shot proportion",
+            metric_time_index_name,
+        ]
+
+        return results_df
+
+    def get_report_dfs(
+        self, with_metrics: bool = True, with_times: bool = True
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        Generate report as two dataframes, one for the dataset information, and one for the benchmark results
+
+        :param with_metrics: whether to include metrics in the benchmark results dataframe
+        :param with_times: whether to include times in the benchmark results dataframe
+        :return: the two dataframes
+        """
+
+        if not self.results:
+            return "please invoke run_benchmark() to generate report data"
+
+        results_df = self.get_results_df(
+            self.results, with_metrics=with_metrics, with_times=with_times
+        )
 
         metric_time_index_name = (
             "Metric/Time"
