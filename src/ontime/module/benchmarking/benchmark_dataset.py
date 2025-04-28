@@ -56,6 +56,7 @@ class BenchmarkDataset:
         self.stride = stride if stride is not None else target_length
         self.target_length = target_length
         self.name = name
+        self.processing_fn = processing_fn or (lambda ts: ts)
 
         # depreciation about train_proportion
         if train_proportion is not None:
@@ -78,7 +79,6 @@ class BenchmarkDataset:
         if target_columns is None:
             target_columns = list(ts.columns)
         self.target_columns = target_columns
-        self.processing_fn = processing_fn or (lambda ts: ts)
         self.scaler_type = scaler_type
 
     @property
