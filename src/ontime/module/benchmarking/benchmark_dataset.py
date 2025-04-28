@@ -77,7 +77,7 @@ class BenchmarkDataset:
         self.test_batch_size = test_batch_size
         # if target columns is None, we use all columns
         if target_columns is None:
-            target_columns = list(ts.columns)
+            target_columns = list(self.ts.columns)
         self.target_columns = target_columns
         self.scaler_type = scaler_type
 
