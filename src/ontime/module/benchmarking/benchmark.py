@@ -60,11 +60,12 @@ def setup_logger(
 
     return logger
 
+
 def save_data(
-        data: Any,
-        path: str,
-        file_name: str,
-        format: Literal["json", "pickle"] = "json",
+    data: Any,
+    path: str,
+    file_name: str,
+    format: Literal["json", "pickle"] = "json",
 ) -> None:
     """
     Save a data object to a file in the specified format.
@@ -83,6 +84,7 @@ def save_data(
             pickle.dump(data, f)
     else:
         raise ValueError("format must be either 'json' or 'pickle'")
+
 
 class Benchmark:
     """
@@ -163,7 +165,12 @@ class Benchmark:
         """
         self.metrics.append(metric)
 
-    def run(self, logging_level: str = "warning", nb_predictions: int = 1, run_name: str = None):
+    def run(
+        self,
+        logging_level: str = "warning",
+        nb_predictions: int = 1,
+        run_name: str = None,
+    ):
         """
         Run the benchmark
 
@@ -309,7 +316,12 @@ class Benchmark:
 
                             logger.info(f"Computed metrics: \n {metrics}")
 
-                        save_data(self.predictions, f"{run_dir}", "predictions", format="pickle")
+                        save_data(
+                            self.predictions,
+                            f"{run_dir}",
+                            "predictions",
+                            format="pickle",
+                        )
                         save_data(self.results, f"{run_dir}", "results", format="json")
 
     def get_results(self):
@@ -395,9 +407,11 @@ class Benchmark:
             )  # generate table
 
         return "\n".join(report)
-    
+
     @staticmethod
-    def get_results_df(results: Dict, with_metrics: bool = True, with_times: bool = True) -> pd.DataFrame:
+    def get_results_df(
+        results: Dict, with_metrics: bool = True, with_times: bool = True
+    ) -> pd.DataFrame:
         """
         Generate a dataframe from the benchmark results
 
