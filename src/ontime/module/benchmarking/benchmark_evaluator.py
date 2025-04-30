@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Union, Tuple
 
 from ontime import TimeSeries
 from ontime.core.modelling.model import Model
@@ -36,13 +36,14 @@ class BenchmarkEvaluator:
         else:
             _, self.test_ts = dataset.get_train_test_split()
 
-    def evaluate(self, model: Model, scaler: Scaler = None) -> Dict[str, Any]:
+    def evaluate(self, model: Model, scaler: Scaler = None, return_predictions: bool = False) -> Union[Dict[str, Any], Tuple[Dict[str, Any], List[TimeSeries]]]:
         """
         Evaluation method, computing metrics for each batch of data, and aggregating it.
 
         :param model: the model to evaluate
         :param scaler: scaler to use for scaling the time series, default to None
         :param test_ts: time series to use for evaluation, default to None. If None, use the test time series from the dataset
+        :param return_predictions: if True, return the predictions as well, default to False
         :return: calculated metrics
         """
         # create windows
@@ -100,4 +101,4 @@ class BenchmarkEvaluator:
             )
             results[metric.name] = metric.aggregate_series_metrics(metric_results)
 
-        return results
+        return results, pred_target_ts_list if return_predictions else results

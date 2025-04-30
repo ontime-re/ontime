@@ -1,7 +1,6 @@
 ## Project specific
 .DS_Store
 poetry.lock
-dev
 
 # Created by https://www.toptal.com/developers/gitignore/api/intellij+all,python,jupyternotebooks
 # Edit at https://www.toptal.com/developers/gitignore?templates=intellij+all,python,jupyternotebooks
@@ -284,4 +283,9 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all,python,jupyternotebooks
 
 # darts log
-darts_logs/
+**/darts_logs/
+# ontime benchmark results save
+**/benchmark_results/
+# dev folder and symlinks
+**/dev/
+**/dev

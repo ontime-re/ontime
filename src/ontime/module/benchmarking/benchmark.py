@@ -169,6 +169,7 @@ class Benchmark:
         self,
         logging_level: str = "warning",
         nb_predictions: int = 1,
+        save_all_predictions: bool = False,
         run_name: str = None,
     ):
         """
@@ -176,6 +177,8 @@ class Benchmark:
 
         :param logging_level: logging level, can either be debug, info, warning, error or critical. Default to warning
         :param nb_predictions: the number of predictions to do per model and dataset, for plotting purpose
+        :param save_all_predictions: if True, save all predictions in the result directory, default to False
+        :param run_name: name of the run, if None, a random name will be generated
         """
         logger = setup_logger(logging_level=LOG_LEVELS[logging_level])
 
@@ -184,6 +187,9 @@ class Benchmark:
             run_name = f"benchmark_{int(time.time())}"
         run_dir = f"{self.result_dir}/{run_name}"
         os.makedirs(run_dir, exist_ok=True)
+        if save_all_predictions:
+            all_predictions_dir = f"{run_dir}/all_predictions"
+            os.makedirs(all_predictions_dir, exist_ok=True)
         logger.info(f"Running benchmark {run_name}")
 
         total_steps = len(self.model_configs) * len(self.datasets)
@@ -218,6 +224,8 @@ class Benchmark:
                 for model_config in self.model_configs:
                     bar.text(f"{model_config.model_name} on {dataset.name}")
                     bar()
+
+                    logger.info(f"On {model_config.model_name} model...")
 
                     dataset_results[model_config.model_name] = model_results = {}
                     dataset_predictions[model_config.model_name] = model_predictions = (
@@ -280,7 +288,15 @@ class Benchmark:
                             logger.info("Evaluating...")
 
                             start_time = time.time()
-                            metrics = evaluator.evaluate(model=model, scaler=scaler)
+                            eval_results = evaluator.evaluate(model=model, scaler=scaler, return_predictions=save_all_predictions)
+                            if save_all_predictions:
+                                metrics, all_predictions = eval_results
+                                save_data(all_predictions, 
+                                          all_predictions_dir, 
+                                          f"{model_config.model_name}_{dataset.name}_{few_shot_proportion}", format="pickle")
+                            else:
+                                metrics = eval_results
+                            
                             times["evaluation"] = time.time() - start_time
 
                             logger.info(f"Evaluation done, took {times['evaluation']}")
