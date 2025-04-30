@@ -103,4 +103,4 @@ class BenchmarkEvaluator:
             )
             results[metric.name] = metric.aggregate_series_metrics(metric_results)
 
-        return results, pred_target_ts_list if return_predictions else results
+        return (results, pred_target_ts_list) if return_predictions else results
