@@ -36,7 +36,9 @@ class BenchmarkEvaluator:
         else:
             _, self.test_ts = dataset.get_train_test_split()
 
-    def evaluate(self, model: Model, scaler: Scaler = None, return_predictions: bool = False) -> Union[Dict[str, Any], Tuple[Dict[str, Any], List[TimeSeries]]]:
+    def evaluate(
+        self, model: Model, scaler: Scaler = None, return_predictions: bool = False
+    ) -> Union[Dict[str, Any], Tuple[Dict[str, Any], List[TimeSeries]]]:
         """
         Evaluation method, computing metrics for each batch of data, and aggregating it.
 

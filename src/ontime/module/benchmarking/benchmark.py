@@ -288,15 +288,22 @@ class Benchmark:
                             logger.info("Evaluating...")
 
                             start_time = time.time()
-                            eval_results = evaluator.evaluate(model=model, scaler=scaler, return_predictions=save_all_predictions)
+                            eval_results = evaluator.evaluate(
+                                model=model,
+                                scaler=scaler,
+                                return_predictions=save_all_predictions,
+                            )
                             if save_all_predictions:
                                 metrics, all_predictions = eval_results
-                                save_data(all_predictions, 
-                                          all_predictions_dir, 
-                                          f"{model_config.model_name}_{dataset.name}_{few_shot_proportion}", format="pickle")
+                                save_data(
+                                    all_predictions,
+                                    all_predictions_dir,
+                                    f"{model_config.model_name}_{dataset.name}_{few_shot_proportion}",
+                                    format="pickle",
+                                )
                             else:
                                 metrics = eval_results
-                            
+
                             times["evaluation"] = time.time() - start_time
 
                             logger.info(f"Evaluation done, took {times['evaluation']}")
