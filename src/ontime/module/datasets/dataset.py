@@ -43,8 +43,9 @@ class Dataset:
     ETTh2Dataset = DartsDataset(dd.ETTh2Dataset())
     ETTm1Dataset = DartsDataset(dd.ETTm1Dataset())
     ETTm2Dataset = DartsDataset(dd.ETTm2Dataset())
-    # this one won't load for an unknown reason
-    # ElectricityConsumptionZurichDataset = (dd.ElectricityConsumptionZurichDataset(), ''
+    ElectricityConsumptionZurichDataset = DartsDataset(
+        dd.ElectricityConsumptionZurichDataset()
+    )
     ElectricityDataset = DartsDataset(dd.ElectricityDataset())
     EnergyDataset = DartsDataset(dd.EnergyDataset())
     ExchangeRateDataset = DartsDataset(dd.ExchangeRateDataset())
