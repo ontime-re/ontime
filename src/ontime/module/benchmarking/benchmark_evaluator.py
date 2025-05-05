@@ -37,15 +37,19 @@ class BenchmarkEvaluator:
             _, self.test_ts = dataset.get_train_test_split()
 
     def evaluate(
-        self, model: Model, scaler: Scaler = None, return_predictions: bool = False
+        self,
+        model: Model,
+        scaler: Scaler = None,
+        return_predictions: bool = False,
+        scaled_evaluation: bool = False,
     ) -> Union[Dict[str, Any], Tuple[Dict[str, Any], List[TimeSeries]]]:
         """
         Evaluation method, computing metrics for each batch of data, and aggregating it.
 
         :param model: the model to evaluate
         :param scaler: scaler to use for scaling the time series, default to None
-        :param test_ts: time series to use for evaluation, default to None. If None, use the test time series from the dataset
         :param return_predictions: if True, return the predictions as well, default to False
+        :param scaled_evaluation: whether to compute metrics and predictions on scaled data, default to False
         :return: calculated metrics
         """
         # create windows
@@ -53,11 +57,7 @@ class BenchmarkEvaluator:
             self.dataset.input_length + self.dataset.target_length + self.dataset.gap
         )
 
-        test_ts = self.test_ts
-        if scaler is not None:
-            test_ts = scaler.transform(self.test_ts)
-
-        ts_list = split_in_windows(test_ts, window_length, self.dataset.stride)
+        ts_list = split_in_windows(self.test_ts, window_length, self.dataset.stride)
 
         input_ts_list, target_ts_list = split_inputs_from_targets(
             ts_list,
@@ -65,6 +65,9 @@ class BenchmarkEvaluator:
             target_length=self.dataset.target_length,
             gap_length=self.dataset.gap,
         )
+
+        if scaler is not None:
+            input_ts_list = [scaler.transform(ts) for ts in input_ts_list]
 
         batch_size = self.dataset.test_batch_size
 
@@ -77,16 +80,22 @@ class BenchmarkEvaluator:
             )  # model should be able to handle list of inputs
 
         if scaler is not None:
-            # inverse transform the predictions, we need to do it time series by time series
-            pred_ts_list = [scaler.inverse_transform(ts) for ts in pred_ts_list]
+            if scaled_evaluation:
+                # transform the target as well
+                target_ts_list = [scaler.transform(ts) for ts in target_ts_list]
+            else:
+                # inverse transform the predictions, we need to do it time series by time series
+                pred_ts_list = [scaler.inverse_transform(ts) for ts in pred_ts_list]
 
         # filter target_ts_list to only include the target columns
         target_ts_list = [
             ts.drop_columns(self.dataset.get_input_columns()) for ts in target_ts_list
         ]
+
         input_target_ts_list = [
             ts.drop_columns(self.dataset.get_input_columns()) for ts in input_ts_list
         ]  # needed for insample
+
         # keep target components of prediction
         pred_target_ts_list = [
             ts.with_columns_renamed(ts.columns, self.test_ts.columns).drop_columns(
