@@ -84,8 +84,9 @@ class BenchmarkEvaluator:
                 # transform the target as well
                 target_ts_list = [scaler.transform(ts) for ts in target_ts_list]
             else:
-                # inverse transform the predictions, we need to do it time series by time series
+                # inverse transform the predictions and the input time series (for insample)
                 pred_ts_list = [scaler.inverse_transform(ts) for ts in pred_ts_list]
+                input_ts_list = [scaler.inverse_transform(ts) for ts in input_ts_list]
 
         # filter target_ts_list to only include the target columns
         target_ts_list = [
