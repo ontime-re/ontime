@@ -42,15 +42,17 @@ class Model(AbstractModel):
     It is chosen once and then kept for the whole lifecycle of the model.
     """
 
-    def __init__(self, model: Union[AbstractModel, Type[AbstractModel]], **params):
+    def __init__(
+        self, wrapped_model: Union[AbstractModel, Type[AbstractModel]], **params
+    ):
         """
         Initializes a Model.
 
-        :param model: either a model class or a model instance
+        :param wrapped_model: either a model class or a model instance
         """
 
         super().__init__()
-        self.model = model
+        self.model = wrapped_model
         self.params = params
         self.is_model_undefined = True
 
@@ -81,6 +83,8 @@ class Model(AbstractModel):
         """
 
         size_of_ts = ts.n_components
+
+        # handle naming conflict:
 
         if is_subclass_or_instance_of_subclass(self.model, ForecastingModel):
             # Darts Models

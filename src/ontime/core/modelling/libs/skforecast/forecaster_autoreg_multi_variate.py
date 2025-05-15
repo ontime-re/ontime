@@ -13,16 +13,16 @@ class ForecasterAutoregMultiVariate(AbstractModel):
     Generic wrapper around SkForecast ForecasterAutoreg models
     """
 
-    def __init__(self, model: Union[Type[BaseEstimator], BaseEstimator], **params):
+    def __init__(self, sk_model: Union[Type[BaseEstimator], BaseEstimator], **params):
         """
         Initialize model based on ForecasterAutoregMultiVariate. **params are defined in ForecasterAutoregMultiVariate
         from sklearn
         """
         super().__init__()
         # check if model is a class or an instance
-        if isinstance(model, type):
-            model = model()
-        self.model = SkForecasterAutoregMultiVariate(regressor=model, **params)
+        if isinstance(sk_model, type):
+            sk_model = sk_model()
+        self.model = SkForecasterAutoregMultiVariate(regressor=sk_model, **params)
 
     def fit(self, ts: TimeSeries, **params) -> "ForecasterAutoregMultiVariate":
         self.model.fit(series=ts.pd_dataframe(), **params)
