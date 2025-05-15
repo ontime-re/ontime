@@ -13,15 +13,15 @@ class ForecasterAutoreg(AbstractModel):
     Generic wrapper around SkForecast ForecasterAutoreg models
     """
 
-    def __init__(self, model: Union[Type[BaseEstimator], BaseEstimator], **params):
+    def __init__(self, sk_model: Union[Type[BaseEstimator], BaseEstimator], **params):
         """
         Initialize model based on ForecasterAutoreg. **params are defined in ForecasterAutoreg from sklearn
         """
         super().__init__()
         # check if model is a class or an instance
-        if isinstance(model, type):
-            model = model()
-        self.model = SkForecastForecasterAutoreg(regressor=model, **params)
+        if isinstance(sk_model, type):
+            sk_model = sk_model()
+        self.model = SkForecastForecasterAutoreg(regressor=sk_model, **params)
 
     def fit(self, ts: TimeSeries, **params) -> "ForecasterAutoreg":
         self.model.fit(y=ts.pd_series(), **params)
