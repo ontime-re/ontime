@@ -34,7 +34,7 @@ install-dependencies-test:
 
 install-dependencies-docs:
 	@echo "Installing..."
-	sudo apt install -y pandoc
+	sudo apt update && sudo apt install -y pandoc
 	uv lock
 	uv sync --group docs
 
