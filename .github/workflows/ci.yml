@@ -6,7 +6,7 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ 'main', 'develop', '100-migrate-project-manager-from-poetry-to-uv']
+    branches: [ 'main', 'develop']
   
 jobs:
 
