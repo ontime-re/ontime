@@ -36,7 +36,7 @@ install-dependencies-docs:
 	@echo "Installing..."
 	sudo apt install -y pandoc
 	uv lock
-	uv install --group docs
+	uv sync --group docs
 
 activate:
 	@echo "Activating virtual environment"
