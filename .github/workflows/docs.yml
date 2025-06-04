@@ -8,7 +8,7 @@ name: Documentation
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["develop", "main"]
+    branches: [ 'main', 'develop']
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:

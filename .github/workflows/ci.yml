@@ -81,8 +81,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install dependency manager
-        uses: snok/install-poetry@v1
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Install dependencies
         run: make install-dependencies
