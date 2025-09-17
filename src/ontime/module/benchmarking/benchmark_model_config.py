@@ -25,7 +25,7 @@ class BenchmarkModelConfig:
         benchmark_mode: Optional[BenchmarkMode] = None,
         static_model_params: Optional[Dict[str, Any]] = None,
         dynamic_model_params: Optional[Dict[str, Callable[[BenchmarkDataset], Any]]] = None,
-        dynamic_fit_kwargs: Optional[Dict[str, Callable[[BenchmarkDataset], Any]]] = None,
+        dynamic_predict_kwargs: Optional[Dict[str, Callable[[BenchmarkDataset], Any]]] = None,
         validation_set_param: Optional[str] = None,
     ):
         """
@@ -36,7 +36,7 @@ class BenchmarkModelConfig:
         :param benchmark_mode: DEPRECATED - either zero shot or full shot
         :param static_model_params: dictionary of model parameters that are static, known as soon as the model is declared
         :param dynamic_model_params: dictionary of model parameters that are functions depending on the dataset
-        :param dynamic_fit_kwargs: dictionary of additional parameters for model predict method,
+        :param dynamic_predict_kwargs: dictionary of additional parameters for model predict method,
         that are functions depending on the dataset
         :param validation_set_param: name of the parameter for the validation set to give to the model fit method
         :return: the initialized BenchmarkModelConfig
@@ -48,7 +48,7 @@ class BenchmarkModelConfig:
         self.validation_set_param = validation_set_param
         self._static_model_params = static_model_params or {}
         self._dynamic_model_params = dynamic_model_params or {}
-        self._dynamic_fit_kwargs = dynamic_fit_kwargs or {}
+        self._dynamic_predict_kwargs = dynamic_predict_kwargs or {}
 
         # depreciation about benchmark_mode
         if benchmark_mode is not None:
@@ -97,5 +97,5 @@ class BenchmarkModelConfig:
         :param dataset: The dataset being used to compute dynamic kwargs.
         :return: the resolved prediction kwargs
         """
-        return self._resolve_dynamic_params(self._dynamic_model_params, dataset)
+        return self._resolve_dynamic_params(self._dynamic_predict_kwargs, dataset)
 
