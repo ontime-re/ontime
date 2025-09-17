@@ -1,12 +1,12 @@
 import warnings
 from typing import List, Optional, Union, Callable, Tuple
-from enum import Enum
+from enum import StrEnum
 
 from ontime.core.time_series.time_series import TimeSeries
 from ontime.module.datasets.dataset import Dataset
 from sklearn.base import BaseEstimator
 
-class SeriesDomain(Enum):
+class SeriesDomain(StrEnum):
     WEATHER = "weather"
     FINANCE = "finance"
     TRANSPORT = "transport"
