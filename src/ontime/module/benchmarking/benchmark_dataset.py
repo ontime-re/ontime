@@ -90,8 +90,6 @@ class BenchmarkDataset:
         if isinstance(domain, list):
             assert len(domain) == len(self.ts.columns)
         self.domain = domain
-
-
         self.target_columns = target_columns
         self.scaler_type = scaler_type
 
