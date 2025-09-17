@@ -1,10 +1,17 @@
 import warnings
 from typing import List, Optional, Union, Callable, Tuple
+from enum import Enum
 
 from ontime.core.time_series.time_series import TimeSeries
 from ontime.module.datasets.dataset import Dataset
 from sklearn.base import BaseEstimator
 
+class SeriesDomain(Enum):
+    WEATHER = "weather"
+    FINANCE = "finance"
+    TRANSPORT = "transport"
+    ENERGY = "energy"
+    WEB = "web"
 
 class BenchmarkDataset:
     """
@@ -21,6 +28,7 @@ class BenchmarkDataset:
         stride: Optional[int] = None,
         processing_fn: Optional[Callable[[TimeSeries], TimeSeries]] = None,
         target_columns: Optional[List[str]] = None,
+        domain: Optional[Union[SeriesDomain, List[SeriesDomain]]] = None,
         test_proportion: float = 0.2,
         train_proportion: Optional[float] = None,
         validation_proportion: Optional[float] = 0.2,
@@ -39,6 +47,7 @@ class BenchmarkDataset:
         :param gap: gap in the time series between the end of the input and the begining. Default to 0
         :param stride: stride in the time series between two consecutive window. Default to target_length
         :param target_columns: time series columns to be used as target, i.e. features to be predicted, defaults to None
+        :param domain: domain of the time series. If a list, should be the same length as the time series number of components. Defaults to None
         :param test_proportion: proportion of the time series to be used for testing
         :param train_proportion: proportion of the time series to be used for training
         :param validation_proportion: proportion of the training time series to be used for validation, default to None. If None, set to test_proportion
@@ -78,6 +87,11 @@ class BenchmarkDataset:
         # if target columns is None, we use all columns
         if target_columns is None:
             target_columns = list(self.ts.columns)
+        if isinstance(domain, list):
+            assert len(domain) == len(self.ts.columns)
+        self.domain = domain
+
+
         self.target_columns = target_columns
         self.scaler_type = scaler_type
 
@@ -149,3 +163,18 @@ class BenchmarkDataset:
         :return: the list of input columns
         """
         return list(set(self.ts.columns) - set(self.target_columns))
+
+    def get_domain_string_list(self):
+        """
+        Returns the list of domain as strings.
+        A domain is linked to a time series column.
+
+        :return: the list of domain strings
+        """
+        if self.domain is None:
+            return self.domain
+        elif isinstance(self.domain, list):
+            return [d.value for d in self.domain]
+        else:
+            return [self.domain] * len(self.ts.columns)
+

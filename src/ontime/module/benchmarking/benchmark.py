@@ -287,11 +287,14 @@ class Benchmark:
 
                             logger.info("Evaluating...")
 
+                            predict_kwargs = model_config.get_predict_kwargs(dataset)
+
                             start_time = time.time()
                             eval_results = evaluator.evaluate(
                                 model=model,
                                 scaler=scaler,
                                 return_predictions=save_all_predictions,
+                                predict_kwargs=predict_kwargs,
                             )
                             if save_all_predictions:
                                 metrics, all_predictions = eval_results
