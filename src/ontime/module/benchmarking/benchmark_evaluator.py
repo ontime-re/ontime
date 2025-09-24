@@ -42,6 +42,7 @@ class BenchmarkEvaluator:
         scaler: Scaler = None,
         return_predictions: bool = False,
         scaled_evaluation: bool = False,
+        predict_kwargs: Dict[str, Any] = None,
     ) -> Union[Dict[str, Any], Tuple[Dict[str, Any], List[TimeSeries]]]:
         """
         Evaluation method, computing metrics for each batch of data, and aggregating it.
@@ -50,8 +51,12 @@ class BenchmarkEvaluator:
         :param scaler: scaler to use for scaling the time series, default to None
         :param return_predictions: if True, return the predictions as well, default to False
         :param scaled_evaluation: whether to compute metrics and predictions on scaled data, default to False
+        :param predict_kwargs: additional arguments to pass to model.predict, default to None
         :return: calculated metrics
         """
+        if predict_kwargs is None:
+            predict_kwargs = {}
+
         # create windows
         window_length = (
             self.dataset.input_length + self.dataset.target_length + self.dataset.gap
@@ -76,7 +81,7 @@ class BenchmarkEvaluator:
         for i in range(0, len(input_ts_list), batch_size):
             batch_inputs = input_ts_list[i : i + batch_size]
             pred_ts_list.extend(
-                model.predict(ts=batch_inputs, n=self.dataset.target_length)
+                model.predict(ts=batch_inputs, n=self.dataset.target_length, **predict_kwargs)
             )  # model should be able to handle list of inputs
 
         if scaler is not None:
