@@ -271,7 +271,10 @@ class Benchmark:
                             if few_shot_proportion > 0.0:
                                 logging.info("Training ...")
                                 start_time = time.time()
-                                fit_kwargs = {**model_config.get_fit_kwargs(dataset), **{"ts": train_set}}
+                                fit_kwargs = {
+                                    **model_config.get_fit_kwargs(dataset),
+                                    **{"ts": train_set},
+                                }
                                 if model_config.validation_set_param is not None:
                                     fit_kwargs[model_config.validation_set_param] = (
                                         val_set

@@ -81,7 +81,9 @@ class BenchmarkEvaluator:
         for i in range(0, len(input_ts_list), batch_size):
             batch_inputs = input_ts_list[i : i + batch_size]
             pred_ts_list.extend(
-                model.predict(ts=batch_inputs, n=self.dataset.target_length, **predict_kwargs)
+                model.predict(
+                    ts=batch_inputs, n=self.dataset.target_length, **predict_kwargs
+                )
             )  # model should be able to handle list of inputs
 
         if scaler is not None:

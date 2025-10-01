@@ -24,9 +24,15 @@ class BenchmarkModelConfig:
         zero_shot_only: Optional[bool] = None,
         benchmark_mode: Optional[BenchmarkMode] = None,
         static_model_params: Optional[Dict[str, Any]] = None,
-        dynamic_model_params: Optional[Dict[str, Callable[[BenchmarkDataset], Any]]] = None,
-        dynamic_predict_params: Optional[Dict[str, Callable[[BenchmarkDataset], Any]]] = None,
-        dynamic_fit_params: Optional[Dict[str, Callable[[BenchmarkDataset], Any]]] = None,
+        dynamic_model_params: Optional[
+            Dict[str, Callable[[BenchmarkDataset], Any]]
+        ] = None,
+        dynamic_predict_params: Optional[
+            Dict[str, Callable[[BenchmarkDataset], Any]]
+        ] = None,
+        dynamic_fit_params: Optional[
+            Dict[str, Callable[[BenchmarkDataset], Any]]
+        ] = None,
         validation_set_param: Optional[str] = None,
     ):
         """
@@ -54,7 +60,6 @@ class BenchmarkModelConfig:
         self._dynamic_predict_kwargs = dynamic_predict_params or {}
         self._dynamic_fit_kwargs = dynamic_fit_params or {}
 
-
         # depreciation about benchmark_mode
         if benchmark_mode is not None:
             warnings.warn(
@@ -70,8 +75,8 @@ class BenchmarkModelConfig:
 
     @staticmethod
     def _resolve_dynamic_params(
-            dynamic_map: Dict[str, Callable[[BenchmarkDataset], Any]],
-            dataset: BenchmarkDataset,
+        dynamic_map: Dict[str, Callable[[BenchmarkDataset], Any]],
+        dataset: BenchmarkDataset,
     ) -> Dict[str, Any]:
         """
         Helper method to resolve dynamic parameters for a dataset.
@@ -91,7 +96,9 @@ class BenchmarkModelConfig:
         """
 
         # resolve dynamic parameters that depend on dataset
-        resolved_model_dynamic_params = self._resolve_dynamic_params(self._dynamic_model_params, dataset)
+        resolved_model_dynamic_params = self._resolve_dynamic_params(
+            self._dynamic_model_params, dataset
+        )
         model_params = {**self._static_model_params, **resolved_model_dynamic_params}
 
         return self.model_class(**model_params)
@@ -111,4 +118,3 @@ class BenchmarkModelConfig:
         :return: the resolved prediction kwargs
         """
         return self._resolve_dynamic_params(self._dynamic_fit_kwargs, dataset)
-

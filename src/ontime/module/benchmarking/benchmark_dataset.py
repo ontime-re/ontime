@@ -6,12 +6,14 @@ from ontime.core.time_series.time_series import TimeSeries
 from ontime.module.datasets.dataset import Dataset
 from sklearn.base import BaseEstimator
 
+
 class SeriesDomain(StrEnum):
     WEATHER = "weather"
     FINANCE = "finance"
     TRANSPORT = "transport"
     ENERGY = "energy"
     WEB = "web"
+
 
 class BenchmarkDataset:
     """
@@ -175,4 +177,3 @@ class BenchmarkDataset:
             return [d.value for d in self.domain]
         else:
             return [self.domain] * len(self.ts.columns)
-
