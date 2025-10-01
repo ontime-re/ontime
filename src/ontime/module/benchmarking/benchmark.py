@@ -321,7 +321,9 @@ class Benchmark:
                                 for input in inputs[dataset.name]:
                                     start_time = time.time()
                                     prediction = model.predict(
-                                        ts=input, n=dataset.target_length
+                                        ts=input,
+                                        n=dataset.target_length,
+                                        **predict_kwargs,
                                     )
                                     predictions_time.append(time.time() - start_time)
                                     predictions.append(prediction)
