@@ -41,6 +41,7 @@ class BenchmarkEvaluator:
         model: Model,
         scaler: Scaler = None,
         return_predictions: bool = False,
+        batch_size: int = 32,
         scaled_evaluation: bool = False,
         predict_kwargs: Dict[str, Any] = None,
     ) -> Union[Dict[str, Any], Tuple[Dict[str, Any], List[TimeSeries]]]:
@@ -50,6 +51,7 @@ class BenchmarkEvaluator:
         :param model: the model to evaluate
         :param scaler: scaler to use for scaling the time series, default to None
         :param return_predictions: if True, return the predictions as well, default to False
+        :param batch_size: number of samples that will be given to the model predict method at once, default to 32.
         :param scaled_evaluation: whether to compute metrics and predictions on scaled data, default to False
         :param predict_kwargs: additional arguments to pass to model.predict, default to None
         :return: calculated metrics
@@ -73,8 +75,6 @@ class BenchmarkEvaluator:
 
         if scaler is not None:
             input_ts_list = [scaler.transform(ts) for ts in input_ts_list]
-
-        batch_size = self.dataset.test_batch_size
 
         pred_ts_list = []
 
