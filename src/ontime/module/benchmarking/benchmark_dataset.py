@@ -36,7 +36,7 @@ class BenchmarkDataset:
         validation_proportion: Optional[float] = 0.2,
         few_shot_proportions: List[float] = [1.0],
         train_batch_size: int = 16,
-        test_batch_size: int = 16,
+        test_batch_size: int = None,
         scaler_type: Optional[type[BaseEstimator]] = None,
     ):
         """
@@ -57,7 +57,7 @@ class BenchmarkDataset:
         defaults to [1.0]
         If None, set to (1 - train_proportion).
         :param train_batch_size: batch size for training
-        :param test_batch_size: batch size for testing
+        :param test_batch_size: batch size for testing. Deprecated, will be removed in future releases.
         :processing_fn: processing pipeline to apply to entire ts once loaded, only taken into consideration if a ImportedDataset is given, default to None
         :param scaler_type: sklearn scaler class to use for scaling the time series, default to None
         """
@@ -85,6 +85,13 @@ class BenchmarkDataset:
         self.validation_proportion = validation_proportion
         self.few_shot_proportions = few_shot_proportions
         self.train_batch_size = train_batch_size
+        if test_batch_size:
+            warnings.warn(
+                "The 'test_batch_size' argument is deprecated and will be removed in a future version.\n"
+                "You can define a test batch size in model configuration instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         self.test_batch_size = test_batch_size
         # if target columns is None, we use all columns
         if target_columns is None:

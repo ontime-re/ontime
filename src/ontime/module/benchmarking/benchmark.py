@@ -297,6 +297,7 @@ class Benchmark:
                                 model=model,
                                 scaler=scaler,
                                 return_predictions=save_all_predictions,
+                                batch_size=model_config.test_batch_size(dataset),
                                 predict_kwargs=predict_kwargs,
                             )
                             if save_all_predictions:
