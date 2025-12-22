@@ -8,6 +8,9 @@ from ontime.module.processing.common import (
     split_inputs_from_targets,
 )
 from darts.dataprocessing.transformers import Scaler
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 class BenchmarkEvaluator:
@@ -41,6 +44,7 @@ class BenchmarkEvaluator:
         model: Model,
         scaler: Scaler = None,
         return_predictions: bool = False,
+        univariate_prediction: bool = False,
         batch_size: int = 32,
         scaled_evaluation: bool = False,
         predict_kwargs: Dict[str, Any] = None,
@@ -51,6 +55,8 @@ class BenchmarkEvaluator:
         :param model: the model to evaluate
         :param scaler: scaler to use for scaling the time series, default to None
         :param return_predictions: if True, return the predictions as well, default to False
+        :param univariate_prediction: whether to take only target columns as input for prediction (for univariate models),
+        default to False
         :param batch_size: number of samples that will be given to the model predict method at once, default to 32.
         :param scaled_evaluation: whether to compute metrics and predictions on scaled data, default to False
         :param predict_kwargs: additional arguments to pass to model.predict, default to None
@@ -64,7 +70,20 @@ class BenchmarkEvaluator:
             self.dataset.input_length + self.dataset.target_length + self.dataset.gap
         )
 
-        ts_list = split_in_windows(self.test_ts, window_length, self.dataset.stride)
+        test_ts = self.test_ts
+        if univariate_prediction:
+            # filter test_ts to only include target columns
+            test_ts = self.test_ts.drop_columns(
+                [
+                    col
+                    for col in self.test_ts.columns
+                    if col in self.dataset.get_input_columns()
+                ]
+            )
+
+        logger.info("Columns used for prediction: %s", test_ts.columns)
+
+        ts_list = split_in_windows(test_ts, window_length, self.dataset.stride)
 
         input_ts_list, target_ts_list = split_inputs_from_targets(
             ts_list,
@@ -95,22 +114,29 @@ class BenchmarkEvaluator:
                 pred_ts_list = [scaler.inverse_transform(ts) for ts in pred_ts_list]
                 input_ts_list = [scaler.inverse_transform(ts) for ts in input_ts_list]
 
-        # filter target_ts_list to only include the target columns
-        target_ts_list = [
-            ts.drop_columns(self.dataset.get_input_columns()) for ts in target_ts_list
-        ]
-
-        input_target_ts_list = [
-            ts.drop_columns(self.dataset.get_input_columns()) for ts in input_ts_list
-        ]  # needed for insample
-
-        # keep target components of prediction
+        input_target_ts_list = input_ts_list  # needed for insample
         pred_target_ts_list = [
-            ts.with_columns_renamed(ts.columns, self.test_ts.columns).drop_columns(
-                self.dataset.get_input_columns()
-            )
-            for ts in pred_ts_list
+            ts.with_columns_renamed(ts.columns, test_ts.columns) for ts in pred_ts_list
         ]
+        # filter target_ts_list to only include the target columns
+        # only for multivariate prediction, as we already did it for univariate
+        if not univariate_prediction:
+            target_ts_list = [
+                ts.drop_columns(self.dataset.get_input_columns())
+                for ts in target_ts_list
+            ]
+            input_target_ts_list = [
+                ts.drop_columns(self.dataset.get_input_columns())
+                for ts in input_ts_list
+            ]
+            pred_target_ts_list = [
+                ts.drop_columns(self.dataset.get_input_columns())
+                for ts in pred_target_ts_list
+            ]
+            logger.info(
+                "Columns used for metrics computation: %s",
+                target_ts_list[0].columns,
+            )
 
         results = {}
 

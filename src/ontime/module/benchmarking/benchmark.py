@@ -298,6 +298,7 @@ class Benchmark:
                                 scaler=scaler,
                                 return_predictions=save_all_predictions,
                                 batch_size=model_config.test_batch_size(dataset),
+                                univariate_prediction=model_config.is_univariate,
                                 predict_kwargs=predict_kwargs,
                             )
                             if save_all_predictions:
