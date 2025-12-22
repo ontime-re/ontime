@@ -23,6 +23,7 @@ class BenchmarkModelConfig:
         model_class: Type[AbstractModel],
         zero_shot_only: Optional[bool] = None,
         benchmark_mode: Optional[BenchmarkMode] = None,
+        is_univariate: Optional[bool] = False,
         test_batch_size: Optional[Callable[[BenchmarkDataset], int]] = lambda ds: 32,
         static_model_params: Optional[Dict[str, Any]] = None,
         dynamic_model_params: Optional[
@@ -42,6 +43,8 @@ class BenchmarkModelConfig:
         :param model_name: name of the model
         :param model_class: class of the model to be instanciated
         :param benchmark_mode: DEPRECATED - either zero shot or full shot
+        :param zero_shot_only: either if the model must be evaluated in zero shot learning setting only.
+        :param is_univariate: whether the model is univariate (only handles univariate time series) or not.
         :param test_batch_size: function that takes a BenchmarkDataset and returns the test batch size for this model.
         Default to a function returning 32.
         :param static_model_params: dictionary of model parameters that are static, known as soon as the model is declared
@@ -57,6 +60,7 @@ class BenchmarkModelConfig:
         self.zero_shot_only = zero_shot_only
         self.benchmark_mode = benchmark_mode
         self.model_class = model_class
+        self.is_univariate = is_univariate
         self.test_batch_size = test_batch_size
         self.validation_set_param = validation_set_param
         self._static_model_params = static_model_params or {}
