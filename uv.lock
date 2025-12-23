@@ -2755,7 +2755,7 @@ wheels = [
 
 [[package]]
 name = "nbclient"
-version = "0.10.3"
+version = "0.10.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jupyter-client" },
@@ -2763,9 +2763,9 @@ dependencies = [
     { name = "nbformat" },
     { name = "traitlets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8d/f3/1f6cf2ede4b026bc5f0b424cb41adf22f9c804e90a4dbd4fdb42291a35d5/nbclient-0.10.3.tar.gz", hash = "sha256:0baf171ee246e3bb2391da0635e719f27dc77d99aef59e0b04dcb935ee04c575", size = 62564, upload-time = "2025-12-19T15:50:09.331Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/56/91/1c1d5a4b9a9ebba2b4e32b8c852c2975c872aec1fe42ab5e516b2cecd193/nbclient-0.10.4.tar.gz", hash = "sha256:1e54091b16e6da39e297b0ece3e10f6f29f4ac4e8ee515d29f8a7099bd6553c9", size = 62554, upload-time = "2025-12-23T07:45:46.369Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b2/77/0c73678f5260501a271fd7342bee5d639440f2e9e07d590f1100a056d87c/nbclient-0.10.3-py3-none-any.whl", hash = "sha256:39e9bd403504dd2484dd0fd25235bb6a683ce8cd9873356e40d880696adc9e35", size = 25473, upload-time = "2025-12-19T15:50:07.671Z" },
+    { url = "https://files.pythonhosted.org/packages/83/a0/5b0c2f11142ed1dddec842457d3f65eaf71a0080894eb6f018755b319c3a/nbclient-0.10.4-py3-none-any.whl", hash = "sha256:9162df5a7373d70d606527300a95a975a47c137776cd942e52d9c7e29ff83440", size = 25465, upload-time = "2025-12-23T07:45:44.51Z" },
 ]
 
 [[package]]
@@ -3216,7 +3216,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.26.4,<2" },
     { name = "periodicity-detection", specifier = ">=0.1.3,<0.2" },
     { name = "protobuf", specifier = ">=4.24.4,<5" },
-    { name = "skforecast", specifier = ">=0.12.0,<0.13" },
+    { name = "skforecast", specifier = ">=0.19.1" },
     { name = "tabulate", specifier = ">=0.9.0,<0.10" },
     { name = "tensorflow", specifier = ">=2.16.1,<3" },
     { name = "torch", specifier = ">=2.0.0,!=2.0.1,!=2.1.0" },
@@ -4274,11 +4274,11 @@ wheels = [
 
 [[package]]
 name = "pyparsing"
-version = "3.2.5"
+version = "3.3.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f2/a5/181488fc2b9d093e3972d2a472855aae8a03f000592dbfce716a512b3359/pyparsing-3.2.5.tar.gz", hash = "sha256:2df8d5b7b2802ef88e8d016a2eb9c7aeaa923529cd251ed0fe4608275d4105b6", size = 1099274, upload-time = "2025-09-21T04:11:06.277Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/33/c1/1d9de9aeaa1b89b0186e5fe23294ff6517fce1bc69149185577cd31016b2/pyparsing-3.3.1.tar.gz", hash = "sha256:47fad0f17ac1e2cad3de3b458570fbc9b03560aa029ed5e16ee5554da9a2251c", size = 1550512, upload-time = "2025-12-23T03:14:04.391Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/10/5e/1aa9a93198c6b64513c9d7752de7422c06402de6600a8767da1524f9570b/pyparsing-3.2.5-py3-none-any.whl", hash = "sha256:e38a4f02064cf41fe6593d328d0512495ad1f3d8a91c4f73fc401b3079a59a5e", size = 113890, upload-time = "2025-09-21T04:11:04.117Z" },
+    { url = "https://files.pythonhosted.org/packages/8b/40/2614036cdd416452f5bf98ec037f38a1afb17f327cb8e6b652d4729e0af8/pyparsing-3.3.1-py3-none-any.whl", hash = "sha256:023b5e7e5520ad96642e2c6db4cb683d3970bd640cdf7115049a6e9c3682df82", size = 121793, upload-time = "2025-12-23T03:14:02.103Z" },
 ]
 
 [[package]]
@@ -4984,19 +4984,23 @@ wheels = [
 
 [[package]]
 name = "skforecast"
-version = "0.12.1"
+version = "0.19.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "joblib" },
+    { name = "numba" },
     { name = "numpy" },
     { name = "optuna" },
     { name = "pandas" },
+    { name = "rich" },
     { name = "scikit-learn" },
+    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "scipy", version = "1.16.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f9/ad/e377d9b9644ea4c2468ff8f2a851c339f90da7292257e1764f4cdd7ac9a3/skforecast-0.12.1.tar.gz", hash = "sha256:f031a40e547e1d090289670b40007d80448ca9f89fab4b6c868d5fcc99575c37", size = 446304, upload-time = "2024-05-20T17:02:33.685Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/16/87/02c286a926d796a918075c2069a3ea16bad2543a2cd7bf6756335a076b4a/skforecast-0.19.1.tar.gz", hash = "sha256:67e5fe5415983e3678312a70cefa6f2f81da005162298e91643a6913c95979d8", size = 770630, upload-time = "2025-12-10T14:04:52.811Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/52/fc/622eb6242d6aca357300717bc1e06f01340110a4d37f0b89d3c678bf6130/skforecast-0.12.1-py3-none-any.whl", hash = "sha256:a2cc06be42f2e41a03fd18fe4b6878f7a52bb049f20763b4c1ef818597517fe8", size = 560573, upload-time = "2024-05-20T17:02:30.93Z" },
+    { url = "https://files.pythonhosted.org/packages/fe/fd/7ea84c0837f67a1c3afd19109714530b127e65e499e0e425caa05e8e9b42/skforecast-0.19.1-py3-none-any.whl", hash = "sha256:687c10f6ca51a168cdd3feaed834797f04021e7c33dfd388c99f8c92b013f45f", size = 968310, upload-time = "2025-12-10T14:04:51.256Z" },
 ]
 
 [[package]]
