@@ -133,10 +133,6 @@ class BenchmarkEvaluator:
                 ts.drop_columns(self.dataset.get_input_columns())
                 for ts in pred_target_ts_list
             ]
-            logger.info(
-                "Columns used for metrics computation: %s",
-                target_ts_list[0].columns,
-            )
 
         results = {}
 
