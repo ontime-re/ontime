@@ -3,8 +3,8 @@ from typing import Union, Type, Optional, List
 from sklearn.base import BaseEstimator
 from ...abstract_model import AbstractModel
 from ontime.core.time_series import TimeSeries
-from skforecast.ForecasterAutoregMultiVariate import (
-    ForecasterAutoregMultiVariate as SkForecasterAutoregMultiVariate,
+from skforecast.recursive import (
+    ForecasterRecursiveMultiSeries as SKForecastForecasterRecursiveMultiSeries,
 )
 
 
@@ -22,7 +22,7 @@ class ForecasterAutoregMultiVariate(AbstractModel):
         # check if model is a class or an instance
         if isinstance(sk_model, type):
             sk_model = sk_model()
-        self.model = SkForecasterAutoregMultiVariate(regressor=sk_model, **params)
+        self.model = SKForecastForecasterRecursiveMultiSeries(estimator=sk_model, **params)
 
     def fit(self, ts: TimeSeries, **params) -> "ForecasterAutoregMultiVariate":
         self.model.fit(series=ts.pd_dataframe(), **params)
