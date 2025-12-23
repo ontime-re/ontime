@@ -10,9 +10,6 @@ from ontime.module.processing.common import (
 from darts.dataprocessing.transformers import Scaler
 from logging import getLogger
 
-logger = getLogger(__name__)
-
-
 class BenchmarkEvaluator:
     """
     Evaluator class to benchmark models on a specific dataset, according to different metrics.
@@ -62,6 +59,9 @@ class BenchmarkEvaluator:
         :param predict_kwargs: additional arguments to pass to model.predict, default to None
         :return: calculated metrics
         """
+
+        logger = getLogger(__name__)
+
         if predict_kwargs is None:
             predict_kwargs = {}
 
@@ -97,8 +97,13 @@ class BenchmarkEvaluator:
 
         pred_ts_list = []
 
+        logger.info("Starting predictions on %d samples", len(input_ts_list))
+        logger.info(input_ts_list)
+
         for i in range(0, len(input_ts_list), batch_size):
             batch_inputs = input_ts_list[i : i + batch_size]
+            logger.info("Predicting batch %d to %d", i, i + batch_size)
+            logger.info(batch_inputs)
             pred_ts_list.extend(
                 model.predict(
                     ts=batch_inputs, n=self.dataset.target_length, **predict_kwargs
