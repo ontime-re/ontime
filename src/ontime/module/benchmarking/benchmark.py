@@ -310,9 +310,7 @@ class Benchmark:
                                     format="pickle",
                                 )
                             else:
-                                metrics, energy = eval_results
-
-                            save_data(energy, f"{run_dir}", "energy", format="json")
+                                metrics = eval_results
 
                             times["evaluation"] = time.time() - start_time
 
@@ -346,6 +344,7 @@ class Benchmark:
                                     "suceeded": True,
                                     "times": times,
                                     "metrics": metrics,
+                                    "energy": energy,
                                 }
                             )
 
@@ -394,22 +393,27 @@ class Benchmark:
 
             all_times_keys = set()  # Collect all possible time-related keys
             all_metrics_keys = set()  # Collect all possible metric keys
+            all_energy_keys = set()  # Collect all possible metric keys
 
             # time and metric columns
             for model, proportions in models.items():
                 for proportion, data in proportions.items():
                     all_times_keys.update(data.get("times", {}).keys())
                     all_metrics_keys.update(data.get("metrics", {}).keys())
+                    all_energy_keys.update(data.get("energy", {}).keys())
 
             # for consistent sorting
             all_times_keys = sorted(all_times_keys)
             all_metrics_keys = sorted(all_metrics_keys)
+            all_energy_keys = sorted(all_energy_keys)
 
             headers = (
                 ["Model", "Few-shot %", "", "Success", ""]
                 + all_times_keys
                 + [""]
                 + all_metrics_keys
+                + [""]
+                + all_energy_keys
             )
             table = []
 
@@ -423,6 +427,10 @@ class Benchmark:
                         f"{data['metrics'].get(k, 0):.3f}" for k in all_metrics_keys
                     ]
 
+                    energy_values = [
+                        f"{data['energy'].get(k, 0):.3f}" for k in all_energy_keys
+                    ]
+
                     row = (
                         [
                             model,
@@ -434,6 +442,8 @@ class Benchmark:
                         + times_values
                         + [""]
                         + metrics_values
+                        + [""]
+                        + energy_values
                     )
                     table.append(row)
 
@@ -445,7 +455,10 @@ class Benchmark:
 
     @staticmethod
     def get_results_df(
-        results: Dict, with_metrics: bool = True, with_times: bool = True
+            results: Dict,
+            with_metrics: bool = True,
+            with_times: bool = True,
+            with_energy: bool = True
     ) -> pd.DataFrame:
         """
         Generate a dataframe from the benchmark results
@@ -453,6 +466,7 @@ class Benchmark:
         :param results: the benchmark results
         :param with_metrics: whether to include metrics in the benchmark results dataframe
         :param with_times: whether to include times in the benchmark results dataframe
+        :param with_energy: whether to include energy in the benchmark results dataframe
         :return: the dataframe
         """
         flat_results = {}
@@ -475,30 +489,43 @@ class Benchmark:
                                     (model_name, proportion_str, metric_name), {}
                                 )[dataset_name] = metric_value
 
+                        elif key == "energy" and with_energy:
+                            for energy_name, energy_value in values.items():
+                                flat_results.setdefault(
+                                    (model_name, proportion_str, energy_name), {}
+                                )[dataset_name] = energy_value
+
         results_df = pd.DataFrame.from_dict(flat_results, orient="index")
 
-        metric_time_index_name = (
-            "Metric/Time"
-            if with_metrics and with_times
-            else "Metric" if with_metrics else "Time"
-        )
+        labels = []
+        if with_metrics:
+            labels.append("Metric")
+        if with_times:
+            labels.append("Time")
+        if with_energy:
+            labels.append("Energy")
+        metric_time_energy_index_name = "/".join(labels)
 
         results_df.index.names = [
             "Model",
             "Few-shot proportion",
-            metric_time_index_name,
+            metric_time_energy_index_name,
         ]
 
         return results_df
 
     def get_report_dfs(
-        self, with_metrics: bool = True, with_times: bool = True
+            self,
+            with_metrics: bool = True,
+            with_times: bool = True,
+            with_energy: bool = True
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Generate report as two dataframes, one for the dataset information, and one for the benchmark results
 
         :param with_metrics: whether to include metrics in the benchmark results dataframe
         :param with_times: whether to include times in the benchmark results dataframe
+        :param with_energy: whether to include energy in the benchmark results dataframe
         :return: the two dataframes
         """
 
@@ -509,16 +536,19 @@ class Benchmark:
             self.results, with_metrics=with_metrics, with_times=with_times
         )
 
-        metric_time_index_name = (
-            "Metric/Time"
-            if with_metrics and with_times
-            else "Metric" if with_metrics else "Time"
-        )
+        labels = []
+        if with_metrics:
+            labels.append("Metric")
+        if with_times:
+            labels.append("Time")
+        if with_energy:
+            labels.append("Energy")
+        metric_time_energy_index_name = "/".join(labels)
 
         results_df.index.names = [
             "Model",
             "Few-shot proportion",
-            metric_time_index_name,
+            metric_time_energy_index_name,
         ]
 
         ds_info_df = pd.DataFrame.from_dict(self.dataset_info, orient="index").T
