@@ -1,4 +1,8 @@
+import time
 from typing import List, Dict, Any, Union, Tuple
+
+from codecarbon import EmissionsTracker
+from e3scraper import E3Meter, E3Daemon
 
 from ontime import TimeSeries
 from ontime.core.modelling.model import Model
@@ -48,7 +52,7 @@ class BenchmarkEvaluator:
         batch_size: int = 32,
         scaled_evaluation: bool = False,
         predict_kwargs: Dict[str, Any] = None,
-    ) -> Union[Dict[str, Any], Tuple[Dict[str, Any], List[TimeSeries]]]:
+    ) -> Union[Tuple[Dict[str, Any], Dict[str, List[float]]], Tuple[Dict[str, Any], Dict[str, List[float]], List[TimeSeries]]]:
         """
         Evaluation method, computing metrics for each batch of data, and aggregating it.
 
@@ -60,7 +64,7 @@ class BenchmarkEvaluator:
         :param batch_size: number of samples that will be given to the model predict method at once, default to 32.
         :param scaled_evaluation: whether to compute metrics and predictions on scaled data, default to False
         :param predict_kwargs: additional arguments to pass to model.predict, default to None
-        :return: calculated metrics
+        :return: calculated metrics and energy used
         """
         if predict_kwargs is None:
             predict_kwargs = {}
@@ -97,13 +101,41 @@ class BenchmarkEvaluator:
 
         pred_ts_list = []
 
+        # Initialising energy tracking
+        ## CodeCarbon
+        tracker = EmissionsTracker(
+            experiment_id=str(time.time()))
+        tracker.start()
+
+        ## PDU
+        pdu = E3Meter(
+            hostname="160.98.61.173",
+        )
+        pdu_daemon = E3Daemon(
+            pdu,
+            interval_seconds=1,
+        )
+
+        cc_ts_list: List[float] = []
+        pdu_ts_list: List[float] = []
+
         for i in range(0, len(input_ts_list), batch_size):
             batch_inputs = input_ts_list[i : i + batch_size]
+
+            # Start energy tracking
+            tracker.start_task(i)
+            pdu_daemon.start()
+
             pred_ts_list.extend(
                 model.predict(
                     ts=batch_inputs, n=self.dataset.target_length, **predict_kwargs
                 )
             )  # model should be able to handle list of inputs
+
+            # Stop energy tracking and save pdu values
+            cc_ts_list[i] = tracker.stop_task().energy_consumed
+            pdu_ts_list[i] = pdu_daemon.get_wh()
+            pdu_daemon.flush() # Reset pdu counter
 
         if scaler is not None:
             if scaled_evaluation:
@@ -146,4 +178,9 @@ class BenchmarkEvaluator:
             )
             results[metric.name] = metric.aggregate_series_metrics(metric_results)
 
-        return (results, pred_target_ts_list) if return_predictions else results
+        energy = {
+            "cc": cc_ts_list,
+            "pdu": pdu_ts_list,
+        }
+
+        return (results, energy, pred_target_ts_list) if return_predictions else (results, energy)
