@@ -17,6 +17,11 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 
+# Energy measuring specifics
+ENERGY_PROBING_ADDRESS = "160.98.61.173"
+ENERGY_PROBING_INTERVAL = 1.0
+
+
 class BenchmarkEvaluator:
     """
     Evaluator class to benchmark models on a specific dataset, according to different metrics.
@@ -52,7 +57,7 @@ class BenchmarkEvaluator:
         batch_size: int = 32,
         scaled_evaluation: bool = False,
         predict_kwargs: Dict[str, Any] = None,
-    ) -> Union[Tuple[Dict[str, Any], Dict[str, List[float]]], Tuple[Dict[str, Any], Dict[str, List[float]], List[TimeSeries]]]:
+    ) -> Union[Tuple[Dict[str, Any], Dict[str, float]], Tuple[Dict[str, Any], Dict[str, float], List[TimeSeries]]]:
         """
         Evaluation method, computing metrics for each batch of data, and aggregating it.
 
@@ -104,27 +109,30 @@ class BenchmarkEvaluator:
         # Initialising energy tracking
         ## CodeCarbon
         tracker = EmissionsTracker(
-            experiment_id=str(time.time()))
+            experiment_id=str(time.time()),
+            log_level="error",
+            save_to_file=False,
+            tracking_mode="machine",
+            measure_power_secs=ENERGY_PROBING_INTERVAL
+        )
         tracker.start()
 
         ## PDU
         pdu = E3Meter(
-            hostname="160.98.61.173",
+            hostname=ENERGY_PROBING_ADDRESS,
+            force_http=True
         )
         pdu_daemon = E3Daemon(
             pdu,
-            interval_seconds=1,
+            interval_seconds=ENERGY_PROBING_INTERVAL,
         )
 
-        cc_ts_list: List[float] = []
-        pdu_ts_list: List[float] = []
+        # Start energy tracking
+        tracker.start_task()
+        pdu_daemon.start()
 
         for i in range(0, len(input_ts_list), batch_size):
             batch_inputs = input_ts_list[i : i + batch_size]
-
-            # Start energy tracking
-            tracker.start_task(i)
-            pdu_daemon.start()
 
             pred_ts_list.extend(
                 model.predict(
@@ -132,10 +140,11 @@ class BenchmarkEvaluator:
                 )
             )  # model should be able to handle list of inputs
 
-            # Stop energy tracking and save pdu values
-            cc_ts_list[i] = tracker.stop_task().energy_consumed
-            pdu_ts_list[i] = pdu_daemon.get_wh()
-            pdu_daemon.flush() # Reset pdu counter
+        # Stop energy tracking and save values
+        cc_energy = tracker.stop_task().energy_consumed
+        pdu_daemon.stop()
+        pdu_energy = pdu_daemon.get_wh()
+        pdu_daemon.flush() # Reset pdu counter
 
         if scaler is not None:
             if scaled_evaluation:
@@ -179,8 +188,8 @@ class BenchmarkEvaluator:
             results[metric.name] = metric.aggregate_series_metrics(metric_results)
 
         energy = {
-            "cc": cc_ts_list,
-            "pdu": pdu_ts_list,
+            "cc": cc_energy,
+            "pdu": pdu_energy,
         }
 
         return (results, energy, pred_target_ts_list) if return_predictions else (results, energy)

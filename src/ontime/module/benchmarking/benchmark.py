@@ -63,7 +63,6 @@ def setup_logger(
 
 def save_data(
     data: Any,
-    energy: dict,
     path: str,
     file_name: str,
     format: Literal["json", "pickle"] = "json",
@@ -72,7 +71,6 @@ def save_data(
     Save a data object to a file in the specified format.
 
     :param data: The data object to save.
-    :param energy: The energy object to save.
     :param path: The path where the file will be saved.
     :param file_name: The name of the file (without extension).
     :param format: The format to save the file in. Can be either "json" or "pickle", defaults to "json".
@@ -81,13 +79,9 @@ def save_data(
     if format == "json":
         with open(f"{path}/{file_name}.json", "w") as f:
             json.dump(data, f, indent=4)
-        with open(f"{path}/{file_name}-energy.json", "w") as f:
-            json.dump(energy, f, indent=4)
     elif format == "pickle":
         with open(f"{path}/{file_name}.pkl", "wb") as f:
             pickle.dump(data, f)
-        with open(f"{path}/{file_name}-energy.pkl", "wb") as f:
-            pickle.dump(energy, f)
     else:
         raise ValueError("format must be either 'json' or 'pickle'")
 
@@ -311,13 +305,14 @@ class Benchmark:
                                 metrics, energy, all_predictions = eval_results
                                 save_data(
                                     all_predictions,
-                                    energy,
                                     all_predictions_dir,
                                     f"{model_config.model_name}_{dataset.name}_{few_shot_proportion}",
                                     format="pickle",
                                 )
                             else:
-                                metrics = eval_results
+                                metrics, energy = eval_results
+
+                            save_data(energy, f"{run_dir}", "energy", format="json")
 
                             times["evaluation"] = time.time() - start_time
 
