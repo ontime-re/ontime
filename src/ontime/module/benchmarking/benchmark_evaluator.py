@@ -141,7 +141,7 @@ class BenchmarkEvaluator:
             )  # model should be able to handle list of inputs
 
         # Stop energy tracking and save values
-        cc_energy = tracker.stop_task().energy_consumed
+        cc_energy = tracker.stop_task().energy_consumed * 1000.0
         pdu_daemon.stop()
         pdu_energy = pdu_daemon.get_wh()
         pdu_daemon.flush() # Reset pdu counter
