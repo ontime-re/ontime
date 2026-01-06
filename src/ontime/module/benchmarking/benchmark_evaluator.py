@@ -129,7 +129,8 @@ class BenchmarkEvaluator:
         )
 
         # Resetting vRAM usage statistics, if training has been done
-        # Uncomment this line if the training step must be included
+        torch.cuda.empty_cache()
+        ## Uncomment this line if the training step must be included
         torch.cuda.memory.reset_peak_memory_stats()
 
         # Start energy tracking
