@@ -1,6 +1,7 @@
 import time
 from typing import List, Dict, Any, Union, Tuple
 
+import torch
 from codecarbon import EmissionsTracker
 from e3scraper import E3Meter, E3Daemon
 
@@ -127,6 +128,10 @@ class BenchmarkEvaluator:
             interval_seconds=ENERGY_PROBING_INTERVAL,
         )
 
+        # Resetting vRAM usage statistics, if training has been done
+        # Uncomment this line if the training step must be included
+        torch.cuda.reset_peak_memory_stats()
+
         # Start energy tracking
         tracker.start_task()
         pdu_daemon.start()
@@ -145,6 +150,10 @@ class BenchmarkEvaluator:
         pdu_daemon.stop()
         pdu_energy = pdu_daemon.get_wh()
         pdu_daemon.flush() # Reset pdu counter
+
+        # Getting the maximal amount of vRAM used
+        used_memory = round(torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024, 3)
+        torch.cuda.reset_peak_memory_stats()
 
         if scaler is not None:
             if scaled_evaluation:
@@ -190,6 +199,7 @@ class BenchmarkEvaluator:
         energy = {
             "cc": cc_energy,
             "pdu": pdu_energy,
+            "memory": used_memory,
         }
 
         return (results, energy, pred_target_ts_list) if return_predictions else (results, energy)
