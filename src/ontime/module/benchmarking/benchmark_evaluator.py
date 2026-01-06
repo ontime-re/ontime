@@ -130,7 +130,7 @@ class BenchmarkEvaluator:
 
         # Resetting vRAM usage statistics, if training has been done
         # Uncomment this line if the training step must be included
-        torch.cuda.reset_peak_memory_stats()
+        torch.cuda.memory.reset_peak_memory_stats()
 
         # Start energy tracking
         tracker.start_task()
@@ -153,7 +153,7 @@ class BenchmarkEvaluator:
 
         # Getting the maximal amount of vRAM used
         used_memory = round(torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024, 3)
-        torch.cuda.reset_peak_memory_stats()
+        torch.cuda.memory.reset_peak_memory_stats()
 
         if scaler is not None:
             if scaled_evaluation:
