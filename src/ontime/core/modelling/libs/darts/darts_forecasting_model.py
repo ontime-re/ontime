@@ -2,6 +2,7 @@ from typing import Optional, Union, Type, List
 from ...abstract_model import AbstractModel
 from ....time_series import TimeSeries
 from darts.models.forecasting.forecasting_model import ModelMeta, GlobalForecastingModel
+from darts.models.forecasting.global_baseline_models import _GlobalNaiveModel
 import numpy as np
 
 
@@ -30,7 +31,7 @@ class DartsForecastingModel(AbstractModel):
         self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
     ) -> Union[List[TimeSeries], TimeSeries]:
         if ts:
-            if isinstance(self.model, GlobalForecastingModel):
+            if isinstance(self.model, GlobalForecastingModel) and not isinstance(self.model, _GlobalNaiveModel):
                 pred = self.model.predict(series=ts, n=n, **params)
             else:
                 if isinstance(ts, list):
