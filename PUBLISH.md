@@ -4,44 +4,44 @@
 Publish onTime on PyPI
 ======================
 
-This is a simple guide to publish onTime on PyPI.
+A quick guide to publishing a new version of onTime on PyPI.
 
 ## Steps
 
-Change branch to `main`
+Switch to the `main` branch:
 
     git checkout main
 
-Merge `develop` on `main`
+Merge `develop` into `main`:
 
     git merge develop
     git push
 
-Update the version in `pyproject.toml`
+Update the version in `pyproject.toml`:
 
     [tool.poetry]
     name = "ontime"
     version = "x.y.z-suffix"
 
-Commit and push
-    
+Commit and push:
+
     git add pyproject.toml
     git commit -m 'Update version to x.y.z-suffix'
 
-Tag the version
-    
+Tag the version:
+
     git tag -a v<x.y.z-suffix> -m 'Version x.y.z-suffix'
     git push origin v<x.y.z-suffix>
 
-Build
+Build the package:
 
     make build
 
-Publish
+Publish the package:
 
     make publish
 
-Check that the package is available on PyPI
+Check that the package is available on PyPI:
 
     https://pypi.org/project/ontime/#history
 

@@ -11,16 +11,16 @@
 Make a Release
 ==============
 
-This is a guides to publish onTime on PyPI.
+This guide walks you through publishing a new version of onTime on PyPI.
 
-#. Change branch to `main`
+#. Switch to the `main` branch
 
     .. code-block:: bash
 
         # make sure you are on the right branch
         git checkout main
 
-#. Merge `develop` on `main`
+#. Merge `develop` into `main`
 
     .. code-block:: bash
 
@@ -45,7 +45,7 @@ This is a guides to publish onTime on PyPI.
 #. Tag the version
 
     .. code-block:: bash
-    
+
         git tag -a v<x.y.z-suffix> -m 'Version x.y.z-suffix'
         git push origin v<x.y.z-suffix>
 
@@ -61,11 +61,11 @@ This is a guides to publish onTime on PyPI.
 
         make publish
 
-    Also, make the `GitHub Release <https://github.com/fredmontet/ontime/releases/new>`_.
+    Then create the `GitHub Release <https://github.com/fredmontet/ontime/releases/new>`_.
 
-#. Check if everything went well
+#. Double-check everything went well
 
     * On `GitHub Actions <https://github.com/fredmontet/ontime/actions>`_.
     * On `PyPI <https://pypi.org/project/ontime/>`_.
     * Done! 🎉
-    
+

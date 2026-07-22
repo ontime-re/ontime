@@ -22,14 +22,14 @@
 **onTime** Documentation
 ========================
 
-| onTime is an open source library for sensor data analysis and more. It aims at providing
-| a comprehensive API for time series analysis, prediction, as well as anomaly detections.
+| onTime is an open source library for sensor data analysis and more. It provides
+| a comprehensive API for time series analysis, prediction, and anomaly detection.
 |
 
 .. note::
 
-    This documentation is a **work in progress**. If you have any questions or suggestions, please
-    feel free to contact us or open an issue on the GitHub repository.
+    This documentation is a **work in progress**. If you have any questions or
+    suggestions, feel free to contact us or open an issue on the GitHub repository.
 
 
 .. raw:: html
@@ -41,9 +41,9 @@
                     <h3 class="card-title">Getting started</h3>
                     <div class="card-body flex-fill">
                         <p class="card-text">
-                            Start to use onTime to handle your time series.
-                            This guide provides you with an installation guide
-                            and tutorials to explain the concepts the library.
+                            New to onTime? Start here. This guide walks you
+                            through installing the library and introduces the
+                            core concepts you'll use throughout the documentation.
                         </p>
                         <a href="https://ontime.re/getting_started"
                            class="btn btn-outline-secondary btn-sm"
@@ -58,10 +58,9 @@
                     <h3 class="card-title">User Guide</h3>
                     <div class="card-body flex-fill">
                         <p class="card-text">
-                            The pages in this section provide detailed tutorials
-                            so that you can make great use of onTime's
-                            workflows. Also, we present some real world
-                            scenarios.
+                            A collection of notebooks covering onTime's
+                            workflows in depth, from core building blocks to
+                            real-world, domain-specific scenarios.
                         </p>
                         <a href="https://ontime.re/user_guide"
                            class="btn btn-outline-secondary btn-sm"
@@ -78,9 +77,9 @@
                     <h3 class="card-title">API Reference</h3>
                     <div class="card-body flex-fill">
                         <p class="card-text">
-                            <i>Coming soon</i>—This reference is the classical developer's
-                            documentation. It explains the classes, methods and
-                            variables that can be used within onTime. 
+                            <i>Coming soon</i>—the classic developer reference,
+                            documenting the classes, methods, and variables
+                            available in onTime.
                         </p>
                         <!--<a href="https://ontime.re/api_reference"
                            class="btn btn-secondary btn-sm"
@@ -95,9 +94,9 @@
                     <h3 class="card-title">Contribution Guide</h3>
                     <div class="card-body flex-fill">
                         <p class="card-text">
-                            Finally, if you are a developer and you want to
-                            involve yourself in onTime's quest, the following
-                            pages contains all the information you need.
+                            Want to get involved in onTime's development?
+                            These pages cover everything you need to start
+                            contributing.
                         </p>
                         <a href="https://ontime.re/contributing"
                            class="btn btn-outline-secondary btn-sm"

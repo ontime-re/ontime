@@ -4,20 +4,20 @@ User Guide
 ==========
 
 
-This guides provides you with a topical introduction to use onTime. Its aim
-is to showcase concrete use case of the library.
+This guide gives you a topic-by-topic introduction to onTime, showcasing
+concrete use cases through runnable notebooks.
 
 
 .. note::
 
     This guide is a work in progress. If you have any questions or suggestions, please feel free to contact us.
-    
 
-The user guide is divided into several sections:
 
-1. `core` : for all basic features
-2. `module` : for all features using core features. E.g. benchmarking, ml preprocessing, etc.
-3. `context` : for all features related to the usage of onTime in an applied scenario
+The user guide is organized into three sections:
+
+1. **Core**: the fundamental building blocks of the library.
+2. **Module**: higher-level features built on top of the core, such as benchmarking and ML preprocessing.
+3. **Context**: applied, real-world scenarios showing onTime in action.
 
 
 Core
