@@ -24,7 +24,7 @@ Core
 ----
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     0_core/0.1_time-series
     0_core/0.1.1_time-series_data-loading
@@ -33,15 +33,22 @@ Core
     0_core/0.3_generators
     0_core/0.4_models
     0_core/0.5_plots
-    0_core/0.6-processors
+    0_core/0.6_processors
+    0_core/0.7_custom-class
+    0_core/1-models/1.0-autoencoder
 
 Module
 ------
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
-    1_module/0-preprocessing/1.0-preprocessing-common
+    1_module/0-data/1.0-data-dataset
+    1_module/0.6-anomaly-frequency
+    1_module/1-processing/1.0-preprocessing-common
+    1_module/1-processing/pytorch/1.0_pytorch-dataset
+    1_module/1-processing/tensorflow/1.0_tensorflow-dataset
+    1_module/3-benchmarking/3.0-benchmarking
 
 Context
 -------

@@ -19,3 +19,4 @@ Tutorials
     :maxdepth: 1
 
     0_create-an-anomaly-detection-workflow
+    1_optimize-model-hyperparameters-optuna
