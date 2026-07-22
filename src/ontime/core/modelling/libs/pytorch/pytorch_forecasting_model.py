@@ -2,6 +2,7 @@ from typing import Any, Optional, Dict, Union, Type, List
 import warnings
 
 from ...abstract_model import AbstractModel
+from ...utils import normalize_prediction
 from ....time_series import TimeSeries
 from ontime.module.processing.pytorch.time_series_data_module import (
     TimeSeriesDataModule,
@@ -130,10 +131,15 @@ class TorchForecastingModel(L.LightningModule, AbstractModel):
             predictions = predictions[:, :n, :]
 
         result = [
-            TimeSeries.from_times_and_values(
-                forecast_index, prediction.squeeze(0).cpu().numpy()
+            normalize_prediction(
+                TimeSeries.from_times_and_values(
+                    forecast_index, prediction.squeeze(0).cpu().numpy()
+                ),
+                series,
             )
-            for forecast_index, prediction in zip(forecast_indices, predictions)
+            for forecast_index, prediction, series in zip(
+                forecast_indices, predictions, ts_list
+            )
         ]
 
         return result if is_batch else result[0]

@@ -27,6 +27,13 @@ class AbstractModel(ABC):
         """
         Predict n steps into the future
 
+        Implementations must return predictions with a consistent format:
+        the time index must follow the same frequency and name as the input
+        data and start at the time step immediately after the last observed
+        point, and the component names must exactly match those of the input
+        data. The `ontime.core.modelling.utils.normalize_prediction` helper
+        can be used to enforce this.
+
         :param n: int number of steps to predict
         :param ts: the time series from which make the prediction. Optional if the model
         can predict on the ts it has been trained on.
