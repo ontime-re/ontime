@@ -1,18 +1,23 @@
 import warnings
 from typing import List, Optional, Union, Callable, Tuple
-from enum import StrEnum
+from enum import Enum
 
 from ontime.core.time_series.time_series import TimeSeries
 from ontime.module.datasets.dataset import Dataset
 from sklearn.base import BaseEstimator
 
 
-class SeriesDomain(StrEnum):
+class SeriesDomain(str, Enum):
     WEATHER = "weather"
     FINANCE = "finance"
     TRANSPORT = "transport"
     ENERGY = "energy"
     WEB = "web"
+
+    def __str__(self) -> str:
+        # Mirrors enum.StrEnum's __str__ (Python 3.11+), needed since the
+        # project supports Python 3.10 where StrEnum is not available.
+        return self.value
 
 
 class BenchmarkDataset:
