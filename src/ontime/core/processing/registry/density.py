@@ -24,7 +24,7 @@ class Density(AbstractProcessor):
         assert mode in {
             "absolute",
             "relative",
-        }, f"mode has an invalid value: {value}. Must be 'absolute' or 'relative'."
+        }, f"mode has an invalid value: {mode}. Must be 'absolute' or 'relative'."
 
         self.window_length = window_length
         self.mode = mode
