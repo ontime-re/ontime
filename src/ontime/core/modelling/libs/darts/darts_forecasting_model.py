@@ -31,7 +31,9 @@ class DartsForecastingModel(AbstractModel):
         self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
     ) -> Union[List[TimeSeries], TimeSeries]:
         if ts:
-            if isinstance(self.model, GlobalForecastingModel) and not isinstance(self.model, _GlobalNaiveModel):
+            if isinstance(self.model, GlobalForecastingModel) and not isinstance(
+                self.model, _GlobalNaiveModel
+            ):
                 pred = self.model.predict(series=ts, n=n, **params)
             else:
                 if isinstance(ts, list):
