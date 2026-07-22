@@ -6,10 +6,11 @@
    getting_started
    user_guide/index
    tutorials/index
+   api_reference
    contributing/index
 
-.. image:: https://github.com/fredmontet/ontime/actions/workflows/ci.yml/badge.svg
-   :target: https://github.com/fredmontet/ontime/actions/workflows/ci.yml
+.. image:: https://github.com/ontime-re/ontime/actions/workflows/ci.yml/badge.svg
+   :target: https://github.com/ontime-re/ontime/actions/workflows/ci.yml
    :alt: Continuous Integration
 
 
@@ -77,15 +78,15 @@
                     <h3 class="card-title">API Reference</h3>
                     <div class="card-body flex-fill">
                         <p class="card-text">
-                            <i>Coming soon</i>—the classic developer reference,
-                            documenting the classes, methods, and variables
-                            available in onTime.
+                            The classic developer reference, documenting the
+                            classes, methods, and variables available in
+                            onTime.
                         </p>
-                        <!--<a href="https://ontime.re/api_reference"
-                           class="btn btn-secondary btn-sm"
+                        <a href="https://ontime.re/api_reference"
+                           class="btn btn-outline-secondary btn-sm"
                            role="button" aria-pressed="true">
                             Go to the API Reference
-                        </a>-->
+                        </a>
                     </div>
                 </div>
             </div>

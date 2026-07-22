@@ -17,17 +17,20 @@ what you have in mind is already being tracked.
 Branching model
 ---------------
 
-As of the 15th of January 2024, the project is still small, so contributors
-are added directly to the repository and we don't use pull requests yet.
-We'll switch to pull requests once the project grows.
+We use a fork/branch and pull request workflow: create a branch for your
+change, push your commits, and open a pull request against ``develop`` once
+it's ready for review.
 
-In the meantime, please follow this branch naming convention:
+Please follow this branch naming convention:
 
     <issue number>-<issue slug>
 
 For example, if you're working on issue #1, name your branch ``1-add-readme``.
 If you're on an issue page, GitHub gives you a button in the sidebar to create
 a branch with the correct name automatically.
+
+Once your pull request is approved and CI passes, it can be merged into
+``develop``. Releases are cut from ``main`` — see :doc:`make_a_release`.
 
 
 Submit bug reports
@@ -47,5 +50,5 @@ To suggest an enhancement or a new feature, the usual way is to open an issue.
 If you'd rather discuss it with us live, feel free to reach out.
 
 
-.. _here: https://github.com/fredmontet/ontime/issues
+.. _here: https://github.com/ontime-re/ontime/issues
 .. _Binder: https://mybinder.org/

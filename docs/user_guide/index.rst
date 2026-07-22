@@ -23,12 +23,15 @@ The user guide is organized into three sections:
 Core
 ----
 
+The core notebooks introduce onTime's foundational objects — time series,
+detectors, generators, models, plots and processors — and how they fit
+together. Start here if you're new to the library.
+
 .. toctree::
     :maxdepth: 2
 
     0_core/0.1_time-series
     0_core/0.1.1_time-series_data-loading
-    0_core/0.1.2_time-series_custom-class
     0_core/0.2_detectors
     0_core/0.3_generators
     0_core/0.4_models
@@ -39,6 +42,10 @@ Core
 
 Module
 ------
+
+The module notebooks cover features built on top of the core: data handling
+and datasets, anomaly frequency analysis, preprocessing for PyTorch and
+TensorFlow, and model benchmarking.
 
 .. toctree::
     :maxdepth: 2
@@ -52,6 +59,9 @@ Module
 
 Context
 -------
+
+The context notebooks show onTime applied to real-world, domain-specific
+scenarios rather than isolated features.
 
 .. toctree::
     :maxdepth: 1

@@ -1,10 +1,14 @@
-[![Continuous Integration](https://github.com/fredmontet/ontime/actions/workflows/ci.yml/badge.svg)](https://github.com/fredmontet/ontime/actions/workflows/ci.yml)
+[![Continuous Integration](https://github.com/ontime-re/ontime/actions/workflows/ci.yml/badge.svg)](https://github.com/ontime-re/ontime/actions/workflows/ci.yml)
 [![PyPI version](https://badge.fury.io/py/ontime.svg)](https://badge.fury.io/py/ontime)
 
 Publish onTime on PyPI
 ======================
 
 A quick guide to publishing a new version of onTime on PyPI.
+
+> This file mirrors `docs/contributing/make_a_release.rst`, the version
+> published on [ontime.re](https://ontime.re/contributing). Keep both in
+> sync if you update the release process.
 
 ## Steps
 
@@ -19,7 +23,7 @@ Merge `develop` into `main`:
 
 Update the version in `pyproject.toml`:
 
-    [tool.poetry]
+    [project]
     name = "ontime"
     version = "x.y.z-suffix"
 
@@ -33,11 +37,11 @@ Tag the version:
     git tag -a v<x.y.z-suffix> -m 'Version x.y.z-suffix'
     git push origin v<x.y.z-suffix>
 
-Build the package:
+Build the package (runs `uv build`):
 
     make build
 
-Publish the package:
+Publish the package (runs `uv publish`):
 
     make publish
 

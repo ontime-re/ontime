@@ -1,5 +1,5 @@
-.. image:: https://github.com/fredmontet/ontime/actions/workflows/ci.yml/badge.svg
-   :target: https://github.com/fredmontet/ontime/actions/workflows/ci.yml
+.. image:: https://github.com/ontime-re/ontime/actions/workflows/ci.yml/badge.svg
+   :target: https://github.com/ontime-re/ontime/actions/workflows/ci.yml
    :alt: Continuous Integration
 
 
@@ -31,7 +31,7 @@ This guide walks you through publishing a new version of onTime on PyPI.
 
     .. code-block:: bash
 
-        [tool.poetry]
+        [project]
         name = "ontime"
         version = "x.y.z-suffix"
 
@@ -55,17 +55,19 @@ This guide walks you through publishing a new version of onTime on PyPI.
 
         make build
 
+    This runs ``uv build`` under the hood.
+
 #. Publish the package
 
     .. code-block:: bash
 
         make publish
 
-    Then create the `GitHub Release <https://github.com/fredmontet/ontime/releases/new>`_.
+    This runs ``uv publish``. Then create the `GitHub Release <https://github.com/ontime-re/ontime/releases/new>`_.
 
 #. Double-check everything went well
 
-    * On `GitHub Actions <https://github.com/fredmontet/ontime/actions>`_.
+    * On `GitHub Actions <https://github.com/ontime-re/ontime/actions>`_.
     * On `PyPI <https://pypi.org/project/ontime/>`_.
     * Done! 🎉
 
