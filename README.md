@@ -8,29 +8,29 @@
 
 ## Getting Started
 
-Install the library with :
+Install the library with:
 
-  pip install ontime
+    pip install ontime
 
-Then, take a look at documentation on [ontime.re](https://ontime.re) with : 
+Then, head over to the documentation on [ontime.re](https://ontime.re):
 
-- a [Getting Started](https://ontime.re/getting_started) as usual,
-- a [User Guide](https://ontime.re/user_guide) with many notebooks as examples.
+- the [Getting Started](https://ontime.re/getting_started) guide to install onTime and run your first example,
+- the [User Guide](https://ontime.re/user_guide), a collection of notebooks that walk through the library's features in detail.
 
 ## Purpose of the library
 
-The purpose of onTime is to make a technological transfer to the partners of the 
-DiagnoBat project with respect to their intellectual property. Most parts of 
-the library are extendable by using dynamically loaded classes. This
-mecanism allows anyone to keep parts of the library private within their own company. 
+onTime was created to support a technology transfer to the partners of the DiagnoBat
+project, while respecting their intellectual property. Most of the library is built
+around dynamically loaded classes, so anyone can extend it and keep company-specific
+parts private.
 
-The library objectives are :
+The library's objectives are to:
 
-  1. to extend the time series libraries (Darts, GluonTS, Kats, etc.)
-  2. to provide benchmarking tools for models and/or detectors
-  3. to provide domain specific tools (e.g. for energy consumption, district heating networks, etc.)
+  1. extend existing time series libraries (Darts, GluonTS, Kats, etc.),
+  2. provide benchmarking tools for models and detectors,
+  3. provide domain-specific tools (e.g. for energy consumption, district heating networks, etc.).
 
-In case you have any questions, don't hesitate to ask them by opening an issue or email.
+If you have any questions, feel free to open an issue or reach out by email.
 
 ## License
 
