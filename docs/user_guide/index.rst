@@ -38,6 +38,7 @@ together. Start here if you're new to the library.
     0_core/0.5_plots
     0_core/0.6_processors
     0_core/0.7_custom-class
+    0_core/0.8_fourier
 
 Module
 ------
