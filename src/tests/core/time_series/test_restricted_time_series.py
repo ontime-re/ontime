@@ -32,7 +32,9 @@ class TestRestrictedTimeSeries(unittest.TestCase):
 
     def test_constructor__non_restriction_object__should_raise_assertion_error(self):
         with self.assertRaises(AssertionError):
-            RestrictedTimeSeries(make_xa([1.0, 2.0, 3.0]), restrictions=["not a restriction"])
+            RestrictedTimeSeries(
+                make_xa([1.0, 2.0, 3.0]), restrictions=["not a restriction"]
+            )
 
     def test_add_restriction__violated_after_construction__should_raise_assertion_error(
         self,
