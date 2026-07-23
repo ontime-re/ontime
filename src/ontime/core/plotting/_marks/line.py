@@ -27,12 +27,17 @@ def line(
 
     df = Plot.melt(ts)
 
-    default_kwargs = {"x": f"{ts.time_index.name}:T", "y": "value:Q"}
-    if not subplots:
-        default_kwargs["color"] = "variable:N"
-    encode_kwargs = {**default_kwargs, **(encode_kwargs or {})}
+    default_kwargs = {
+        "x": f"{ts.time_index.name}:T",
+        "y": "value:Q",
+        **({} if subplots else {"color": "variable:N"}),
+    }
+    override_kwargs = encode_kwargs or {}
     if subplots:
-        encode_kwargs.pop("color", None)
+        override_kwargs = {
+            key: value for key, value in override_kwargs.items() if key != "color"
+        }
+    encode_kwargs = {**default_kwargs, **override_kwargs}
 
     match type:
         # Dashed line
