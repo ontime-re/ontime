@@ -31,6 +31,8 @@ def line(
     if not subplots:
         default_kwargs["color"] = "variable:N"
     encode_kwargs = {**default_kwargs, **(encode_kwargs or {})}
+    if subplots:
+        encode_kwargs.pop("color", None)
 
     match type:
         # Dashed line
@@ -48,12 +50,12 @@ def line(
         case _:
             chart = Chart(df).mark_line().encode(**encode_kwargs)
 
-    if width is not None or height is not None:
-        properties = {}
-        if width is not None:
-            properties["width"] = width
-        if height is not None:
-            properties["height"] = height
+    properties = {
+        key: value
+        for key, value in {"width": width, "height": height}.items()
+        if value is not None
+    }
+    if properties:
         chart = chart.properties(**properties)
 
     if subplots:
