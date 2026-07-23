@@ -30,7 +30,7 @@ def line(
     default_kwargs = {"x": f"{ts.time_index.name}:T", "y": "value:Q"}
     if not subplots:
         default_kwargs["color"] = "variable:N"
-    encode_kwargs = encode_kwargs if encode_kwargs is not None else default_kwargs
+    encode_kwargs = {**default_kwargs, **(encode_kwargs or {})}
 
     match type:
         # Dashed line
