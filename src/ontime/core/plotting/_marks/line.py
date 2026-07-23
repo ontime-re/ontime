@@ -27,16 +27,14 @@ def line(
 
     df = Plot.melt(ts)
 
-    default_kwargs = {
-        "x": f"{ts.time_index.name}:T",
-        "y": "value:Q",
-        **({} if subplots else {"color": "variable:N"}),
-    }
+    default_kwargs = {"x": f"{ts.time_index.name}:T", "y": "value:Q"}
     override_kwargs = encode_kwargs or {}
     if subplots:
         override_kwargs = {
             key: value for key, value in override_kwargs.items() if key != "color"
         }
+    else:
+        default_kwargs["color"] = "variable:N"
     encode_kwargs = {**default_kwargs, **override_kwargs}
 
     match type:
@@ -55,11 +53,11 @@ def line(
         case _:
             chart = Chart(df).mark_line().encode(**encode_kwargs)
 
-    properties = {
-        key: value
-        for key, value in {"width": width, "height": height}.items()
-        if value is not None
-    }
+    properties = {}
+    if width is not None:
+        properties["width"] = width
+    if height is not None:
+        properties["height"] = height
     if properties:
         chart = chart.properties(**properties)
 
