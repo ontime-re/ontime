@@ -3,8 +3,7 @@ Figure, the subplot container of onTime.
 
 A ``Plot`` is a single panel, made of layered marks. A :class:`Figure` places
 several panels next to each other. Figures are built with the factories
-:func:`rows`, :func:`cols` and :func:`grid`, or with the ``/`` (rows) and ``|``
-(cols) operators, and they nest freely.
+:func:`rows` and :func:`cols`, and they nest freely.
 
     import ontime as on
 
@@ -21,9 +20,8 @@ Scale sharing propagates : a ``share_x`` or ``share_y`` given **explicitly** to 
 group is inherited by its nested groups, unless the nested call sets the flag
 itself. A flag left unset nowhere in the chain falls back to the default of the
 group kind, i.e. ``share_x=True`` and ``share_y=False`` for rows,
-``share_x=False`` and ``share_y=False`` for cols, ``share_x=True`` and
-``share_y=True`` for grids. This is the most likely source of surprise when
-nesting figures.
+``share_x=False`` and ``share_y=False`` for cols. This is the most likely source
+of surprise when nesting figures.
 
 Known constraint : in Vega-Lite 5, ``selection_interval(bind="scales")`` does not
 reliably propagate across concatenated views, therefore synchronised pan and zoom
@@ -89,7 +87,7 @@ class Figure:
     """
     A composition of panels, compiled to concatenated Altair views.
 
-    Figures are normally created by :func:`rows`, :func:`cols` and :func:`grid`
+    Figures are normally created by :func:`rows` and :func:`cols`
     rather than instantiated directly.
 
     :param layout: the layout IR of the figure
@@ -204,18 +202,6 @@ class Figure:
                 f"{', '.join(supported)}"
             )
         self.to_altair().save(path, **kwargs)
-
-    # --------------------------------------------------------------- operators
-
-    def __truediv__(self, other: Panelish) -> "Figure":
-        return rows(self, other)
-
-    def __and__(self, other: Panelish) -> "Figure":
-        # hidden alias of `/` for Altair users
-        return rows(self, other)
-
-    def __or__(self, other: Panelish) -> "Figure":
-        return cols(self, other)
 
     # ------------------------------------------------------------ presentation
 
@@ -577,50 +563,6 @@ def cols(
     :return: Figure
     """
     return _build(Cols, panels, share_x, share_y, sizes, spacing, title)
-
-
-def grid(
-    panels: Sequence[Panelish],
-    columns: int,
-    share_x: Optional[bool] = None,
-    share_y: Optional[bool] = None,
-    spacing: Optional[int] = None,
-    title: Optional[str] = None,
-) -> Figure:
-    """
-    Place panels on a grid of small multiples, filled row by row.
-
-    :param panels: the panels, either ``Plot``, ``Figure`` or Altair charts
-    :param columns: number of columns of the grid
-    :param share_x: whether the x scale domain is shared, defaults to ``True``
-    :param share_y: whether the y scale domain is shared, defaults to ``True``
-        since small multiples are homogeneous
-    :param spacing: inter-panel gap in px, defaults to 4
-    :param title: title of the grid
-    :return: Figure
-    """
-    if isinstance(panels, (str, bytes)) or not isinstance(panels, AbcSequence):
-        raise TypeError(
-            f"grid expects a sequence of panels, got {type(panels).__name__}"
-        )
-    if not isinstance(columns, int) or isinstance(columns, bool) or columns < 1:
-        raise ValueError(f"columns must be a positive int, got {columns!r}")
-    if not panels:
-        raise ValueError("grid needs at least one panel, none was given")
-
-    nodes = [_to_node(panel) for panel in panels]
-    lines = [
-        Cols(nodes[start : start + columns], spacing=spacing)
-        for start in range(0, len(nodes), columns)
-    ]
-    layout = Rows(
-        lines,
-        share_x=share_x if share_x is not None else True,
-        share_y=share_y if share_y is not None else True,
-        spacing=spacing,
-        title=title,
-    )
-    return Figure(layout)
 
 
 def _build(

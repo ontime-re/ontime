@@ -1,9 +1,9 @@
 """
 Layout intermediate representation (IR) for onTime figures.
 
-Every front-end (the :func:`ontime.rows`, :func:`ontime.cols` and
-:func:`ontime.grid` factories, the ``/`` and ``|`` operators and, later on, a
-string layout DSL) compiles down to the immutable tree defined here :
+Every front-end (the :func:`ontime.rows` and :func:`ontime.cols` factories and,
+later on, a string layout DSL) compiles down to the immutable tree defined
+here :
 
 - :class:`Panel` : a leaf, wrapping a single ``Plot``
 - :class:`Rows` : vertical stacking of its children

@@ -1,3 +1,3 @@
 from .plot import Plot
-from .figure import Figure, rows, cols, grid
+from .figure import Figure, rows, cols
 from .marks import marks

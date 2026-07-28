@@ -53,15 +53,6 @@ class TestFigure(unittest.TestCase):
             on.rows(self.a, on.cols(self.b, self.c)).layout,
         )
 
-    def test_operators__division_and_pipe__should_bind_division_tighter(self):
-        self.assertIs(
-            (self.a / self.b | self.c).layout,
-            on.cols(on.rows(self.a, self.b), self.c).layout,
-        )
-
-    def test_operators__ampersand__should_alias_division(self):
-        self.assertIs((self.a & self.b).layout, on.rows(self.a, self.b).layout)
-
     def test_layout__nested_cols__should_keep_orientation_nodes(self):
         layout = on.cols(on.rows(self.a, self.b), self.c).layout
         self.assertIsInstance(layout, Cols)
@@ -98,15 +89,6 @@ class TestFigure(unittest.TestCase):
     def test_repr__sizes__should_be_annotated(self):
         figure = on.rows(self.a, self.b, sizes=[240, 40])
         self.assertEqual(repr(figure), "a:240 / b:40")
-
-    def test_grid__five_panels_over_three_columns__should_build_two_rows(self):
-        panels = [self.make_plot(name, name) for name in ("a", "b", "c", "d", "e")]
-        self.assertEqual(repr(on.grid(panels, columns=3)), "(a | b | c) / (d | e)")
-
-    def test_grid__default_flags__should_share_both_scales(self):
-        layout = on.grid([self.a, self.b], columns=2).layout
-        self.assertTrue(layout.share_x)
-        self.assertTrue(layout.share_y)
 
     # ------------------------------------------------------------- compilation
 
@@ -236,9 +218,14 @@ class TestFigure(unittest.TestCase):
         spec = self.compile(figure)
         self.assertEqual(spec["hconcat"][0]["resolve"]["scale"]["y"], "independent")
 
-    def test_to_altair__grid__should_concatenate_rows_of_columns(self):
+    def test_to_altair__rows_of_cols__should_concatenate_rows_of_columns(self):
         panels = [self.make_plot(name, name) for name in ("a", "b", "c", "d", "e")]
-        spec = self.compile(on.grid(panels, columns=3).properties(width=180, height=90))
+        figure = on.rows(
+            on.cols(*panels[:3]),
+            on.cols(*panels[3:]),
+            share_y=True,
+        ).properties(width=180, height=90)
+        spec = self.compile(figure)
         self.assertEqual(len(spec["vconcat"]), 2)
         self.assertEqual([len(row["hconcat"]) for row in spec["vconcat"]], [3, 2])
         self.assertEqual(spec["resolve"]["scale"]["y"], "shared")
@@ -330,14 +317,6 @@ class TestFigure(unittest.TestCase):
             self.make_plot("main", width=300), self.make_plot("profile", width=120)
         ).properties(height=100)
         self.assertIsInstance(figure.show(), alt.HConcatChart)
-
-    def test_grid__zero_columns__should_raise(self):
-        with self.assertRaises(ValueError):
-            on.grid([self.a, self.b], columns=0)
-
-    def test_grid__no_panel__should_raise(self):
-        with self.assertRaises(ValueError):
-            on.grid([], columns=2)
 
     def test_show__panel_without_mark__should_raise(self):
         figure = on.rows(on.Plot(self.make_series("a")), self.a)

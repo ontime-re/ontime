@@ -47,39 +47,6 @@ class Plot:
         """
         return alt.layer(*self.layers)
 
-    def __truediv__(self, other):
-        """
-        Stack this plot and another panel vertically
-
-        :param other: Plot or Figure
-        :return: Figure
-        """
-        from .figure import rows
-
-        return rows(self, other)
-
-    def __and__(self, other):
-        """
-        Hidden alias of `/` for Altair users
-
-        :param other: Plot or Figure
-        :return: Figure
-        """
-        from .figure import rows
-
-        return rows(self, other)
-
-    def __or__(self, other):
-        """
-        Place this plot and another panel side by side
-
-        :param other: Plot or Figure
-        :return: Figure
-        """
-        from .figure import cols
-
-        return cols(self, other)
-
     @staticmethod
     def melt(
         ts: TimeSeries, var_name: str = "variable", value_name: str = "value"
