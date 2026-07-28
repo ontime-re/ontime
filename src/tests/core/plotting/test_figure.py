@@ -29,6 +29,14 @@ class TestFigure(unittest.TestCase):
             plot = plot.properties(**properties)
         return plot
 
+    HIDDEN_AXIS = {
+        "labels": False,
+        "ticks": False,
+        "title": None,
+        "minExtent": 0,
+        "maxExtent": 0,
+    }
+
     @staticmethod
     def compile(figure):
         """Compile a figure to a Vega-Lite dict, without the vegafusion transformer."""
@@ -116,9 +124,8 @@ class TestFigure(unittest.TestCase):
         spec = self.compile(figure.properties(width=300, height=200))
         self.assertEqual(spec["resolve"]["scale"]["y"], "shared")
 
-    def test_to_altair__default_layout__should_flush_and_space_panels(self):
+    def test_to_altair__default_layout__should_space_panels(self):
         spec = self.compile(on.rows(self.a, self.b).properties(width=800, height=140))
-        self.assertEqual(spec["bounds"], "flush")
         self.assertEqual(spec["spacing"], 4)
 
     def test_to_altair__figure_spacing__should_override_the_default_gap(self):
@@ -133,9 +140,67 @@ class TestFigure(unittest.TestCase):
         figure = on.rows(self.a, self.b, self.c).properties(width=800, height=140)
         panels = self.compile(figure)["vconcat"]
         axes = [panel["layer"][0]["encoding"]["x"].get("axis") for panel in panels]
-        self.assertEqual(axes[0], {"labels": False, "title": None})
-        self.assertEqual(axes[1], {"labels": False, "title": None})
+        self.assertEqual(axes[0], self.HIDDEN_AXIS)
+        self.assertEqual(axes[1], self.HIDDEN_AXIS)
         self.assertIsNone(axes[2])
+
+    def test_to_altair__shared_y__should_hide_the_redundant_y_axes(self):
+        figure = on.cols(self.a, self.b, self.c, share_y=True).properties(
+            width=200, height=140
+        )
+        panels = self.compile(figure)["hconcat"]
+        axes = [panel["layer"][0]["encoding"]["y"].get("axis") for panel in panels]
+        self.assertIsNone(axes[0])
+        self.assertEqual(axes[1], self.HIDDEN_AXIS)
+        self.assertEqual(axes[2], self.HIDDEN_AXIS)
+
+    def test_to_altair__independent_y__should_keep_every_y_axis(self):
+        figure = on.cols(self.a, self.b).properties(width=200, height=140)
+        panels = self.compile(figure)["hconcat"]
+        for panel in panels:
+            self.assertIsNone(panel["layer"][0]["encoding"]["y"].get("axis"))
+
+    def test_to_altair__hide_shared_axes_off__should_keep_every_axis(self):
+        figure = on.rows(self.a, self.b).properties(
+            width=800, height=140, hide_shared_axes=False
+        )
+        panels = self.compile(figure)["vconcat"]
+        for panel in panels:
+            self.assertIsNone(panel["layer"][0]["encoding"]["x"].get("axis"))
+
+    def test_to_altair__default_bounds__should_measure_panels_in_full(self):
+        spec = self.compile(on.rows(self.a, self.b).properties(width=400, height=100))
+        self.assertEqual(spec["bounds"], "full")
+
+    def test_to_altair__flush_bounds__should_be_forwarded(self):
+        figure = on.rows(self.a, self.b).properties(
+            width=400, height=100, bounds="flush"
+        )
+        self.assertEqual(self.compile(figure)["bounds"], "flush")
+
+    def test_to_altair__default_axis_extent__should_reserve_room_for_the_y_axis(self):
+        spec = self.compile(on.rows(self.a, self.b).properties(width=400, height=100))
+        self.assertEqual(spec["config"]["axisY"], {"minExtent": 40})
+
+    def test_to_altair__axis_extent__should_be_configurable(self):
+        figure = on.rows(self.a, self.b).properties(width=400, axis_extent=90)
+        self.assertEqual(self.compile(figure)["config"]["axisY"], {"minExtent": 90})
+
+    def test_to_altair__axis_extent_of_zero__should_not_configure_the_axis(self):
+        figure = on.rows(self.a, self.b).properties(width=400, axis_extent=0)
+        self.assertNotIn("axisY", self.compile(figure)["config"])
+
+    def test_to_altair__panel_title__should_be_hoisted_out_of_the_layers(self):
+        plot = (
+            on.Plot(self.make_series("a"))
+            .add(on.marks.line)
+            .add(on.marks.dots)
+            .properties(title="a")
+        )
+        panel = self.compile(on.rows(plot, self.b).properties(width=400))["vconcat"][0]
+        self.assertEqual(panel["title"], "a")
+        for layer in panel["layer"]:
+            self.assertNotIn("title", layer)
 
     def test_to_altair__independent_x__should_keep_every_x_axis(self):
         figure = on.rows(self.a, self.b, share_x=False).properties(
@@ -322,6 +387,14 @@ class TestFigure(unittest.TestCase):
         figure = on.rows(on.Plot(self.make_series("a")), self.a)
         with self.assertRaises(ValueError):
             figure.show()
+
+    def test_properties__unknown_bounds__should_raise(self):
+        with self.assertRaises(ValueError):
+            on.rows(self.a, self.b).properties(bounds="tight")
+
+    def test_properties__negative_axis_extent__should_raise(self):
+        with self.assertRaises(ValueError):
+            on.rows(self.a, self.b).properties(axis_extent=-10)
 
     def test_save__unsupported_extension__should_raise(self):
         figure = on.rows(self.a, self.b).properties(width=400, height=100)
