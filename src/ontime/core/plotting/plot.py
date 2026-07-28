@@ -12,6 +12,7 @@ class Plot:
         Plot.config()
         self.ts = ts
         self.layers = []
+        self._title = None
 
     def add(self, mark: Callable, ts: TimeSeries = None, **kwargs):
         """
@@ -33,6 +34,8 @@ class Plot:
         :param kwargs: The properties to set
         :return: Plot
         """
+        if "title" in kwargs:
+            self._title = kwargs["title"]
         self.layers[-1] = self.layers[-1].properties(**kwargs)
         return self
 
