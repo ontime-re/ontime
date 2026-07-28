@@ -12,6 +12,7 @@ class Plot:
         Plot.config()
         self.ts = ts
         self.layers = []
+        self._title = None
 
     def add(self, mark: Callable, ts: TimeSeries = None, **kwargs):
         """
@@ -33,6 +34,8 @@ class Plot:
         :param kwargs: The properties to set
         :return: Plot
         """
+        if "title" in kwargs:
+            self._title = kwargs["title"]
         self.layers[-1] = self.layers[-1].properties(**kwargs)
         return self
 
@@ -43,6 +46,39 @@ class Plot:
         :return: Altair LayerChart
         """
         return alt.layer(*self.layers)
+
+    def __truediv__(self, other):
+        """
+        Stack this plot and another panel vertically
+
+        :param other: Plot or Figure
+        :return: Figure
+        """
+        from .figure import rows
+
+        return rows(self, other)
+
+    def __and__(self, other):
+        """
+        Hidden alias of `/` for Altair users
+
+        :param other: Plot or Figure
+        :return: Figure
+        """
+        from .figure import rows
+
+        return rows(self, other)
+
+    def __or__(self, other):
+        """
+        Place this plot and another panel side by side
+
+        :param other: Plot or Figure
+        :return: Figure
+        """
+        from .figure import cols
+
+        return cols(self, other)
 
     @staticmethod
     def melt(

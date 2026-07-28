@@ -16,24 +16,17 @@ class TimeSeries(DartsTimeSeries):
     def __init__(self, xa: xr.DataArray):
         super().__init__(xa)
 
-    def plot(
-        self, width: int = 400, height: int = 200, subplots: bool = False, **kwargs
-    ):
+    def plot(self, width: int = 400, height: int = 200, **kwargs):
         """
         Plot the TimeSeries
 
         :param width: width of the plot
         :param height: height of the plot
-        :param subplots: whether to display each variable in its own subplot
         :param kwargs: additional arguments to pass to the line mark
-        :return: Altair chart
+        :return: Altair LayerChart
         """
-        from ..plotting._marks.line import line
-
-        if subplots:
-            return line(self, subplots=True, width=width, height=height, **kwargs)
-
         from ..plotting.plot import Plot
+        from ..plotting._marks.line import line
 
         return (
             Plot(self).add(line, **kwargs).properties(width=width, height=height).show()

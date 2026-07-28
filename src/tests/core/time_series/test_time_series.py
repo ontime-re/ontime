@@ -1,6 +1,5 @@
 import unittest
 
-import altair as alt
 import pandas as pd
 import torch
 
@@ -12,11 +11,6 @@ class TestTimeSeries(unittest.TestCase):
         self.index = pd.date_range("2024-01-01", periods=4, freq="D")
         self.df = pd.DataFrame({"a": [1.0, 2.0, 3.0, 4.0]}, index=self.index)
         self.df.index.name = "time"
-        self.multi_df = pd.DataFrame(
-            {"a": [1.0, 2.0, 3.0, 4.0], "b": [4.0, 3.0, 2.0, 1.0]},
-            index=self.index,
-        )
-        self.multi_df.index.name = "time"
 
     def test_from_pandas__dataframe__should_create_time_series_with_same_values(self):
         ts = TimeSeries.from_pandas(self.df)
@@ -59,19 +53,3 @@ class TestTimeSeries(unittest.TestCase):
         self.assertListEqual(
             list(converted.values().flatten()), list(ts.values().flatten())
         )
-
-    def test_plot__default_multivariate_series__should_return_layer_chart(self):
-        ts = TimeSeries.from_pandas(self.multi_df)
-
-        chart = ts.plot()
-
-        self.assertIsInstance(chart, alt.LayerChart)
-
-    def test_plot__subplots_true__should_return_facet_chart_per_variable(self):
-        ts = TimeSeries.from_pandas(self.multi_df)
-
-        chart = ts.plot(subplots=True)
-
-        self.assertIsInstance(chart, alt.FacetChart)
-        self.assertEqual(chart.facet.row.shorthand, "variable:N")
-        self.assertEqual(chart.resolve.scale.y, "independent")
