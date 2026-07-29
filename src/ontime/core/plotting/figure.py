@@ -35,9 +35,15 @@ several tracks gets the sum of them, plus the gaps in between.
 Scale sharing propagates : a ``share_x`` or ``share_y`` given **explicitly** to a
 group is inherited by its nested groups, unless the nested call sets the flag
 itself. A flag left unset nowhere in the chain falls back to the default of the
-group kind, i.e. ``share_x=True`` and ``share_y=False`` for rows,
-``share_x=False`` and ``share_y=False`` for cols. This is the most likely source
-of surprise when nesting figures.
+group kind, i.e. ``share_x=True`` and ``share_y=False`` for rows and layouts,
+``share_x=False`` and ``share_y=False`` for cols, and both ``True`` for grids.
+This is the most likely source of surprise when nesting figures.
+
+Sharing is not limited to booleans : panels that are not a group of their own are
+shared by naming them, ``share_y="AC"`` for one group of two panels, or
+``share_y=["AC", "BD"]`` for two independent groups. Every string is one group, so
+``["A", "C"]`` shares nothing. A named group is rendered by pinning the union of
+the data domains of its panels on each of them.
 
 Placement : panels are measured with their axes and titles (``bounds="full"``)
 and separated by ``spacing`` px, so they never run over each other. A shared axis
