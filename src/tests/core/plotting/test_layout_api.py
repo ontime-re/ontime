@@ -112,6 +112,46 @@ class TestLayoutApi(unittest.TestCase):
         heights = [row["height"] for row in self.compile(figure)["vconcat"][:1]]
         self.assertEqual(heights, [210])
 
+    def test_layout__unsized_tracks__should_span_the_track_extents(self):
+        figure = on.layout(
+            "A A B\nC C B",
+            A=self.a,
+            B=self.b,
+            C=self.c,
+            spacing=4,
+        ).properties(width=300, height=150)
+        spec = self.compile(figure)
+        panel_a = spec["hconcat"][0]["vconcat"][0]
+        panel_b = spec["hconcat"][1]
+        # the figure extents size one track, a spanning panel covers several
+        self.assertEqual((panel_a["width"], panel_a["height"]), (604, 150))
+        self.assertEqual((panel_b["width"], panel_b["height"]), (300, 304))
+
+    def test_layout__unsized_tracks__should_align_the_panels_of_a_group(self):
+        figure = on.layout(
+            "T T\nA B",
+            T=self.a,
+            A=self.b,
+            B=self.c,
+            spacing=4,
+        ).properties(width=400, height=100)
+        spec = self.compile(figure)
+        banner = spec["vconcat"][0]
+        row = spec["vconcat"][1]["hconcat"]
+        # the banner spans the two columns the panels below it sit in
+        self.assertEqual(banner["width"], 804)
+        self.assertEqual([cell["width"] for cell in row], [400, 400])
+
+    def test_layout__spacer__should_span_the_tracks_of_its_neighbours(self):
+        figure = on.layout("A .\nA B", A=self.a, B=self.b, spacing=4).properties(
+            width=700, height=300
+        )
+        spec = self.compile(figure)
+        self.assertEqual(spec["hconcat"][0]["height"], 604)
+        self.assertEqual(
+            [cell["height"] for cell in spec["hconcat"][1]["vconcat"]], [300, 300]
+        )
+
     def test_layout__tracks_of_wrong_length__should_raise(self):
         with self.assertRaises(ValueError) as raised:
             on.layout("A B", A=self.a, B=self.b, widths=[100])

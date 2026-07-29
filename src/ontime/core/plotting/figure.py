@@ -21,16 +21,21 @@ draws the arrangement as a string, or with the factories :func:`rows`,
         A=on.Plot(solar).add(on.marks.line),
         B=on.Plot(nuclear).add(on.marks.line),
         C=on.Plot(total).add(on.marks.line),
-    ).properties(width=900, height=300).show()
+    ).properties(width=300, height=150).show()
 
 Naming : ``rows(a, b)`` reads as "a and b are rows", i.e. they are stacked
 vertically. The factories describe their arguments, not the container, which
 avoids the usual ``vstack`` / ``hstack`` ambiguity.
 
-Sizes are never part of a layout string. Extents are given as track vectors,
-``heights=`` for the grid rows and ``widths=`` for the grid columns, one entry
-per track, all ints (px) or all floats (relative weights). A panel spanning
-several tracks gets the sum of them, plus the gaps in between.
+Sizes are never part of a layout string. The ``width`` and ``height`` of a figure
+are the extent of **one panel**, so a figure of three columns is about three times
+as wide, and a panel spanning several tracks is as long as the tracks it covers,
+gaps included.
+
+Tracks are sized individually with the vectors ``heights=`` for the grid rows and
+``widths=`` for the grid columns, one entry per track, all ints (px) or all floats
+(relative weights). Weights are shares of the extent of the figure, which is then
+read as the total of that axis rather than as the extent of one panel.
 
 Scale sharing propagates : a ``share_x`` or ``share_y`` given **explicitly** to a
 group is inherited by its nested groups, unless the nested call sets the flag
@@ -235,7 +240,10 @@ class Figure:
         level ``.properties()`` always wins. ``width`` and ``height`` are the
         default extents of a **single panel**, whereas ``widths`` and ``heights``
         are the extents of the grid **tracks** of the figure, one entry per grid
-        column and per grid row.
+        column and per grid row. A panel spanning several tracks is as long as the
+        tracks it covers, gaps included, so a figure is usually larger than
+        ``width`` by ``height``. An axis whose tracks are given as relative weights
+        is the exception : there ``width`` or ``height`` is the total to share.
 
         ``spacing`` is the gap left between panels. Since the default
         ``bounds="full"`` measures a panel with its axes and its title, the gap
@@ -745,6 +753,17 @@ class _Compiler:
             # no track was sized, so every panel keeps the extent of the figure
             return extents
 
+        if all(weight == int(weight) for weight in weights.values()):
+            # integer weights count grid tracks, they are not a share of a total :
+            # a panel spanning two tracks is twice as long, gap included
+            unit = default
+            if unit is None:
+                unit = DEFAULT_TRACK_HEIGHT if vertical else DEFAULT_TRACK_WIDTH
+            for index, weight in weights.items():
+                tracks = int(weight)
+                extents[index] = unit * tracks + spacing * (tracks - 1)
+            return extents
+
         if total is not None:
             # the room left by the gaps and by the panels sized in pixels is
             # split between the weighted panels, proportionally to their weight
@@ -754,24 +773,13 @@ class _Compiler:
                 extents[index] = max(int(round(weight / share * available)), 1)
             return extents
 
-        if any(weight != int(weight) for weight in weights.values()):
-            if not self.build:
-                # validation only, the extent may still be set afterwards
-                return [default if extent is None else extent for extent in extents]
-            raise ValueError(
-                f"fractional sizes need the total {axis} of the figure, "
-                f"call .properties({axis}=...) or give pixel sizes"
-            )
-
-        # without a total extent, an integer weight counts grid tracks, so a
-        # panel spanning two of them is twice as long, gap included
-        unit = default
-        if unit is None:
-            unit = DEFAULT_TRACK_HEIGHT if vertical else DEFAULT_TRACK_WIDTH
-        for index, weight in weights.items():
-            tracks = int(weight)
-            extents[index] = unit * tracks + spacing * (tracks - 1)
-        return extents
+        if not self.build:
+            # validation only, the extent may still be set afterwards
+            return [default if extent is None else extent for extent in extents]
+        raise ValueError(
+            f"fractional sizes need the total {axis} of the figure, "
+            f"call .properties({axis}=...) or give pixel sizes"
+        )
 
     def _cross_extent(
         self, node: Group, context: _Extent, vertical: bool
@@ -779,20 +787,56 @@ class _Compiler:
         """
         Resolve the extent handed to the children across the stacking axis.
 
-        Columns of unequal heights would be misaligned, so when the figure has no
-        explicit height, the natural height of the group is measured from the
-        panels and their pixel extents and used instead.
+        A group spans as many tracks across its stacking axis as its widest child
+        does, so the extent handed over is the extent of those tracks. Otherwise the
+        extent of the figure is handed over, and columns of unequal heights would be
+        misaligned, so when the figure has no explicit height the natural height of
+        the group is measured from the panels and their pixel extents instead.
 
         :param node: the group whose children are measured
         :param context: the sizing context of the group
         :param vertical: whether the group stacks vertically
         :return: int or None
         """
-        if vertical:
-            return context.width
-        if context.height is not None:
-            return context.height
-        return self._natural(node, "y")
+        axis = "x" if vertical else "y"
+        unit = context.panel_width if vertical else context.panel_height
+        tracks = self._cross_tracks(node, axis)
+        if unit is not None and tracks is not None and tracks > 1:
+            spacing = _resolve_spacing(node.spacing, self.figure._spacing)
+            return unit * tracks + spacing * (tracks - 1)
+        total = context.width if vertical else context.height
+        if total is not None:
+            return total
+        if unit is not None:
+            return unit
+        return None if vertical else self._natural(node, "y")
+
+    def _cross_tracks(self, node: LayoutNode, axis: str) -> Optional[int]:
+        """
+        Count the grid tracks a subtree spans along an axis, if they are all unsized.
+
+        :param node: the node to measure
+        :param axis: ``"x"`` or ``"y"``
+        :return: int, or None when a track of the subtree is sized
+        """
+        if not isinstance(node, Group):
+            return 1
+        if node._axis != axis:
+            # the tracks of the axis are the ones of the children, and a child
+            # spanning several of them has a sibling covering the same tracks
+            counts = [self._cross_tracks(child, axis) for child in node.children]
+            if any(count is None for count in counts):
+                return None
+            return max(counts)
+        tracks = 0
+        for child in node.children:
+            size = child.size
+            if size is None:
+                size = 1
+            elif isinstance(size, Px) or size != int(size):
+                return None
+            tracks += int(size)
+        return tracks
 
     def _natural(self, node: LayoutNode, axis: str) -> Optional[int]:
         """
@@ -825,8 +869,8 @@ class _Compiler:
         known = [extent for extent in found if extent is not None]
         return max(known) if known else None
 
-    @staticmethod
     def _child_context(
+        self,
         child: LayoutNode,
         context: _Extent,
         extent: Optional[int],
@@ -838,8 +882,10 @@ class _Compiler:
         Build the sizing context of a child from the one of its parent.
 
         The extent given to a child is a total, hence a child stacking along the
-        same axis splits it between its own children, whereas any other child
-        hands it over as is.
+        same axis splits it between its own children, whereas any other child hands
+        it over as is. Across the stacking axis, a panel fills the extent of the
+        tracks it spans, while a group hands the track extent over untouched, which
+        is what keeps its panels aligned with the ones of its siblings.
 
         :param child: the child node
         :param context: the sizing context of the parent
@@ -857,18 +903,24 @@ class _Compiler:
         elif same_axis:
             panel_extent = _split(extent, len(child.children), spacing)
 
+        if isinstance(child, Group):
+            panel_cross = context.panel_width if vertical else context.panel_height
+        else:
+            # a panel fills the tracks it spans across the stacking axis
+            panel_cross = cross
+
         if vertical:
             return _Extent(
                 width=cross,
                 height=extent,
-                panel_width=cross,
+                panel_width=panel_cross,
                 panel_height=panel_extent,
             )
         return _Extent(
             width=extent,
             height=cross,
             panel_width=panel_extent,
-            panel_height=cross,
+            panel_height=panel_cross,
         )
 
     def _check_equal_widths(self, node: Group, context: _Extent) -> None:
