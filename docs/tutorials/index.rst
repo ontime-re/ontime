@@ -21,3 +21,4 @@ Tutorials
 
     0_create-an-anomaly-detection-workflow
     1_optimize-model-hyperparameters-optuna
+    2_sweep-forecast-horizons-optuna
