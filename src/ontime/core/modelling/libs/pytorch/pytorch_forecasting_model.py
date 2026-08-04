@@ -2,6 +2,7 @@ from typing import Any, Optional, Dict, Union, Type, List
 import warnings
 
 from ...abstract_model import AbstractModel
+from ...utils import normalize_prediction
 from ....time_series import TimeSeries
 from ontime.module.processing.pytorch.time_series_data_module import (
     TimeSeriesDataModule,
@@ -20,7 +21,7 @@ class TorchForecastingModel(L.LightningModule, AbstractModel):
 
     def __init__(
         self,
-        model: Union[Type[nn.Module], nn.Module],
+        torch_model: Union[Type[nn.Module], nn.Module],
         input_chunk_length: int,
         output_chunk_length: int,
         n_epochs: int = 10,
@@ -31,7 +32,7 @@ class TorchForecastingModel(L.LightningModule, AbstractModel):
     ):
         """Constructor of a TorchForecastingModel object
 
-        :param model: a torch model class (not instantiated)
+        :param torch_model: a torch model class (not instantiated)
         :param input_chunk_length: number of time steps in the past the model use for making one predicton
         :param output_chunk_length: number of time steps to be predicted by the model at once
         :param n_epochs: number of training epochs
@@ -40,10 +41,10 @@ class TorchForecastingModel(L.LightningModule, AbstractModel):
         :param train_data_module_params: params for the training data module to use. Input length and target length are defined by input_chunk_length and output_chunk_length parameters
         """
         super(TorchForecastingModel, self).__init__()
-        self.model = model
+        self.model = torch_model
         # check if model is a class or an instance
-        if isinstance(model, type):
-            self.model = model(**params)
+        if isinstance(torch_model, type):
+            self.model = torch_model(**params)
         self.input_chunk_length = input_chunk_length
         self.output_chunk_length = output_chunk_length
         self.n_epochs = n_epochs
@@ -130,10 +131,15 @@ class TorchForecastingModel(L.LightningModule, AbstractModel):
             predictions = predictions[:, :n, :]
 
         result = [
-            TimeSeries.from_times_and_values(
-                forecast_index, prediction.squeeze(0).cpu().numpy()
+            normalize_prediction(
+                TimeSeries.from_times_and_values(
+                    forecast_index, prediction.squeeze(0).cpu().numpy()
+                ),
+                series,
             )
-            for forecast_index, prediction in zip(forecast_indices, predictions)
+            for forecast_index, prediction, series in zip(
+                forecast_indices, predictions, ts_list
+            )
         ]
 
         return result if is_batch else result[0]

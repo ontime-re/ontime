@@ -16,7 +16,7 @@ def dots(ts: TimeSeries, type: str = None, encode_kwargs: dict = None) -> Chart:
     df = Plot.melt(ts)
 
     default_kwargs = {
-        "x": "time:T",
+        "x": f"{ts.time_index.name}:T",
         "y": "value:Q",
         "color": "variable:N",
     }

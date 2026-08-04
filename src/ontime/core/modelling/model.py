@@ -4,12 +4,7 @@ from sklearn.base import BaseEstimator
 from ..time_series import TimeSeries
 from .abstract_model import AbstractModel
 from .libs.darts.darts_forecasting_model import DartsForecastingModel
-from .libs.skforecast.forecaster_autoreg import (
-    ForecasterAutoreg as SkForecastForecasterAutoreg,
-)
-from .libs.skforecast.forecaster_autoreg_multi_variate import (
-    ForecasterAutoregMultiVariate as SkForecasterAutoregMultiSeries,
-)
+from .libs.skforecast.skforecast_forecasting_model import SkForecastForecastingModel
 from .libs.pytorch.pytorch_forecasting_model import TorchForecastingModel
 from torch import nn
 
@@ -42,15 +37,17 @@ class Model(AbstractModel):
     It is chosen once and then kept for the whole lifecycle of the model.
     """
 
-    def __init__(self, model: Union[AbstractModel, Type[AbstractModel]], **params):
+    def __init__(
+        self, wrapped_model: Union[AbstractModel, Type[AbstractModel]], **params
+    ):
         """
         Initializes a Model.
 
-        :param model: either a model class or a model instance
+        :param wrapped_model: either a model class or a model instance
         """
 
         super().__init__()
-        self.model = model
+        self.model = wrapped_model
         self.params = params
         self.is_model_undefined = True
 
@@ -80,19 +77,13 @@ class Model(AbstractModel):
         does not inherit from a known base class such as `ModelMeta`, `BaseEstimator`, or `nn.Module`.
         """
 
-        size_of_ts = ts.n_components
-
         if is_subclass_or_instance_of_subclass(self.model, ForecastingModel):
             # Darts Models
             self.model = DartsForecastingModel(self.model, **self.params)
         # This take all the sklearn regressors and pipelines
         elif is_subclass_or_instance_of_subclass(self.model, BaseEstimator):
-            if size_of_ts > 1:
-                # scikit-learn API compatible models
-                self.model = SkForecasterAutoregMultiSeries(self.model, **self.params)
-            else:
-                # scikit-learn API compatible models
-                self.model = SkForecastForecasterAutoreg(self.model, **self.params)
+            # scikit-learn API compatible models
+            self.model = SkForecastForecastingModel(self.model, **self.params)
         elif is_subclass_or_instance_of_subclass(self.model, nn.Module):
             self.model = TorchForecastingModel(self.model, **self.params)
         else:

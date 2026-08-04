@@ -2,6 +2,7 @@ from typing import Optional, Union, Type, List
 from ...abstract_model import AbstractModel
 from ....time_series import TimeSeries
 from darts.models.forecasting.forecasting_model import ModelMeta, GlobalForecastingModel
+from darts.models.forecasting.global_baseline_models import _GlobalNaiveModel
 import numpy as np
 
 
@@ -10,17 +11,17 @@ class DartsForecastingModel(AbstractModel):
     Generic wrapper around Darts forecasting models
     """
 
-    def __init__(self, model: Union[Type[ModelMeta], ModelMeta], **params):
+    def __init__(self, darts_model: Union[Type[ModelMeta], ModelMeta], **params):
         """Constructor of a ForecastingModel object
 
-        :param model: Darts forecasting model class
+        :param darts_model: Darts forecasting model class
         :param params: dict of keyword arguments for this model's constructor
         """
         super().__init__()
-        self.model = model
+        self.model = darts_model
         # check if model is a class or an instance
-        if isinstance(model, type):
-            self.model = model(**params)
+        if isinstance(darts_model, type):
+            self.model = darts_model(**params)
 
     def fit(self, ts: TimeSeries, **params) -> "DartsForecastingModel":
         self.model.fit(ts, **params)
@@ -30,7 +31,9 @@ class DartsForecastingModel(AbstractModel):
         self, n: int, ts: Optional[Union[List[TimeSeries], TimeSeries]] = None, **params
     ) -> Union[List[TimeSeries], TimeSeries]:
         if ts:
-            if isinstance(self.model, GlobalForecastingModel):
+            if isinstance(self.model, GlobalForecastingModel) and not isinstance(
+                self.model, _GlobalNaiveModel
+            ):
                 pred = self.model.predict(series=ts, n=n, **params)
             else:
                 if isinstance(ts, list):
