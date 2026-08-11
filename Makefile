@@ -73,7 +73,7 @@ build-docs:
 
 dev-docs:
 	@echo "Start a development server for the documentation"
-	sphinx-autobuild docs docs/_build/html
+	uv run sphinx-autobuild docs docs/_build/html
 
 publish:
 	@echo "Publishing package"

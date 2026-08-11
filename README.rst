@@ -24,15 +24,19 @@ Getting Started
 
 Install the library with:
 
-  pip install ontime
+.. code-block::
 
-Then, head over to the documentation on `ontime.re <https://ontime.re>`_:
+   pip install ontime
+
+
+Then, head over to the documentation on `ontime.re <https://ontime.re>`_\ :
+
 
 * the `Getting Started <https://ontime.re/getting_started>`_ guide to install onTime and run your first example,
-* the `User Guide <https://ontime.re/user_guide>`_, a collection of notebooks that walk through the library's features in detail.
+* the `User Guide <https://ontime.re/user_guide>`_\ , a collection of notebooks that walk through the library's features in detail.
 
 Purpose of the library
------------------------
+----------------------
 
 onTime was created to support a technology transfer to the partners of the DiagnoBat
 project, while respecting their intellectual property. Most of the library is built
@@ -40,6 +44,7 @@ around dynamically loaded classes, so anyone can extend it and keep company-spec
 parts private.
 
 The library's objectives are to:
+
 
 #. extend existing time series libraries (Darts, GluonTS, Kats, etc.),
 #. provide benchmarking tools for models and detectors,
