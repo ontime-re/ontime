@@ -21,7 +21,7 @@ def activity(
     fig, ax = plt.subplots(figsize=figsize)
 
     ax = calmap.yearplot(
-        ts.pd_series(),
+        ts.to_series(),
         cmap=cmap,
         how=resampling_method,
         linewidth=linewidth,

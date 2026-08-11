@@ -28,7 +28,7 @@ class Correlation(AbstractProcessor):
         :return: TimeSeries
             Each correlation is a component of the TimeSeries with a name such as 'var_a_var_b'
         """
-        df = ts.pd_dataframe()
+        df = ts.to_dataframe()
         df = Correlation.compute_correlations(df, self.window)
         df = Correlation.pivot(df)
         df.columns.name = None  # Otherwise, the column name is 'pair' and from_dataframe() fails in the next line

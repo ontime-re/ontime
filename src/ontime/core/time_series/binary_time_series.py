@@ -1,4 +1,3 @@
-import xarray as xr
 import numpy as np
 
 from .restricted_time_series import RestrictedTimeSeries
@@ -10,22 +9,23 @@ class BinaryTimeSeries(RestrictedTimeSeries):
     A time series with restrictions on the data so that all values are either 0 or 1.
     """
 
-    def __init__(self, xa: xr.DataArray):
+    def __init__(self, *args, **kwargs):
         """
         Initialize the BinaryTimeSeries.
 
-        :param xa: Xarray DataArray to use.
+        :param args: positional arguments passed to the Darts TimeSeries constructor.
+        :param kwargs: keyword arguments passed to the Darts TimeSeries constructor.
         """
-        super().__init__(xa)
+        super().__init__(*args, **kwargs)
         self.restriction = Restriction("Binary Restriction", self.binary_restriction)
         self.add_restriction(self.restriction)
 
     @staticmethod
-    def binary_restriction(xa: xr.DataArray) -> bool:
+    def binary_restriction(values: np.ndarray) -> bool:
         """
-        Check if all values in the data array are either 0 or 1.
+        Check if all values are either 0 or 1.
 
-        :param xa: The Xarray DataArray to check.
+        :param values: The values to check.
         :return: bool
         """
-        return np.all((xa == 0) | (xa == 1))
+        return np.all((values == 0) | (values == 1))

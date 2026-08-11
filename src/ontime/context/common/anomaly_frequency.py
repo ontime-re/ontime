@@ -7,7 +7,7 @@ class AnomalyFrequency:
     """
 
     def __init__(self, anomalies_ts: BinaryTimeSeries):
-        self.anomalies_series = anomalies_ts.pd_series()
+        self.anomalies_series = anomalies_ts.to_series()
         pass
 
     def get_number_of_anomaly_in_window(self, window_size: str) -> TimeSeries:

@@ -29,9 +29,9 @@ class SlicedDataset(Dataset):
         self, data: TimeSeries, period: int, labels: TimeSeries = None
     ) -> Tuple[list, list]:
         sliced_data = pp.common.split_in_windows(data, period, period)
-        sliced_data = [elt.pd_dataframe().to_numpy() for elt in sliced_data]
+        sliced_data = [elt.to_dataframe().to_numpy() for elt in sliced_data]
         sliced_labels = None
         if labels is not None:
             sliced_labels = pp.common.split_in_windows(labels, period, period)
-            sliced_labels = [elt.pd_dataframe().to_numpy() for elt in sliced_labels]
+            sliced_labels = [elt.to_dataframe().to_numpy() for elt in sliced_labels]
         return sliced_data, sliced_labels

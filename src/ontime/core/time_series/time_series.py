@@ -3,7 +3,6 @@ from typing import List
 
 from darts import TimeSeries as DartsTimeSeries
 import pandas as pd
-import xarray as xr
 from torch import Tensor
 
 
@@ -13,8 +12,8 @@ class TimeSeries(DartsTimeSeries):
     This is a wrapper around Darts TimeSeries, functions are added to handle various operations
     """
 
-    def __init__(self, xa: xr.DataArray):
-        super().__init__(xa)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def plot(self, width: int = 400, height: int = 200, **kwargs):
         """
@@ -53,7 +52,7 @@ class TimeSeries(DartsTimeSeries):
         :param period: period to split by
         :return: List of TimeSeries
         """
-        df = self.pd_dataframe()
+        df = self.to_dataframe()
         splits_df = [g for n, g in df.groupby(pd.Grouper(freq=period))]
         splits_ts = list(map(self.from_dataframe, splits_df))
         return splits_ts
@@ -71,15 +70,22 @@ class TimeSeries(DartsTimeSeries):
             ts = ts.append(ts_i)
         return ts
 
-    @staticmethod
-    def from_darts(ts: DartsTimeSeries) -> TimeSeries:
+    @classmethod
+    def from_darts(cls, ts: DartsTimeSeries) -> TimeSeries:
         """
         Convert a Darts TimeSeries to an OnTime TimeSeries
 
         :param ts: Darts TimeSeries
         :return: OnTime TimeSeries
         """
-        return TimeSeries(ts.data_array())
+        return cls(
+            times=ts.time_index,
+            values=ts.all_values(copy=False),
+            components=ts.components,
+            static_covariates=ts.static_covariates,
+            hierarchy=ts.hierarchy,
+            metadata=ts.metadata,
+        )
 
     @staticmethod
     def from_pandas(df: pd.DataFrame, freq=None) -> TimeSeries:

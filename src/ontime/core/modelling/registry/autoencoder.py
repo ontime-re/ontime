@@ -127,7 +127,7 @@ class Autoencoder(nn.Module):
         periods = []
         for col in dataset.columns:
             periods.append(
-                pyd.findfrequency(dataset.pd_dataframe()[col].to_numpy(), detrend=True)
+                pyd.findfrequency(dataset.to_dataframe()[col].to_numpy(), detrend=True)
             )
         period = max(periods)
         while period < 15:
@@ -143,7 +143,7 @@ class Autoencoder(nn.Module):
             for col in dataset.columns:
                 periods.append(
                     pyd.findfrequency(
-                        dataset.pd_dataframe()[col].to_numpy(), detrend=True
+                        dataset.to_dataframe()[col].to_numpy(), detrend=True
                     )
                 )
             period = max(periods)

@@ -1,16 +1,13 @@
 import numpy as np
 from darts import TimeSeries
+from darts.logging import raise_log
 from darts.metrics.metrics import (
     multi_ts_support,
     METRIC_OUTPUT_TYPE,
     _get_values_or_raise,
-    logger,
-    raise_log,
     multivariate_support,
     TIME_AX,
     _get_wrapped_metric,
-    mae,
-    COMP_AX,
     ae,
 )
 from typing import Union, Optional, Sequence, Callable
@@ -24,10 +21,12 @@ def nmae(
     pred_series: Union[TimeSeries, Sequence[TimeSeries]],
     intersect: bool = True,
     *,
+    q: Optional[Union[float, list[float], tuple[np.ndarray, pd.Index]]] = None,
     component_reduction: Optional[Callable[[np.ndarray], float]] = np.nanmean,
     series_reduction: Optional[Callable[[np.ndarray], Union[float, np.ndarray]]] = None,
     n_jobs: int = 1,
     verbose: bool = False,
+    name: Optional[str] = None,
 ) -> METRIC_OUTPUT_TYPE:
     """
     Compute the Normalized Mean Absolute Error (NMAE) as the mean of per-component NMAE values.
@@ -68,7 +67,7 @@ def nmae(
     """
 
     y_true, _ = _get_values_or_raise(
-        actual_series, pred_series, intersect, remove_nan_union=True
+        actual_series, pred_series, intersect, remove_nan_union=True, q=q
     )
 
     y_true_sum = np.nansum(y_true, axis=TIME_AX)
@@ -76,15 +75,18 @@ def nmae(
     if not (y_true_sum > 0).all():
         raise_log(
             ValueError(
-                "The series of actual value cannot sum to zero when computing OPE."
+                "The series of actual value cannot sum to zero when computing NMAE."
             ),
-            logger=logger,
         )
 
     return (
         np.nansum(
             _get_wrapped_metric(ae)(
-                actual_series, pred_series, intersect, time_reduction=np.nansum
+                actual_series,
+                pred_series,
+                intersect,
+                q=q,
+                time_reduction=np.nansum,
             ),
             axis=TIME_AX,
         )

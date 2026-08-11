@@ -1,5 +1,3 @@
-import xarray as xr
-
 from .time_series import TimeSeries
 from ..utils.restriction import Restriction
 
@@ -9,14 +7,15 @@ class RestrictedTimeSeries(TimeSeries):
     A time series with restrictions on the data.
     """
 
-    def __init__(self, xa: xr.DataArray, restrictions=None):
+    def __init__(self, *args, restrictions=None, **kwargs):
         """
         Initialize the RestrictedTimeSeries.
 
-        :param xa: Xarray DataArray to use.
+        :param args: positional arguments passed to the Darts TimeSeries constructor.
         :param restrictions: List of Restriction objects to apply.
+        :param kwargs: keyword arguments passed to the Darts TimeSeries constructor.
         """
-        super().__init__(xa)
+        super().__init__(*args, **kwargs)
 
         self.restrictions = []
         if restrictions is not None:
@@ -34,7 +33,7 @@ class RestrictedTimeSeries(TimeSeries):
         :raises: AssertionError
         """
         for restriction in self.restrictions:
-            restriction.check(self.data_array())
+            restriction.check(self.all_values(copy=False))
         return True
 
     def add_restriction(self, restriction: Restriction) -> None:

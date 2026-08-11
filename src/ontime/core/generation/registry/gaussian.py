@@ -43,4 +43,4 @@ class Gaussian(AbstractGenerator):
         ts = gaussian_timeseries(
             mean, std, start, end, length, freq, column_name, dtype
         )
-        return TimeSeries(ts.data_array())
+        return TimeSeries.from_darts(ts)

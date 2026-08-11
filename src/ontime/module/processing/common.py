@@ -73,7 +73,7 @@ def split_in_windows(ts: TimeSeries, window_length: int, stride_length: int) -> 
     assert stride_length != 0, "stride_length can't be equal to 0, minimum is 1."
 
     # Get DataFrame
-    df = ts.pd_dataframe()
+    df = ts.to_dataframe()
 
     # Initialize a list to hold the DataFrame splits
     splits_df = []
@@ -105,7 +105,7 @@ def split_inputs_from_targets(
     :return: tuple of list of TimeSeries
     """
     # Change inner data structure to DataFrame
-    dfs = [ts.pd_dataframe() for ts in ts_list]
+    dfs = [ts.to_dataframe() for ts in ts_list]
 
     # Create initial arrays
     input_series_list = []
@@ -141,4 +141,4 @@ def timeseries_list_to_numpy(ts_list: list) -> np.array:
     :param ts_list: list of TimeSeries
     :return: np.array
     """
-    return np.array([ts.pd_dataframe().T.to_numpy() for ts in ts_list])
+    return np.array([ts.to_dataframe().T.to_numpy() for ts in ts_list])
