@@ -30,7 +30,7 @@ def mark(
         :param data: BinaryTimeSeries
         :return: TimeSeries
         """
-        ts_tmp = ts.pd_series() * data.pd_series()
+        ts_tmp = ts.to_series() * data.to_series()
         ts_tmp = ts_tmp.replace(0, None)
         ts_tmp.name = data.columns[0]
         return TimeSeries.from_dataframe(ts_tmp.to_frame())

@@ -32,7 +32,7 @@ class BinaryAnomalyLogger:
         :return Pandas DataFrame
         """
         # Create the current log
-        df = ts.pd_dataframe()
+        df = ts.to_dataframe()
         df = df.reset_index()
         print(df.columns)
         log_df = pd.DataFrame(

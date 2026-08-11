@@ -22,11 +22,11 @@ class _NaiveLastValueModel:
         self._last_value = None
 
     def fit(self, ts):
-        self._last_value = ts.pd_dataframe().iloc[-1].to_numpy()
+        self._last_value = ts.to_dataframe().iloc[-1].to_numpy()
         return self
 
     def predict(self, n, ts=None):
-        df = (ts if ts is not None else None).pd_dataframe()
+        df = (ts if ts is not None else None).to_dataframe()
         freq = df.index.freq or pd.infer_freq(df.index)
         index = pd.date_range(
             start=df.index[-1] + (df.index[1] - df.index[0]), periods=n, freq=freq
@@ -118,7 +118,7 @@ class TestCrossValidation(unittest.TestCase):
             self.assertEqual(len(train), 10)
             self.assertEqual(len(test), 2)
         # train windows should shift forward between folds
-        starts = [train.pd_dataframe().index[0] for train, _ in folds]
+        starts = [train.to_dataframe().index[0] for train, _ in folds]
         self.assertEqual(starts, sorted(starts))
         self.assertTrue(len(set(starts)) == len(starts))
 
@@ -128,8 +128,8 @@ class TestCrossValidation(unittest.TestCase):
         folds = cross_validation(self.ts, n_splits=3, strategy="blocked")
         self.assertEqual(len(folds), 3)
         for train, test in folds:
-            train_end = train.pd_dataframe().index[-1]
-            test_start = test.pd_dataframe().index[0]
+            train_end = train.to_dataframe().index[-1]
+            test_start = test.to_dataframe().index[0]
             self.assertLess(train_end, test_start)
 
     def test_crossValidation__gapParameter__shouldLeaveGapBetweenTrainAndTest(self):
@@ -143,8 +143,8 @@ class TestCrossValidation(unittest.TestCase):
             gap=gap,
         )
         for train, test in folds:
-            train_end = train.pd_dataframe().index[-1]
-            test_start = test.pd_dataframe().index[0]
+            train_end = train.to_dataframe().index[-1]
+            test_start = test.to_dataframe().index[0]
             gap_points = (test_start - train_end).days - 1
             self.assertEqual(gap_points, gap)
 

@@ -6,7 +6,7 @@ authors = [{ name = "Fred Montet", email = "fredmontet@gmail.com" }]
 requires-python = ">=3.10,<3.13"
 readme = "README.md"
 dependencies = [
-    "darts>=0.30.0,<0.31",
+    "darts>=0.37",
     "catboost~=1.2",
     "altair>=5.1.0,<6",
     "torch>=2.0.0, !=2.0.1, !=2.1.0",

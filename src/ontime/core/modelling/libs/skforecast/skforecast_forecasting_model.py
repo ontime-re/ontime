@@ -40,12 +40,12 @@ class SkForecastForecastingModel(AbstractModel):
             self.model = SKForecastForecasterRecursiveMultiSeries(
                 estimator=self.sk_model, **self.params
             )
-            self.model.fit(series=ts.pd_dataframe(), **params)
+            self.model.fit(series=ts.to_dataframe(), **params)
         else:
             self.model = SKForecastForecasterRecursive(
                 estimator=self.sk_model, **self.params
             )
-            self.model.fit(y=ts.pd_series(), **params)
+            self.model.fit(y=ts.to_series(), **params)
         return self
 
     def predict(
@@ -61,7 +61,7 @@ class SkForecastForecastingModel(AbstractModel):
                 raise ValueError(
                     f"For now, predict method can only be used on single TimeSeries"
                 )
-            last_window = ts.pd_dataframe() if self.is_multivariate else ts.pd_series()
+            last_window = ts.to_dataframe() if self.is_multivariate else ts.to_series()
             pred = self.model.predict(n, last_window=last_window, **params)
             reference = ts
         if self.is_multivariate:

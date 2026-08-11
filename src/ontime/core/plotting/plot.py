@@ -57,7 +57,7 @@ class Plot:
         :param ts: TimeSeries
         :return: DataFrame
         """
-        df = ts.pd_dataframe()
+        df = ts.to_dataframe()
         df = df.reset_index()
         df = df.melt(ts.time_index.name, var_name=var_name, value_name=value_name)
         return df

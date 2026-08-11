@@ -33,15 +33,15 @@ class Threshold(ThresholdDetector, AbstractDetector):
         if enable_logging:
             self.logger = BinaryAnomalyLogger(**self.logger_params)
 
-    def detect(self, ts: TimeSeries) -> BinaryTimeSeries:
+    def detect(self, ts: TimeSeries, *args, **kwargs) -> BinaryTimeSeries:
         """
         Detects anomalies in the given time series.
 
         :param ts: TimeSeries
         :return: BinaryTimeSeries
         """
-        ts_detected = super().detect(ts)
-        ts_detected = BinaryTimeSeries(ts_detected.data_array())
+        ts_detected = super().detect(ts, *args, **kwargs)
+        ts_detected = BinaryTimeSeries.from_darts(ts_detected)
 
         if self.enable_logging:
             self.logger.log_anomalies(ts_detected)

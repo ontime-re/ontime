@@ -58,7 +58,7 @@ class Profiler:
         # Create a list of DataFrames from the split time series
         data_frames = []
         for time_series in split_ts:
-            df = time_series.pd_dataframe()
+            df = time_series.to_dataframe()
             col = df.columns[0]
             value = df[col].values
             temp_df = pd.DataFrame(

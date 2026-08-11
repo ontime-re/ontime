@@ -1,6 +1,6 @@
 from typing import Callable
 
-import xarray as xr
+import numpy as np
 
 
 class Restriction:
@@ -8,5 +8,5 @@ class Restriction:
         self.name = name
         self.restriction = restriction
 
-    def check(self, xa: xr.DataArray) -> None:
-        assert self.restriction(xa), f"Restriction {self.name} failed"
+    def check(self, values: np.ndarray) -> None:
+        assert self.restriction(values), f"Restriction {self.name} failed"
