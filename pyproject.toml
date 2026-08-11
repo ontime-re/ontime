@@ -1,6 +1,6 @@
 [project]
 name = "ontime"
-version = "0.8.1"
+version = "0.9"
 description = "Your library to work with time series"
 authors = [{ name = "Fred Montet", email = "fredmontet@gmail.com" }]
 requires-python = ">=3.10,<3.13"
