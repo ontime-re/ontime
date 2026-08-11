@@ -82,21 +82,16 @@ class TestFigure(unittest.TestCase):
         with self.assertRaises(AttributeError):
             layout.share_x = True
 
-    def test_repr__rows_of_two_panels__should_render_symbolically(self):
-        self.assertEqual(repr(on.rows(self.a, self.b)), "a / b")
+    def test_repr__rows_of_two_panels__should_be_the_layout_string(self):
+        self.assertEqual(repr(on.rows(self.a, self.b)), "A\nB")
 
-    def test_repr__nested_layout__should_only_bracket_when_needed(self):
-        self.assertEqual(repr(on.cols(on.rows(self.a, self.b), self.c)), "a / b | c")
-        self.assertEqual(repr(on.rows(on.cols(self.a, self.b), self.c)), "(a | b) / c")
+    def test_repr__nested_layout__should_be_the_layout_string(self):
+        self.assertEqual(repr(on.cols(on.rows(self.a, self.b), self.c)), "A B\nC B")
+        self.assertEqual(repr(on.rows(on.cols(self.a, self.b), self.c)), "A B\nC C")
 
-    def test_repr__untitled_panels__should_fall_back_to_positions(self):
-        self.assertEqual(
-            repr(on.rows(self.make_plot("x"), self.make_plot("y"))), "p0 / p1"
-        )
-
-    def test_repr__sizes__should_be_annotated(self):
-        figure = on.rows(self.a, self.b, sizes=[240, 40])
-        self.assertEqual(repr(figure), "a:240 / b:40")
+    def test_to_string__sizes__should_not_be_annotated(self):
+        figure = on.rows(self.a, self.b, heights=[240, 40])
+        self.assertEqual(figure.to_string(), "A\nB")
 
     # ------------------------------------------------------------- compilation
 
@@ -220,7 +215,7 @@ class TestFigure(unittest.TestCase):
 
     def test_to_altair__pixel_sizes__should_set_the_panel_heights(self):
         figure = on.rows(
-            self.make_plot("main"), self.make_plot("strip"), sizes=[240, 40]
+            self.make_plot("main"), self.make_plot("strip"), heights=[240, 40]
         ).properties(width=800)
         panels = self.compile(figure)["vconcat"]
         self.assertEqual([panel["height"] for panel in panels], [240, 40])
@@ -228,10 +223,23 @@ class TestFigure(unittest.TestCase):
 
     def test_to_altair__fractional_sizes__should_split_the_figure_height(self):
         figure = on.rows(
-            self.make_plot("forecast"), self.make_plot("residuals"), sizes=[0.72, 0.28]
+            self.make_plot("forecast"),
+            self.make_plot("residuals"),
+            heights=[0.72, 0.28],
+            spacing=0,
         ).properties(width=700, height=340)
         panels = self.compile(figure)["vconcat"]
         self.assertEqual([panel["height"] for panel in panels], [245, 95])
+
+    def test_to_altair__fractional_sizes__should_leave_room_for_the_gaps(self):
+        figure = on.rows(
+            self.make_plot("forecast"),
+            self.make_plot("residuals"),
+            heights=[0.72, 0.28],
+            spacing=10,
+        ).properties(width=700, height=340)
+        panels = self.compile(figure)["vconcat"]
+        self.assertEqual([panel["height"] for panel in panels], [238, 92])
 
     def test_to_altair__panel_properties__should_win_over_figure_properties(self):
         figure = on.rows(
@@ -242,9 +250,9 @@ class TestFigure(unittest.TestCase):
 
     def test_to_altair__nested_groups__should_size_panels_along_both_axes(self):
         figure = on.cols(
-            on.rows(self.make_plot("main"), self.make_plot("strip"), sizes=[240, 50]),
+            on.rows(self.make_plot("main"), self.make_plot("strip"), heights=[240, 50]),
             self.make_plot("profile"),
-            sizes=[620, 180],
+            widths=[620, 180],
         ).properties(height=300)
         spec = self.compile(figure)
         inner = spec["hconcat"][0]["vconcat"]
@@ -340,27 +348,30 @@ class TestFigure(unittest.TestCase):
 
     def test_rows__sizes_of_wrong_length__should_raise(self):
         with self.assertRaises(ValueError):
-            on.rows(self.a, self.b, sizes=[100, 200, 300])
+            on.rows(self.a, self.b, heights=[100, 200, 300])
 
     def test_rows__mixed_pixel_and_fractional_sizes__should_raise(self):
         with self.assertRaises(ValueError):
-            on.rows(self.a, self.b, sizes=[240, 0.5])
+            on.rows(self.a, self.b, heights=[240, 0.5])
 
-    def test_rows__fractions_not_summing_to_one__should_raise(self):
-        with self.assertRaises(ValueError):
-            on.rows(self.a, self.b, sizes=[0.5, 0.3])
+    def test_rows__fractions_not_summing_to_one__should_be_normalised(self):
+        figure = on.rows(self.a, self.b, heights=[0.5, 0.3], spacing=0).properties(
+            width=400, height=200
+        )
+        panels = self.compile(figure)["vconcat"]
+        self.assertEqual([panel["height"] for panel in panels], [125, 75])
 
     def test_rows__negative_sizes__should_raise(self):
         with self.assertRaises(ValueError):
-            on.rows(self.a, self.b, sizes=[240, -40])
+            on.rows(self.a, self.b, heights=[240, -40])
 
     def test_to_altair__fractional_sizes_without_extent__should_raise(self):
-        figure = on.rows(self.a, self.b, sizes=[0.5, 0.5]).properties(width=400)
+        figure = on.rows(self.a, self.b, heights=[0.5, 0.5]).properties(width=400)
         with self.assertRaises(ValueError):
             figure.to_altair()
 
     def test_properties__fractional_sizes_set_in_two_calls__should_pass(self):
-        figure = on.rows(self.a, self.b, sizes=[0.6, 0.4])
+        figure = on.rows(self.a, self.b, heights=[0.6, 0.4], spacing=0)
         figure = figure.properties(width=400).properties(height=200)
         panels = self.compile(figure)["vconcat"]
         self.assertEqual([panel["height"] for panel in panels], [120, 80])
